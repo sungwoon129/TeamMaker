@@ -11,18 +11,18 @@ create table channel_member (channel_member_id bigint not null auto_increment, c
 create table member (member_id bigint not null auto_increment, created_date datetime(6), deleted bit not null, deleted_date datetime(6), last_modified_date datetime(6), name varchar(255), primary key (member_id)) engine=InnoDB;
 
 /* member 삽입 */
-INSERT INTO `wauction`.`member` (`created_date`, `last_modified_date`, `deleted`, `name`) VALUES (now(), now(), 0, '김가나');
-INSERT INTO `wauction`.`member` (`created_date`, `last_modified_date`, `deleted`, `name`) VALUES (now(), now(), 0, '이다라');
-INSERT INTO `wauction`.`member` (`created_date`, `last_modified_date`, `deleted`, `name`) VALUES (now(), now(), 0, '박마바');
-INSERT INTO `wauction`.`member` (`created_date`, `last_modified_date`, `deleted`, `name`) VALUES (now(), now(), 0, '신사아');
-INSERT INTO `wauction`.`member` (`created_date`, `last_modified_date`, `deleted`, `name`) VALUES (now(), now(), 0, '정자차');
-INSERT INTO `wauction`.`member` (`created_date`, `last_modified_date`, `deleted`, `name`) VALUES (now(), now(), 0, '윤카타');
-INSERT INTO `wauction`.`member` (`created_date`, `last_modified_date`, `deleted`, `name`) VALUES (now(), now(), 0, '연파하');
+INSERT INTO `wauction`.`member` (`created_date`, `last_modified_date`, `deleted`, `name`) VALUES (now(), now(), 0, '김철수');
+INSERT INTO `wauction`.`member` (`created_date`, `last_modified_date`, `deleted`, `name`) VALUES (now(), now(), 0, '이영희');
+INSERT INTO `wauction`.`member` (`created_date`, `last_modified_date`, `deleted`, `name`) VALUES (now(), now(), 0, '박시아');
+INSERT INTO `wauction`.`member` (`created_date`, `last_modified_date`, `deleted`, `name`) VALUES (now(), now(), 0, '신세경');
+INSERT INTO `wauction`.`member` (`created_date`, `last_modified_date`, `deleted`, `name`) VALUES (now(), now(), 0, '정우성');
+INSERT INTO `wauction`.`member` (`created_date`, `last_modified_date`, `deleted`, `name`) VALUES (now(), now(), 0, '윤미래');
+INSERT INTO `wauction`.`member` (`created_date`, `last_modified_date`, `deleted`, `name`) VALUES (now(), now(), 0, '연개소문');
 
 /* channel 삽입 */
-INSERT INTO `wauction`.`channel` (`created_date`, `last_modified_date`, `deleted`, `name`) VALUES (now(), now(), 0, '저녁식사모임');
-INSERT INTO `wauction`.`channel` (`created_date`, `last_modified_date`, `deleted`, `name`) VALUES (now(), now(), 0, '스프링초고수단');
-INSERT INTO `wauction`.`channel` (`created_date`, `last_modified_date`, `deleted`, `name`) VALUES (now(), now(), 0, '개발자들');
+INSERT INTO `wauction`.`channel` (`created_date`, `last_modified_date`, `deleted`, `name`) VALUES (now(), now(), 0, '1번 경매방');
+INSERT INTO `wauction`.`channel` (`created_date`, `last_modified_date`, `deleted`, `name`) VALUES (now(), now(), 0, '2번 경매방');
+INSERT INTO `wauction`.`channel` (`created_date`, `last_modified_date`, `deleted`, `name`) VALUES (now(), now(), 0, '3번 경매방');
 
 /* channel_member 삽입 */
 INSERT INTO `wauction`.`channel_member` (`created_date`, `last_modified_date`, `deleted`, `member_id`, `channel_id`) VALUES (now(), now(), 0, 1, 1);
