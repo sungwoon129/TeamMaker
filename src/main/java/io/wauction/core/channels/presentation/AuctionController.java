@@ -24,7 +24,7 @@ public class AuctionController {
         log.info("Message [{}] send by member: {} to room: {}", auctionRequest.getContent(), auctionRequest.getSenderId(), channelId);
     }
 
-    @MessageMapping("/channels/{channelId}/messages")
+    @MessageMapping("/channels/{channelId}/bid")
     public void bid(@DestinationVariable Long channelId, MessageRequest messageRequest) {
         bidService.bid(messageRequest);
         log.info("Message [{}] send by member: {} to room: {}", messageRequest.getMessage(), messageRequest.getSenderId(), channelId);
