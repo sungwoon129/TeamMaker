@@ -15,6 +15,6 @@ public class Message extends BaseTimeEntity {
     private Long channelId;
     private Long memberId;
 
-    @Column(columnDefinition = "TINYINT(1)")
-    private char deleted;
+    @Column
+    private Boolean deleted;
 }

@@ -10,6 +10,6 @@ public class Member extends BaseTimeEntity{
     @Column(name = "member_id")
     private Long id;
 
-    @Column(columnDefinition = "TINYINT(1)")
-    private char deleted;
+    @Column
+    private Boolean deleted;
 }
