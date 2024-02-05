@@ -12,6 +12,6 @@ public class BidService {
     private final SimpMessagingTemplate simpMessagingTemplate;
 
     public void bid(MessageRequest messageRequest) {
-        simpMessagingTemplate.convertAndSend("/subscription/channels/" + messageRequest.getChannelId(), messageRequest.getMessage());
+        simpMessagingTemplate.convertAndSend("/topic/channels/" + messageRequest.getChannelId(), messageRequest.getMessage());
     }
 }

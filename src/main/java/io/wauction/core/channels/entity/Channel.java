@@ -10,8 +10,8 @@ public class Channel extends BaseTimeEntity{
     @Column(name = "channel_id")
     private Long id;
 
-    @Column(columnDefinition = "TINYINT(1)")
-    private char deleted;
+    @Column
+    private Boolean deleted;
 
 
 
