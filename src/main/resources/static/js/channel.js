@@ -1,16 +1,17 @@
-
-
 class Channel {
     socket;
     stompClient;
+    id;
+
     constructor(channelId) {
-        this.socket = new SockJS('/wauction/' + channelId);
-        this.stompClient = Stomp.over(socket);
+        this.socket = new SockJS('/wauction');
+        this.stompClient = Stomp.over(this.socket);
+        this.id = channelId;
     }
 
     connect() {
-        this.stompClient.connect({}, function (frame) {
-            console.log('Connected: ' + frame);
+        this.stompClient.connect({}, frame => {
+            this.onMessage();
         });
     }
 
@@ -20,47 +21,60 @@ class Channel {
         }
         console.log("Disconnected");
 
-        //TODO : GET /list
     }
 
-    sendMessage() {
-        const data = {
-            channelId: 1,
-            senderId: 1,
-            type:"price",
-            message: "1000"
-        }
-        this.stompClient.send("/app/hello", {}, JSON.stringify(data));
+    sendMessage(data) {
+        this.stompClient.send(`/wauction/channel/${this.id}/greeting`, {}, JSON.stringify(data));
     }
 
     onMessage() {
-        this.stompClient.subscribe('/topic/greetings',  msg => {
+        const url = "/channel/" + this.id;
+        this.stompClient.subscribe(url, msg => {
             this.showMessage(JSON.parse(msg.body));
         });
     }
 
     showMessage(message) {
-        console.log(message);
-
         $("#greetings").append("<tr>" +
-        "<td>" + message.writer + "</td>" +
-        "<td>" + message.msg + "</td>" +
-        "</tr>");
+            "<td>" + message.writer + "</td>" +
+            "<td>" + message.msg + "</td>" +
+            "</tr>");
     }
 }
 
-$(function () {
+document.addEventListener("DOMContentLoaded", () => {
 
-    const channelId = "";
-    const channel = new Channel(channelId);
+    const channel = new Channel(extractChannelIdFromUrl());
 
     channel.connect();
-    channel.onMessage();
 
     $("form").on('submit', function (e) {
         e.preventDefault();
     });
-    $( "#leave" ).click(function() { channel.leave(); });
-    $( "#send" ).click(function() { channel.sendMessage() });
+
+    document.querySelector("#leave").onclick = () => {
+        channel.leave();
+    }
+    document.querySelector("#send").onclick = () => {
+        channel.sendMessage(getData());
+    }
 
 });
+
+const getData = () => {
+    return {
+        sender: document.querySelector("#name").value,
+        type: "join",
+    }
+}
+
+
+const extractChannelIdFromUrl = () => {
+
+    const currentUrl = window.location.href;
+    const regex = /channel\/(.*)/;
+
+    const match = currentUrl.match(regex);
+
+    return match ? match[1] : null;
+}
