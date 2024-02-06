@@ -1,7 +1,6 @@
-package io.wauction.core.channels.service;
+package io.wauction.core.channels.application;
 
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 
 @Getter
 public enum MessageType {
@@ -15,5 +14,4 @@ public enum MessageType {
     MessageType(String name) {
         this.name = name;
     }
-
 }

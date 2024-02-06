@@ -4,13 +4,13 @@ import io.wauction.core.channels.application.ChannelService;
 import io.wauction.core.channels.dto.ChannelRequest;
 import io.wauction.core.channels.entity.Channel;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
 
+import java.net.URISyntaxException;
 import java.util.List;
 
 @Controller
@@ -33,14 +33,15 @@ public class ViewController {
     @GetMapping("/channel/{id}")
     public ModelAndView getDetailView(@PathVariable Long id) {
         ModelAndView mv = new ModelAndView("channel/channel");
-        mv.addObject("info",channelService.findOne(id));
+        mv.addObject("channel",channelService.findOne(id));
 
         return mv;
     }
 
+    @ResponseBody
     @PostMapping("/channel")
-    public String createChannel(ChannelRequest channelRequest) {
-        channelService.create(channelRequest);
-        return "redirect:/channel/channel";
+    public ResponseEntity<Object> createChannel(@RequestBody ChannelRequest channelRequest) throws URISyntaxException {
+        Long channelId = channelService.create(channelRequest);
+        return new ResponseEntity<>(channelId,HttpStatus.CREATED);
     }
 }

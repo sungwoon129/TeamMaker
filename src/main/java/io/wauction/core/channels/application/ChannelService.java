@@ -8,6 +8,8 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+import static io.wauction.core.channels.entity.Channel.createChannel;
+
 @RequiredArgsConstructor
 @Service
 public class ChannelService {
@@ -19,11 +21,13 @@ public class ChannelService {
     }
 
     public Channel findOne(Long id) {
-        return channelRepository.findById(id).orElseThrow(() -> new IllegalArgumentException(""));
+        return channelRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("DB에 존재하지 않는 ID 입니다."));
     }
 
-    public void create(ChannelRequest channelRequest) {
-        Channel channel = new Channel();
+    public Long create(ChannelRequest channelRequest) {
+        Channel channel = createChannel(channelRequest);
         channelRepository.save(channel);
+
+        return channel.getId();
     }
 }

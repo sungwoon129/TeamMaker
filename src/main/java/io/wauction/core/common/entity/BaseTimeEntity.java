@@ -1,4 +1,4 @@
-package io.wauction.core.channels.entity;
+package io.wauction.core.common.entity;
 
 import jakarta.persistence.EntityListeners;
 import jakarta.persistence.MappedSuperclass;

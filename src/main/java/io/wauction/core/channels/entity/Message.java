@@ -1,5 +1,6 @@
 package io.wauction.core.channels.entity;
 
+import io.wauction.core.common.entity.BaseTimeEntity;
 import jakarta.persistence.*;
 
 @Entity
@@ -13,7 +14,7 @@ public class Message extends BaseTimeEntity {
     private String content;
 
     private Long channelId;
-    private Long memberId;
+    private String writer;
 
     @Column
     private Boolean deleted;

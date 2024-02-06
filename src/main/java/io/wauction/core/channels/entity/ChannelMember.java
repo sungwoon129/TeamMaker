@@ -1,9 +1,10 @@
 package io.wauction.core.channels.entity;
 
+import io.wauction.core.common.entity.BaseTimeEntity;
 import jakarta.persistence.*;
 
 @Entity
-public class ChannelMember extends BaseTimeEntity{
+public class ChannelMember extends BaseTimeEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
