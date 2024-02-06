@@ -3,6 +3,7 @@ package io.wauction.core.channels.presentation;
 import io.wauction.core.channels.application.ChannelService;
 import io.wauction.core.channels.dto.ChannelRequest;
 import io.wauction.core.channels.entity.Channel;
+import io.wauction.core.common.dto.CommonResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -40,8 +41,8 @@ public class ViewController {
 
     @ResponseBody
     @PostMapping("/channel")
-    public ResponseEntity<Object> createChannel(@RequestBody ChannelRequest channelRequest) throws URISyntaxException {
+    public ResponseEntity<CommonResponse<Long>> createChannel(@RequestBody ChannelRequest channelRequest) throws URISyntaxException {
         Long channelId = channelService.create(channelRequest);
-        return new ResponseEntity<>(channelId,HttpStatus.CREATED);
+        return new ResponseEntity<>(new CommonResponse<>(channelId),HttpStatus.CREATED);
     }
 }

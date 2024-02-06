@@ -3,12 +3,11 @@ package io.wauction.core.channels.entity;
 import io.wauction.core.channels.dto.ChannelRequest;
 import io.wauction.core.common.entity.BaseTimeEntity;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
+import lombok.*;
 
 @Getter
 @Builder
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 @Entity
 public class Channel extends BaseTimeEntity {
