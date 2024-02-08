@@ -8,7 +8,8 @@ import lombok.NoArgsConstructor;
 public class ChannelRequest {
 
     private String name;
-
-    private int capacity;
+    private String waitingTime;
+    private String auctionTime;
+    private long auctionRuleId;
 
 }

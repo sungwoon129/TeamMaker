@@ -45,15 +45,27 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <form>
+                <form id="channel-request-form">
                     <div class="mb-3">
                         <label for="channel-name" class="col-form-label">채널 이름</label>
-                        <input type="text" class="form-control" id="channel-name">
+                        <input type="text" class="form-control" name="name" id="channel-name">
                     </div>
                     <div class="mb-3">
-                        <label for="channel-capacity" class="col-form-label">최대 인원</label>
-                        <input type="number" class="form-control" id="channel-capacity">
+                        <label for="waiting-time" class="col-form-label">경매 대기시간</label>
+                        <input type="number" class="form-control" name="waitingTime" id="waiting-time">
                     </div>
+                    <div class="mb-3">
+                        <label for="auction-time" class="col-form-label">경매시간</label>
+                        <input type="number" class="form-control" name="auctionTime" id="auction-time">
+                    </div>
+                    <div class="mb-3">
+                        <label for="channel-password" class="col-form-label">비밀번호</label>
+                        <input type="number" class="form-control" name="password" id="channel-password">
+                    </div>
+<!--                    <div class="mb-3">
+                        <label for="auction-rule" class="col-form-label">경매 진행 규칙</label>
+                        <input type="number" class="form-control" name="auctionRuleId" id="auction-rule">
+                    </div>-->
                 </form>
             </div>
             <div class="modal-footer">
