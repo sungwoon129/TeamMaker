@@ -1,11 +1,11 @@
 class Channel {
-    socket;
+
     stompClient;
     id;
 
     constructor(channelId) {
-        this.socket = new SockJS('/wauction');
-        this.stompClient = Stomp.over(this.socket);
+        const socket = new SockJS('/wauction');
+        this.stompClient = Stomp.over(socket);
         this.id = channelId;
     }
 
@@ -28,17 +28,21 @@ class Channel {
     }
 
     onMessage() {
-        const url = "/channel/" + this.id;
-        this.stompClient.subscribe(url, msg => {
+        const topic = "/channel/" + this.id;
+
+        this.stompClient.subscribe(topic, msg => {
+
             this.showMessage(JSON.parse(msg.body));
         });
     }
 
     showMessage(message) {
-        $("#greetings").append("<tr>" +
-            "<td>" + message.writer + "</td>" +
-            "<td>" + message.msg + "</td>" +
-            "</tr>");
+
+        const greetingsElement = document.getElementById("greetings");
+        const newRow = document.createElement("tr");
+        newRow.innerHTML = "<td>" + message.writer + "</td>" +
+            "<td>" + message.msg + "</td>";
+        greetingsElement.appendChild(newRow);
     }
 }
 
@@ -48,16 +52,17 @@ document.addEventListener("DOMContentLoaded", () => {
 
     channel.connect();
 
-    $("form").on('submit', function (e) {
+    document.querySelector('form').addEventListener('submit', function (e) {
         e.preventDefault();
     });
 
-    document.querySelector("#leave").onclick = () => {
+    document.querySelector("#leave").addEventListener("click", () => {
         channel.leave();
-    }
-    document.querySelector("#send").onclick = () => {
+        window.location.href = "/";
+    })
+    document.querySelector("#send").addEventListener("click", () => {
         channel.sendMessage(getData());
-    }
+    })
 
 });
 
@@ -72,7 +77,7 @@ const getData = () => {
 const extractChannelIdFromUrl = () => {
 
     const currentUrl = window.location.href;
-    const regex = /channel\/(.*)/;
+    const regex = /\/channel\/(\d+)/;
 
     const match = currentUrl.match(regex);
 
