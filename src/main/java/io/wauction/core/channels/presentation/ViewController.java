@@ -2,6 +2,7 @@ package io.wauction.core.channels.presentation;
 
 import io.wauction.core.channels.application.ChannelService;
 import io.wauction.core.channels.dto.ChannelRequest;
+import io.wauction.core.channels.dto.ChannelResponse;
 import io.wauction.core.channels.entity.Channel;
 import io.wauction.core.common.dto.CommonResponse;
 import lombok.RequiredArgsConstructor;
@@ -21,12 +22,13 @@ public class ViewController {
     private final ChannelService channelService;
 
 
-    @GetMapping("/list")
+    @GetMapping("/")
     public ModelAndView getListView() {
 
         List<Channel> channelList = channelService.findAll();
+        List<ChannelResponse> list = channelList.stream().map(Channel::toDto).toList();
         ModelAndView mv = new ModelAndView("index");
-        mv.addObject("list",channelList);
+        mv.addObject("list",list);
 
         return mv;
     }
