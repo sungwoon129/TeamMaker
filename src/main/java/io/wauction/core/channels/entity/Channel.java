@@ -1,6 +1,8 @@
 package io.wauction.core.channels.entity;
 
+import io.wauction.core.auction.entity.AuctionRule;
 import io.wauction.core.channels.dto.ChannelRequest;
+import io.wauction.core.channels.dto.ChannelResponse;
 import io.wauction.core.common.entity.BaseTimeEntity;
 import jakarta.persistence.*;
 import lombok.*;
@@ -24,6 +26,13 @@ public class Channel extends BaseTimeEntity {
     private int capacity;
 
     @Column
+    private ChannelState state;
+
+    @OneToOne
+    @Column
+    private AuctionRule auctionRule;
+
+    @Column
     private Boolean deleted;
 
 
@@ -31,8 +40,20 @@ public class Channel extends BaseTimeEntity {
         return Channel.builder()
                 .name(channelRequest.getName())
                 .capacity(channelRequest.getCapacity())
+                .state(ChannelState.WAITING)
                 .build();
     }
 
 
+    public ChannelResponse toDto() {
+        return ChannelResponse.builder()
+                .channelId(id)
+                .name(name)
+                .capacity(capacity)
+                .build();
+    }
+
+    public void changeState(ChannelState state) {
+        this.state = state;
+    }
 }
