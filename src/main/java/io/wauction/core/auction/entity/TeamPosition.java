@@ -1,11 +1,13 @@
 package io.wauction.core.auction.entity;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Embeddable;
+import jakarta.persistence.*;
 
-@Embeddable
+@Entity
 public class TeamPosition {
 
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
     @Column(name = "position_name")
     private String name;
 }

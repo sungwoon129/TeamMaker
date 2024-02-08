@@ -17,16 +17,28 @@ public class AuctionRule extends BaseTimeEntity {
     private Long id;
 
 
-    @ElementCollection(fetch = FetchType.LAZY)
-    @CollectionTable(name = "auction_role", joinColumns = @JoinColumn(name = "rule_id"))
+    @OneToMany(cascade = CascadeType.PERSIST)
+    @JoinColumn(name = "rule_id", updatable = false, nullable = false)
     private List<ParticipantRole> roles = new ArrayList<>();
 
-    @ElementCollection(fetch = FetchType.LAZY)
-    @CollectionTable(name = "auction_position", joinColumns = @JoinColumn(name = "rule_id"))
+
+    @OneToMany(cascade = CascadeType.PERSIST)
+    @JoinColumn(name = "rule_id", updatable = false, nullable = false)
     private List<TeamPosition> positions = new ArrayList<>();
+
+    @OneToMany(cascade = CascadeType.PERSIST)
+    @JoinColumn(name = "rule_id", updatable = false, nullable = false)
+    private List<AuctionItem> auctionItems;
 
     @Enumerated(EnumType.STRING)
     private ProceedWay proceedWay;
 
+    private int skeleton;
+
+
+    // TODO: AuctionRule 생성할 때, auctionItems.size() / roles.size() 값은 1이상이어야함. 최소 1명은 되어야하기때문.
+    public int getMaximumParticipants() {
+        return auctionItems.size() / roles.size();
+    }
 
 }

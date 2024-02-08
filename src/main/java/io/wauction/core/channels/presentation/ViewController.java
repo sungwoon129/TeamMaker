@@ -1,6 +1,7 @@
 package io.wauction.core.channels.presentation;
 
 import io.wauction.core.channels.application.ChannelService;
+import io.wauction.core.channels.application.CreateAuctionRoomService;
 import io.wauction.core.channels.dto.ChannelRequest;
 import io.wauction.core.channels.dto.ChannelResponse;
 import io.wauction.core.channels.entity.Channel;
@@ -20,6 +21,7 @@ import java.util.List;
 public class ViewController {
 
     private final ChannelService channelService;
+    private final CreateAuctionRoomService createAuctionRoomService;
 
 
     @GetMapping("/")
@@ -44,7 +46,7 @@ public class ViewController {
     @ResponseBody
     @PostMapping("/channel")
     public ResponseEntity<CommonResponse<Long>> createChannel(@RequestBody ChannelRequest channelRequest) throws URISyntaxException {
-        Long channelId = channelService.create(channelRequest);
+        Long channelId = createAuctionRoomService.createAuctionRoom(channelRequest);
         return new ResponseEntity<>(new CommonResponse<>(channelId),HttpStatus.CREATED);
     }
 }
