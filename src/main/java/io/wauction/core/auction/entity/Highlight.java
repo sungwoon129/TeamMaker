@@ -9,7 +9,7 @@ public class Highlight extends BaseTimeEntity {
     @Column(name = "highlight_id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Id
-    private String id;
+    private Long id;
 
     private String name;
     private String url;
