@@ -11,6 +11,6 @@ public class Highlight extends BaseTimeEntity {
     @Id
     private String id;
 
-    private String filename;
+    private String name;
     private String url;
 }

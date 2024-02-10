@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 @Entity
 public class ParticipantRole {
 
+    @Column(name = "participant_role_id")
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
