@@ -7,5 +7,5 @@ import java.util.Optional;
 
 public interface AuctionRuleRepository extends JpaRepository<AuctionRule, Long> {
 
-    Optional<AuctionRule> findFirstByOrderByCreatedAtAsc();
+    Optional<AuctionRule> findFirstByOrderByCreatedTimeAsc();
 }

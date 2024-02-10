@@ -30,7 +30,6 @@ public class Channel extends BaseTimeEntity {
     private ChannelState state;
 
     @ManyToOne
-    @Column
     private AuctionRule auctionRule;
 
     @Column

@@ -11,11 +11,11 @@ import java.util.Optional;
 @Service
 public class AuctionRuleService {
 
-    private AuctionRuleRepository auctionRuleRepository;
+    private final AuctionRuleRepository auctionRuleRepository;
 
 
     public AuctionRule getDefaultRule() {
-        Optional<AuctionRule> defaultRule = auctionRuleRepository.findFirstByOrderByCreatedAtAsc();
+        Optional<AuctionRule> defaultRule = auctionRuleRepository.findFirstByOrderByCreatedTimeAsc();
 
         return defaultRule.orElseThrow(() -> new IllegalArgumentException("등록된 기본 경매 룰이 존재하지 않습니다."));
     }

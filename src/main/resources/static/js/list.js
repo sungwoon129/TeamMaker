@@ -5,19 +5,13 @@ const createChannel = () => {
     const form = document.getElementById('channel-request-form');
     const inputs = form.querySelectorAll('input');
 
-    const formData = {};
+    const channelRequest = {};
 
-    // 각 input 요소의 이름과 값을 객체에 추가합니다.
     inputs.forEach(input => {
-        formData[input.name] = input.value;
+        channelRequest[input.name] = input.value;
     });
 
     const url = "/channel"
-
-    const channelRequest = {
-        name,
-        capacity
-    }
 
     fetch(url, {
         method: 'POST',
