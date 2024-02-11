@@ -17,7 +17,7 @@ import org.springframework.stereotype.Controller;
 @RequiredArgsConstructor
 @Slf4j
 @Controller
-public class AuctionController {
+public class ChannelController {
 
     private final SimpMessagingTemplate simpMessagingTemplate;
     private final ObjectMapper objectMapper = new ObjectMapper();

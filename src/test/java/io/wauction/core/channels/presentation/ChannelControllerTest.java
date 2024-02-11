@@ -20,7 +20,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("test")
-public class AuctionControllerTest extends WebSocketTestConfig {
+public class ChannelControllerTest extends WebSocketTestConfig {
 
     @Autowired
     private WebSocketStompClient stompClient;

@@ -1,5 +1,6 @@
 package io.wauction.core.channels.dto;
 
+import io.wauction.core.auction.dto.AuctionRuleResponse;
 import io.wauction.core.channels.entity.ChannelState;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -14,5 +15,6 @@ public class ChannelResponse {
     private String name;
     private int capacity;
     private ChannelState channelState;
+    private AuctionRuleResponse auctionRuleResponse;
 
 }

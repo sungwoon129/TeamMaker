@@ -28,7 +28,7 @@ public class ViewController {
     public ModelAndView getListView() {
 
         List<Channel> channelList = channelService.findAll();
-        List<ChannelResponse> list = channelList.stream().map(Channel::toDto).toList();
+        List<ChannelResponse> list = channelList.stream().map(Channel::toResponseDto).toList();
         ModelAndView mv = new ModelAndView("index");
         mv.addObject("list",list);
 
@@ -38,7 +38,8 @@ public class ViewController {
     @GetMapping("/channel/{id}")
     public ModelAndView getDetailView(@PathVariable Long id) {
         ModelAndView mv = new ModelAndView("channel/channel");
-        mv.addObject("channel",channelService.findOne(id));
+        Channel channel = channelService.findOne(id);
+        mv.addObject("channel",channel.toResponseDto());
 
         return mv;
     }

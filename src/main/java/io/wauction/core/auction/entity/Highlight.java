@@ -1,8 +1,15 @@
 package io.wauction.core.auction.entity;
 
+import io.wauction.core.auction.dto.HighlightResponse;
 import io.wauction.core.common.entity.BaseTimeEntity;
 import jakarta.persistence.*;
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
+
+@Getter
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity
 public class Highlight extends BaseTimeEntity {
 
@@ -13,4 +20,12 @@ public class Highlight extends BaseTimeEntity {
 
     private String name;
     private String url;
+
+    public HighlightResponse toResponseDto() {
+        return HighlightResponse.builder()
+                .id(id)
+                .name(name)
+                .url(url)
+                .build();
+    }
 }

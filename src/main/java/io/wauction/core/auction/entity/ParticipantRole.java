@@ -1,9 +1,14 @@
 package io.wauction.core.auction.entity;
 
+import io.wauction.core.auction.dto.ParticipantRoleResponse;
+import io.wauction.core.common.entity.BaseTimeEntity;
 import jakarta.persistence.*;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity
-public class ParticipantRole {
+public class ParticipantRole extends BaseTimeEntity {
 
     @Column(name = "participant_role_id")
     @Id
@@ -15,4 +20,12 @@ public class ParticipantRole {
 
     @Embedded
     private Point point;
+
+    public ParticipantRoleResponse toResponseDto() {
+        return ParticipantRoleResponse.builder()
+                .id(id)
+                .name(name)
+                .point(point.getValue())
+                .build();
+    }
 }

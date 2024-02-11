@@ -1,13 +1,17 @@
 package io.wauction.core.auction.entity;
 
+import io.wauction.core.auction.dto.AuctionRuleResponse;
 import io.wauction.core.common.entity.BaseTimeEntity;
 import jakarta.persistence.*;
+import lombok.AccessLevel;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import java.util.ArrayList;
 import java.util.List;
 
 @Getter
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity
 public class AuctionRule extends BaseTimeEntity {
 
@@ -41,4 +45,13 @@ public class AuctionRule extends BaseTimeEntity {
         return auctionItems.size() / roles.size();
     }
 
+    public AuctionRuleResponse toResponseDto() {
+        return AuctionRuleResponse.builder()
+                .id(id)
+                .roles(roles.stream().map(ParticipantRole::toResponseDto).toList())
+                .positions(positions.stream().map(TeamPosition::toResponseDto).toList())
+                .items(auctionItems.stream().map(AuctionItem::toResponseDto).toList())
+                .proceedWay(proceedWay)
+                .build();
+    }
 }

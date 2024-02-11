@@ -1,5 +1,6 @@
 package io.wauction.core.auction.entity;
 
+import io.wauction.core.auction.dto.AuctionItemResponse;
 import jakarta.persistence.*;
 import org.hibernate.annotations.Comment;
 
@@ -20,4 +21,13 @@ public class AuctionItem {
     @OneToMany(cascade = CascadeType.PERSIST)
     @JoinColumn(name = "item_id", updatable = false, nullable = false)
     private List<Highlight> highlights = new ArrayList<>();
+
+    public AuctionItemResponse toResponseDto() {
+        return AuctionItemResponse.builder()
+                .id(id)
+                .name(name)
+                .highlights(highlights.stream().map(Highlight::toResponseDto).toList())
+                .build();
+
+    }
 }

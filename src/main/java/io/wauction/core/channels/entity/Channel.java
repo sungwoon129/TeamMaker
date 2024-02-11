@@ -49,11 +49,12 @@ public class Channel extends BaseTimeEntity {
     }
 
 
-    public ChannelResponse toDto() {
+    public ChannelResponse toResponseDto() {
         return ChannelResponse.builder()
                 .channelId(id)
                 .name(name)
                 .capacity(capacity)
+                .auctionRuleResponse(auctionRule.toResponseDto())
                 .build();
     }
 
