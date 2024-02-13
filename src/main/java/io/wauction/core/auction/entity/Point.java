@@ -1,5 +1,6 @@
 package io.wauction.core.auction.entity;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -9,5 +10,6 @@ import lombok.NoArgsConstructor;
 @Embeddable
 public class Point {
 
+    @Column(name = "point")
     private long value;
 }
