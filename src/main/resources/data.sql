@@ -17,29 +17,29 @@ INSERT INTO `team_position` (`position_id`,`position_name`,`rule_id`) VALUES (4,
 INSERT INTO `team_position` (`position_id`,`position_name`,`rule_id`) VALUES (5,'SUPPORT',1);
 
 
-INSERT INTO `auction_item` (`item_id`,`name`,`rule_id`) VALUES (1,'KIIN',1);
-INSERT INTO `auction_item` (`item_id`,`name`,`rule_id`) VALUES (2,'CANYON',1);
-INSERT INTO `auction_item` (`item_id`,`name`,`rule_id`) VALUES (3,'CHOVY',1);
-INSERT INTO `auction_item` (`item_id`,`name`,`rule_id`) VALUES (4,'PEYZ',1);
-INSERT INTO `auction_item` (`item_id`,`name`,`rule_id`) VALUES (5,'LEHENDS',1);
+INSERT INTO `auction_item` (`item_id`,`name`,`rule_id`, `img`) VALUES (1,'KIIN',1, 'https://image.fmkorea.com/files/attach/new3/20230329/14339012/5169126239/5626726225/a96e8f0a4751850e1c87388575c7a195.jpg');
+INSERT INTO `auction_item` (`item_id`,`name`,`rule_id`, `img`) VALUES (2,'CANYON',1, 'https://image.fmkorea.com/files/attach/new3/20230329/14339012/5169126239/5626726225/a96e8f0a4751850e1c87388575c7a195.jpg');
+INSERT INTO `auction_item` (`item_id`,`name`,`rule_id`, `img`) VALUES (3,'CHOVY',1, 'https://image.fmkorea.com/files/attach/new3/20230329/14339012/5169126239/5626726225/a96e8f0a4751850e1c87388575c7a195.jpg');
+INSERT INTO `auction_item` (`item_id`,`name`,`rule_id`, `img`) VALUES (4,'PEYZ',1, 'https://image.fmkorea.com/files/attach/new3/20230329/14339012/5169126239/5626726225/a96e8f0a4751850e1c87388575c7a195.jpg');
+INSERT INTO `auction_item` (`item_id`,`name`,`rule_id`, `img`) VALUES (5,'LEHENDS',1, 'https://image.fmkorea.com/files/attach/new3/20230329/14339012/5169126239/5626726225/a96e8f0a4751850e1c87388575c7a195.jpg');
 
-INSERT INTO `auction_item` (`item_id`,`name`,`rule_id`) VALUES (6,'DORAN',1);
-INSERT INTO `auction_item` (`item_id`,`name`,`rule_id`) VALUES (7,'PEANUT',1);
-INSERT INTO `auction_item` (`item_id`,`name`,`rule_id`) VALUES (8,'ZEKA',1);
-INSERT INTO `auction_item` (`item_id`,`name`,`rule_id`) VALUES (9,'VIPER',1);
-INSERT INTO `auction_item` (`item_id`,`name`,`rule_id`) VALUES (10,'DELIGHT',1);
+INSERT INTO `auction_item` (`item_id`,`name`,`rule_id`, `img`) VALUES (6,'DORAN',1, 'https://image.fmkorea.com/files/attach/new3/20230329/14339012/5169126239/5626726225/a96e8f0a4751850e1c87388575c7a195.jpg');
+INSERT INTO `auction_item` (`item_id`,`name`,`rule_id`, `img`) VALUES (7,'PEANUT',1, 'https://image.fmkorea.com/files/attach/new3/20230329/14339012/5169126239/5626726225/a96e8f0a4751850e1c87388575c7a195.jpg');
+INSERT INTO `auction_item` (`item_id`,`name`,`rule_id`, `img`) VALUES (8,'ZEKA',1, 'https://image.fmkorea.com/files/attach/new3/20230329/14339012/5169126239/5626726225/a96e8f0a4751850e1c87388575c7a195.jpg');
+INSERT INTO `auction_item` (`item_id`,`name`,`rule_id`, `img`) VALUES (9,'VIPER',1, 'https://image.fmkorea.com/files/attach/new3/20230329/14339012/5169126239/5626726225/a96e8f0a4751850e1c87388575c7a195.jpg');
+INSERT INTO `auction_item` (`item_id`,`name`,`rule_id`, `img`) VALUES (10,'DELIGHT',1, 'https://image.fmkorea.com/files/attach/new3/20230329/14339012/5169126239/5626726225/a96e8f0a4751850e1c87388575c7a195.jpg');
 
-INSERT INTO `auction_item` (`item_id`,`name`,`rule_id`) VALUES (11,'PERFECT',1);
-INSERT INTO `auction_item` (`item_id`,`name`,`rule_id`) VALUES (12,'PYOSIK',1);
-INSERT INTO `auction_item` (`item_id`,`name`,`rule_id`) VALUES (13,'BDD',1);
-INSERT INTO `auction_item` (`item_id`,`name`,`rule_id`) VALUES (14,'DEFT',1);
-INSERT INTO `auction_item` (`item_id`,`name`,`rule_id`) VALUES (15,'BERYL',1);
+INSERT INTO `auction_item` (`item_id`,`name`,`rule_id`, `img`) VALUES (11,'PERFECT',1, 'https://image.fmkorea.com/files/attach/new3/20230329/14339012/5169126239/5626726225/a96e8f0a4751850e1c87388575c7a195.jpg');
+INSERT INTO `auction_item` (`item_id`,`name`,`rule_id`, `img`) VALUES (12,'PYOSIK',1, 'https://image.fmkorea.com/files/attach/new3/20230329/14339012/5169126239/5626726225/a96e8f0a4751850e1c87388575c7a195.jpg');
+INSERT INTO `auction_item` (`item_id`,`name`,`rule_id`, `img`) VALUES (13,'BDD',1, 'https://image.fmkorea.com/files/attach/new3/20230329/14339012/5169126239/5626726225/a96e8f0a4751850e1c87388575c7a195.jpg');
+INSERT INTO `auction_item` (`item_id`,`name`,`rule_id`, `img`) VALUES (14,'DEFT',1, 'https://image.fmkorea.com/files/attach/new3/20230329/14339012/5169126239/5626726225/a96e8f0a4751850e1c87388575c7a195.jpg');
+INSERT INTO `auction_item` (`item_id`,`name`,`rule_id`, `img`) VALUES (15,'BERYL',1, 'https://image.fmkorea.com/files/attach/new3/20230329/14339012/5169126239/5626726225/a96e8f0a4751850e1c87388575c7a195.jpg');
 
-INSERT INTO `auction_item` (`item_id`,`name`,`rule_id`) VALUES (16,'KINGEN',1);
-INSERT INTO `auction_item` (`item_id`,`name`,`rule_id`) VALUES (17,'LUCID',1);
-INSERT INTO `auction_item` (`item_id`,`name`,`rule_id`) VALUES (18,'SHOWMAKER',1);
-INSERT INTO `auction_item` (`item_id`,`name`,`rule_id`) VALUES (19,'AIMING',1);
-INSERT INTO `auction_item` (`item_id`,`name`,`rule_id`) VALUES (20,'KELLIN',1);
+INSERT INTO `auction_item` (`item_id`,`name`,`rule_id`, `img`) VALUES (16,'KINGEN',1, 'https://image.fmkorea.com/files/attach/new3/20230329/14339012/5169126239/5626726225/a96e8f0a4751850e1c87388575c7a195.jpg');
+INSERT INTO `auction_item` (`item_id`,`name`,`rule_id`, `img`) VALUES (17,'LUCID',1, 'https://image.fmkorea.com/files/attach/new3/20230329/14339012/5169126239/5626726225/a96e8f0a4751850e1c87388575c7a195.jpg');
+INSERT INTO `auction_item` (`item_id`,`name`,`rule_id`, `img`) VALUES (18,'SHOWMAKER',1, 'https://image.fmkorea.com/files/attach/new3/20230329/14339012/5169126239/5626726225/a96e8f0a4751850e1c87388575c7a195.jpg');
+INSERT INTO `auction_item` (`item_id`,`name`,`rule_id`, `img`) VALUES (19,'AIMING',1, 'https://image.fmkorea.com/files/attach/new3/20230329/14339012/5169126239/5626726225/a96e8f0a4751850e1c87388575c7a195.jpg');
+INSERT INTO `auction_item` (`item_id`,`name`,`rule_id`, `img`) VALUES (20,'KELLIN',1, 'https://image.fmkorea.com/files/attach/new3/20230329/14339012/5169126239/5626726225/a96e8f0a4751850e1c87388575c7a195.jpg');
 
 INSERT INTO `highlight` (`highlight_id`,`name`,`url`,`item_id`) VALUES (1,'KIIN','https://youtu.be/t1_FVzv4l-4?si=XsPcnLvDt34yg-KK',1);
 INSERT INTO `highlight` (`highlight_id`,`name`,`url`,`item_id`) VALUES (2,'CANYON','https://youtu.be/t1_FVzv4l-4?si=XsPcnLvDt34yg-KK',2);
