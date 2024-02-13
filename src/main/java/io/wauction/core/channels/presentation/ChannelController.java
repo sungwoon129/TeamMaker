@@ -23,7 +23,7 @@ public class ChannelController {
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     @MessageMapping("/channel/{channelId}/greeting")
-    public void greeting(@DestinationVariable long channelId, @Payload MessageRequest messageRequest) throws InterruptedException, JsonProcessingException {
+    public void greeting(@DestinationVariable long channelId, @Payload MessageRequest messageRequest) throws JsonProcessingException {
 
         String greetingMessage = MessageType.findByTitle(messageRequest.getType()).makeFullMessage(messageRequest.getSender());
         String destination = "/channel/" + channelId;
@@ -32,13 +32,14 @@ public class ChannelController {
         simpMessagingTemplate.convertAndSend(destination,msg );
     }
 
-    @MessageMapping("/bid")
+    @MessageMapping("/channel/{channelId}/bid")
     @SendTo("/channel/{channelId}")
-    public MessageResponse bid(MessageRequest messageRequest) throws InterruptedException {
-        Thread.sleep(1000);
+    public void bid(@DestinationVariable long channelId, @Payload MessageRequest messageRequest) throws JsonProcessingException {
 
+        String destination = "/channel/" + channelId;
         String bidMessage = MessageType.findByTitle(messageRequest.getType()).makeFullMessage(messageRequest.getMessage());
+        String msg = objectMapper.writeValueAsString(new MessageResponse(messageRequest.getSender(), bidMessage));
 
-        return new MessageResponse(messageRequest.getSender(),bidMessage);
+        simpMessagingTemplate.convertAndSend(destination, msg);
     }
 }
