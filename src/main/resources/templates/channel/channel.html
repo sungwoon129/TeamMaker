@@ -2,8 +2,8 @@
 <html>
 <head>
     <title>Hello WebSocket</title>
-    <link href="/css/main.css" rel="stylesheet">
     <link href="/webjars/bootstrap/css/bootstrap.css" rel="stylesheet">
+    <link href="/css/main.css" rel="stylesheet">
 
     <script src="/webjars/jquery/jquery.slim.js"></script>
     <script src="/webjars/bootstrap/js/bootstrap.js"></script>
@@ -16,64 +16,157 @@
     Javascript and reload this page!</h2></noscript>
 <div id="main-content" class="container">
     <div class="row">
-        <div class="col-md-12">
-            <h2 th:text="${channel.getName()}"></h2>
-        </div>
-        <div class="col-md-6">
+        <div class="col-md-3">
             <form class="form-inline">
                 <div class="form-group">
-                    <button id="leave" class="btn btn-default" type="button">채널 나가기</button>
-                    </button>
+                    <button id="leave" class="btn btn-dark" type="button">채널 나가기</button>
                 </div>
             </form>
         </div>
         <div class="col-md-6">
-            <form class="form-inline">
-                <div class="form-group">
-                    <label for="name">What is your name?</label>
-                    <input type="text" id="name" class="form-control" placeholder="Your name here...">
-                </div>
-                <button id="send" class="btn btn-default" type="button">Send</button>
-            </form>
+            <h2 class="text-bold" th:text="${channel.getName()}"></h2>
+        </div>
+        <div class="col-md-3">
         </div>
     </div>
     <div class="row">
-        <div class="col-md-4">
+        <div class="col-md-3">
             <div class="participant-container">
-                <div th:each="participant : ${channel.getAuctionRuleResponse().getRoles()}" class="participant-info">
-                    <div th:text="${participant.getName()}"></div>
-                    <div th:text="${participant.getPoint()}"></div>
-                </div>
-                <div th:each="position : ${channel.getAuctionRuleResponse().getPositions()}" class="participant-contents">
-                    <div class="item-box">
-                        <div class="profile-image">
-                            <div class="item-name"></div>
-                            <div class="item-price"></div>
-                            <img th:text="${position.getImg()}" class="item-img">
+                <div th:each="participant : ${channel.getAuctionRuleResponse().getRoles()}" class="participant-info mb-1">
+                    <div class="row">
+                        <div class="d-flex p-2 flex-side">
+                            <div th:text="${participant.getName()}" class="text-bold random-color-element"></div>
+                            <div th:text="${'남은 포인트 ' + participant.getPoint()}" class="remaining-point text-custom-orange text-bold"></div>
                         </div>
-                        <div>
-                            <div th:text="${position.getName()}" class="name"></div>
+                    </div>
+                    <div class="row">
+                        <div class="successful-bid-box d-flex p-2">
+                            <div th:each="position : ${channel.getAuctionRuleResponse().getPositions()}" class="successful-bid">
+                                <div class="profile-image">
+                                    <span class="item-name"></span>
+                                    <span class="item-price"></span>
+                                    <div class="item-img">
+                                        <img th:if="${position.getImg() != null}" th:src="${position.getImg()}" alt="Item Image">
+                                        <img th:unless="${position.getImg() != null}" src="/icon/item.png" alt="Default Image">
+                                    </div>
+                                </div>
+                                <div>
+                                    <div th:text="${position.getName()}" class="name text-small"></div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-        <div class="col-md-4">
-            <table id="conversation" class="table table-striped">
-                <thead>
-                <tr>
-                    <th>Greetings</th>
-                </tr>
-                </thead>
-                <tbody id="greetings">
-                </tbody>
-            </table>
+        <div class="col-md-5">
+            <div class="highlight-container mb-2">
+                <div th:each="highlight : ${channel.getAuctionRuleResponse().getItems().get(0).getHighlights().get(0)}"
+                     class="highlight">
+                    <iframe
+                            width="100%"
+                            height="100%"
+                            src="https://www.youtube.com/embed/wXe33FPWicU"
+                            title="YouTube video player" frameborder="0"
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                            allowfullscreen>
+                    </iframe>
+                </div>
+            </div>
+            <div class="under-auction-item mb-3">
+                <div class="row">
+                    <div class="item-image">
+                        <img src="/icon/item.png">
+                    </div>
+                    <div class="item-name-box">
+                        <div class="item-name">
+                            GENZ KIIN
+                        </div>
+                    </div>
+                    <div class="item-info-box">
+                        <div class="item-info-1">TOP</div>
+                        <div class="item-info-2">모스트 챔피언 레넥톤</div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="status-box">
+                        <div class="bid-status">
+                            <span class="badge bg-success">입찰 중</span>
+                        </div>
+                        <div class="bidder-box">
+                            <div class="bidder-text">FAKER</div>
+                            <div class="bid-price">220 포인트</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="progress-bar-box">
+                        <div class="progress-bar-text">
+                            입찰종료까지 남은 시간 <strong>3초</strong>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress">
+                                <div class="progress-bar bg-info" role="progressbar" style="width: 25%;" aria-valuenow="25" aria-valuemin="0" aria-valuemax="100">3초</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="bid-container mb-2">
+                <div class="row">
+                    <div class="d-flex p-2">
+                        <div class="row-title text-success text-bold col-md-2 d-flex justify-content-center align-items-center">입찰하기</div>
+                        <div class="input-group p-2">
+                            <input type="text" class="form-control custom-input" id="point" aria-label="Amount (to the nearest dollar)">
+                            <span class="custom-input-suffix-font">포인트</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="price-control-panel">
+                        <button type="button" class="btn btn-dark">초기화</button>
+                        <button type="button" class="btn btn-dark">+5</button>
+                        <button type="button" class="btn btn-dark">+10</button>
+                        <button type="button" class="btn btn-dark">+50</button>
+                        <button type="button" class="btn btn-dark">+100</button>
+                        <button type="button" id="bid" class="btn btn-outline-success flex-one">입찰</button>
+                    </div>
+                    <div class="panel-helper">
+                        <!-- panel help text -->
+                    </div>
+                </div>
+            </div>
+            <div class="display-container" id="display">
+                <!-- 새로운 메시지가 올때마다 message-line 추가 -->
+                <div class="message-line">
+                    <div class="writer"></div>
+                    <div class="message"></div>
+                </div>
+            </div>
         </div>
-        <div class="col-md-4">
+        <div class="col-md-4 items-container">
+            <div th:each="item, itemStat : ${channel.getAuctionRuleResponse().getItems()}" class="item-container">
+                <div class="item-box">
+                    <div class="item-img">
+                        <img th:if="${item.getImg() != null}" th:src="${item.getImg()}" alt="Item Image">
+                        <img th:unless="${item.getImg() != null}" src="/icon/item.png" alt="Default Image">
+                    </div>
+                    <div th:text="${item.getName()}" class="text-small text-overflow"></div>
+
+                </div>
+                <div th:if="${!itemStat.last}" class="arrow-box">
+                    <img src="/icon/next.png" width="16">
+                </div>
+            </div>
+
         </div>
     </div>
 </div>
 
+<div class="footer">
+    <a href="https://www.flaticon.com/free-icons/next" title="next icons">Next icons created by Smashicons -
+        Flaticon</a>
+</div>
 <script src="/js/channel.js"></script>
 </body>
 </html>
