@@ -17,6 +17,9 @@ public class AuctionItem {
     private Long id;
     private String name;
 
+    @Comment("경매 대상의 이미지 url")
+    private String img;
+
     @Comment("사진이나 동영상등 경매상품의 가치를 표현할 수 있는 자료")
     @OneToMany(cascade = CascadeType.PERSIST)
     @JoinColumn(name = "item_id", updatable = false, nullable = false)
@@ -26,6 +29,7 @@ public class AuctionItem {
         return AuctionItemResponse.builder()
                 .id(id)
                 .name(name)
+                .img(img)
                 .highlights(highlights.stream().map(Highlight::toResponseDto).toList())
                 .build();
 

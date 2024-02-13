@@ -12,6 +12,7 @@ import java.util.List;
 public class AuctionItemResponse {
     private Long id;
     private String name;
+    private String img;
     private List<HighlightResponse> highlights;
 
 }
