@@ -38,7 +38,27 @@
         </div>
     </div>
     <div class="row">
-        <div class="col-md-12">
+        <div class="col-md-4">
+            <div class="participant-container">
+                <div th:each="participant : ${channel.getAuctionRuleResponse().getRoles()}" class="participant-info">
+                    <div th:text="${participant.getName()}"></div>
+                    <div th:text="${participant.getPoint()}"></div>
+                </div>
+                <div th:each="position : ${channel.getAuctionRuleResponse().getPositions()}" class="participant-contents">
+                    <div class="item-box">
+                        <div class="profile-image">
+                            <div class="item-name"></div>
+                            <div class="item-price"></div>
+                            <img th:text="${position.getImg()}" class="item-img">
+                        </div>
+                        <div>
+                            <div th:text="${position.getName()}" class="name"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
             <table id="conversation" class="table table-striped">
                 <thead>
                 <tr>
@@ -48,6 +68,8 @@
                 <tbody id="greetings">
                 </tbody>
             </table>
+        </div>
+        <div class="col-md-4">
         </div>
     </div>
 </div>

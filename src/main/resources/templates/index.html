@@ -26,7 +26,7 @@
             <table id="conversation" class="table table-striped">
                 <tr th:each="channel : ${list}">
                     <td>
-                        <a th:href="@{/channel/{id}(id=${channel.channelId} )}"
+                        <a th:src="@{/channel/{id}(id=${channel.channelId})}"
                            th:text="${channel.name}"></a>
                     </td>
                 </tr>
