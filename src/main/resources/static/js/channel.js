@@ -29,13 +29,13 @@ class Channel {
 
     }
 
-    sendMessage() {
+    sendMessage(messageType) {
         const data = {
             sender: this.user,
             message: document.querySelector("#point").value,
-            type: "price",
+            type: messageType,
         }
-        this.stompClient.send(`/wauction/channel/${this.id}/bid`, {}, JSON.stringify(data));
+        this.stompClient.send(`/wauction/channel/${this.id}/send`, {}, JSON.stringify(data));
     }
 
     onMessage() {
@@ -109,7 +109,8 @@ document.addEventListener("DOMContentLoaded", () => {
         window.location.href = "/";
     })
     document.querySelector("#bid").addEventListener("click", () => {
-        channel.sendMessage();
+        const messageType = "PRICE";
+        channel.sendMessage(messageType);
     })
 
     channel.setTeamColor()

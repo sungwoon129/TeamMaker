@@ -22,24 +22,14 @@ public class ChannelController {
     private final SimpMessagingTemplate simpMessagingTemplate;
     private final ObjectMapper objectMapper = new ObjectMapper();
 
-    @MessageMapping("/channel/{channelId}/greeting")
-    public void greeting(@DestinationVariable long channelId, @Payload MessageRequest messageRequest) throws JsonProcessingException {
 
-        String greetingMessage = MessageType.findByTitle(messageRequest.getType()).makeFullMessage(messageRequest.getSender());
-        String destination = "/channel/" + channelId;
-        String msg = objectMapper.writeValueAsString(new MessageResponse("SYSTEM", greetingMessage));
-
-        simpMessagingTemplate.convertAndSend(destination,msg );
-    }
-
-    @MessageMapping("/channel/{channelId}/bid")
+    @MessageMapping("/channel/{channelId}/send")
     @SendTo("/channel/{channelId}")
-    public void bid(@DestinationVariable long channelId, @Payload MessageRequest messageRequest) throws JsonProcessingException {
+    public void send(@DestinationVariable long channelId, @Payload MessageRequest messageRequest) throws JsonProcessingException {
 
         String destination = "/channel/" + channelId;
-        String bidMessage = MessageType.findByTitle(messageRequest.getType()).makeFullMessage(messageRequest.getMessage());
-        String msg = objectMapper.writeValueAsString(new MessageResponse(messageRequest.getSender(), bidMessage));
+        String msg = MessageType.findByTitle(messageRequest.getType()).makeFullMessage(messageRequest.getMessage());
 
-        simpMessagingTemplate.convertAndSend(destination, msg);
+        simpMessagingTemplate.convertAndSend(destination, new MessageResponse(messageRequest.getSender(), msg));
     }
 }
