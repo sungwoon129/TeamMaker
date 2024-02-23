@@ -32,4 +32,16 @@ public class ChannelController {
 
         simpMessagingTemplate.convertAndSend(destination, new MessageResponse(messageRequest.getSender(), msg));
     }
+
+    @MessageMapping("/channel/{channelId}/ready")
+    @SendTo("/channel/{channelId}")
+    public void ready(@DestinationVariable long channelId, @Payload MessageRequest messageRequest) {
+
+        // TODO : 채널에 속한 사람들의 준비상태 check
+
+        String destination = "/channel/" + channelId;
+        String msg = MessageType.findByTitle(messageRequest.getType()).makeFullMessage(messageRequest.getMessage());
+
+        simpMessagingTemplate.convertAndSend(destination, new MessageResponse(messageRequest.getSender(), msg));
+    }
 }

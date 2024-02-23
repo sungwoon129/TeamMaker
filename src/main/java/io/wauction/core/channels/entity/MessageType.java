@@ -12,6 +12,11 @@ public enum MessageType {
             return msg;
         }
     },
+    READY("ready") {
+        public String makeFullMessage(String msg) {
+            return "경매시작을 위한 준비가 완료되었습니다.";
+        }
+    },
     PRICE("price") {
         public String makeFullMessage(String price) {
             return price + " 포인트 입찰";

@@ -29,6 +29,19 @@ class Channel {
 
     }
 
+    ready() {
+        const data = {
+            sender: this.user,
+            message: "READY",
+            type: "READY",
+        }
+        this.stompClient.send(`/wauction/channel/${this.id}/ready`, {}, JSON.stringify(data));
+    }
+
+    isReadyAll() {
+        return false;
+    }
+
     sendMessage(messageType) {
         const data = {
             sender: this.user,
