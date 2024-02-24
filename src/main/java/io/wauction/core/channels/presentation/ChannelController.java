@@ -20,7 +20,7 @@ import org.springframework.stereotype.Controller;
 public class ChannelController {
 
     private final SimpMessagingTemplate simpMessagingTemplate;
-    private final ObjectMapper objectMapper = new ObjectMapper();
+    //private final ObjectMapper objectMapper = new ObjectMapper();
 
 
     @MessageMapping("/channel/{channelId}/send")
