@@ -26,6 +26,9 @@ public class Channel extends BaseTimeEntity {
     @Column
     private int capacity;
 
+    @Column(name = "head_count")
+    private int headCount;
+
     @Column
     private ChannelState state;
 
@@ -53,6 +56,7 @@ public class Channel extends BaseTimeEntity {
         return ChannelResponse.builder()
                 .channelId(id)
                 .name(name)
+                .headCount(headCount)
                 .capacity(capacity)
                 .auctionRuleResponse(auctionRule.toResponseDto())
                 .build();
