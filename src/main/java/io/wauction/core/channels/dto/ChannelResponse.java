@@ -14,6 +14,7 @@ public class ChannelResponse {
     private long channelId;
     private String name;
     private int capacity;
+    private int headCount;
     private ChannelState channelState;
     private AuctionRuleResponse auctionRuleResponse;
 
