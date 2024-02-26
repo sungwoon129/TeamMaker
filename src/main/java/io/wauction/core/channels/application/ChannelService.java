@@ -27,4 +27,8 @@ public class ChannelService {
         channelRepository.save(channel);
     }
 
+    public void enter(long channelId) {
+        Channel channel = findOne(channelId);
+        channel.enter();
+    }
 }

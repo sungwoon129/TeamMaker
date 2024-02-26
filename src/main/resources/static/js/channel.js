@@ -21,6 +21,16 @@ class Channel {
         });
     }
 
+    enter() {
+        const data = {
+            sender: this.user,
+            message: "JOIN",
+            type: "JOIN",
+        }
+        this.stompClient.send(`/wauction/channel/${this.id}/enter`, {}, JSON.stringify(data));
+    }
+
+
     leave() {
         if (this.stompClient !== null) {
             this.stompClient.disconnect();
@@ -42,7 +52,7 @@ class Channel {
         return false;
     }
 
-    sendMessage(messageType) {
+    bid(messageType) {
         const data = {
             sender: this.user,
             message: document.querySelector("#point").value,
@@ -55,7 +65,6 @@ class Channel {
         const topic = "/channel/" + this.id;
 
         this.stompClient.subscribe(topic, msg => {
-
             this.showMessage(JSON.parse(msg.body));
         });
     }
@@ -111,7 +120,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const channel = new Channel(extractChannelIdFromUrl());
 
+    const channelData = getChannelData(channel.id);
+
     channel.connect();
+
+    channel.setUser(channelData.data.auctionRuleResponse.roles[0].name);
+    channel.enter();
 
     document.querySelector('form').addEventListener('submit', function (e) {
         e.preventDefault();
@@ -123,13 +137,21 @@ document.addEventListener("DOMContentLoaded", () => {
     })
     document.querySelector("#bid").addEventListener("click", () => {
         const messageType = "PRICE";
-        channel.sendMessage(messageType);
+        channel.bid(messageType);
     })
 
     channel.setTeamColor()
-    channel.setUser(channel.teams[2].name)
+
 
 });
+
+const getChannelData = async (channelId) => {
+    const apiUrl = `/api/channel/${channelId}`;
+    const response = await fetch(apiUrl, {
+        method: "GET",
+    })
+    return response.json();
+}
 
 const extractChannelIdFromUrl = () => {
 
@@ -139,6 +161,11 @@ const extractChannelIdFromUrl = () => {
     const match = currentUrl.match(regex);
 
     return match ? match[1] : null;
+}
+
+const changeSeat = () => {
+
+
 }
 
 const getYoutubeEmbedLink = (url) => {
@@ -158,7 +185,3 @@ const shuffleArray = (array) => {
     }
     return array;
 };
-
-const getColorByWriter = (writer) => {
-    return undefined;
-}

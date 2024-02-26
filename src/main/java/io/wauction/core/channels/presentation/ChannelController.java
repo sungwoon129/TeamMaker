@@ -2,6 +2,7 @@ package io.wauction.core.channels.presentation;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.wauction.core.channels.application.ChannelService;
 import io.wauction.core.channels.dto.MessageRequest;
 import io.wauction.core.channels.dto.MessageResponse;
 import io.wauction.core.channels.entity.MessageType;
@@ -20,12 +21,25 @@ import org.springframework.stereotype.Controller;
 public class ChannelController {
 
     private final SimpMessagingTemplate simpMessagingTemplate;
+    private final ChannelService channelService;
     //private final ObjectMapper objectMapper = new ObjectMapper();
 
 
+    @MessageMapping("/channel/{channelId}/enter")
+    @SendTo("/channel/{channelId}")
+    public void enter(@DestinationVariable long channelId, @Payload MessageRequest messageRequest) {
+
+        channelService.enter(channelId);
+
+        String destination = "/channel/" + channelId;
+        String msg = MessageType.findByTitle(messageRequest.getType()).makeFullMessage(messageRequest.getMessage());
+
+        simpMessagingTemplate.convertAndSend(destination, new MessageResponse(messageRequest.getSender(), msg));
+    }
+
     @MessageMapping("/channel/{channelId}/send")
     @SendTo("/channel/{channelId}")
-    public void send(@DestinationVariable long channelId, @Payload MessageRequest messageRequest) throws JsonProcessingException {
+    public void bid(@DestinationVariable long channelId, @Payload MessageRequest messageRequest) throws JsonProcessingException {
 
         String destination = "/channel/" + channelId;
         String msg = MessageType.findByTitle(messageRequest.getType()).makeFullMessage(messageRequest.getMessage());
