@@ -1,5 +1,4 @@
 
-
 class Channel {
 
     stompClient;
@@ -48,8 +47,9 @@ class Channel {
         this.stompClient.send(`/wauction/channel/${this.id}/ready`, {}, JSON.stringify(data));
     }
 
-    isReadyAll() {
-        return false;
+    isReadyAll(message) {
+
+        return message.capacity === message.readyCount;
     }
 
     bid(messageType) {
@@ -65,12 +65,24 @@ class Channel {
         const topic = "/channel/" + this.id;
 
         this.stompClient.subscribe(topic, msg => {
-            this.showMessage(JSON.parse(msg.body));
+            this.updateUi(JSON.parse(msg.body));
         });
     }
 
-    showMessage(message) {
+    updateUi(message) {
 
+        if(message.messageType === "PRICE") {
+            this.showPrice(message)
+        }
+        else if(message.messageType === "READY") {
+            if(this.isReadyAll(message)) this.enableStartUi(message);
+        }
+        else if(message.messageType === "JOIN") {
+            this.updateParticipants(message);
+        }
+    }
+
+    showPrice(message) {
         const writer = this.teams.find(team => team.name === message.writer);
 
         const displayElement = document.getElementById("display");
@@ -88,9 +100,33 @@ class Channel {
 
         newRow.appendChild(writerElement);
         newRow.appendChild(messageElement)
-        
+
         displayElement.appendChild(newRow);
     }
+
+    enableStartUi(message) {
+
+
+    }
+
+    updateParticipants(message) {
+        const inActiveTeam = this.teams.find(team => team.isActive === false);
+
+        inActiveTeam.isActive = true;
+
+        this.teams = this.teams.map({
+            ...,
+            inActiveTeam
+        })
+
+        this.teams.forEach(team => {
+            if(this.user !== team.name && team.isActive === true) {
+                // TODO 입장 효과 UI
+            }
+        })
+
+    }
+
 
     setTeamColor() {
 
@@ -102,7 +138,8 @@ class Channel {
 
             this.teams.push({
                 color: shuffleColors[idx],
-                name:title.textContent
+                name:title.textContent,
+                isActive: false
             });
         })
     }
@@ -135,6 +172,12 @@ document.addEventListener("DOMContentLoaded", () => {
         channel.leave();
         window.location.href = "/";
     })
+
+    document.querySelector("#ready").addEventListener("click", () => {
+        const messageType = "READY";
+        channel.ready(messageType);
+    })
+
     document.querySelector("#bid").addEventListener("click", () => {
         const messageType = "PRICE";
         channel.bid(messageType);
@@ -163,10 +206,8 @@ const extractChannelIdFromUrl = () => {
     return match ? match[1] : null;
 }
 
-const changeSeat = () => {
 
 
-}
 
 const getYoutubeEmbedLink = (url) => {
     var videoId = url.split('v=')[1];
