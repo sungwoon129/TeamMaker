@@ -30,6 +30,9 @@ public class Channel extends BaseTimeEntity {
     @Column(name = "head_count")
     private int headCount;
 
+    @Column(name = "ready_count")
+    private int readyCount;
+
     @Column
     private ChannelState state;
 
@@ -78,5 +81,10 @@ public class Channel extends BaseTimeEntity {
 
     private boolean isAdmissionStatus() {
         return (capacity > headCount) && state.equals(ChannelState.WAITING);
+    }
+
+    public void addReadyCount() {
+
+        this.readyCount += 1;
     }
 }

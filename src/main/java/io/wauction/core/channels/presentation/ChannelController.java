@@ -3,8 +3,10 @@ package io.wauction.core.channels.presentation;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.wauction.core.channels.application.ChannelService;
+import io.wauction.core.channels.dto.EnterMessageResponse;
 import io.wauction.core.channels.dto.MessageRequest;
 import io.wauction.core.channels.dto.MessageResponse;
+import io.wauction.core.channels.dto.ReadyMessageResponse;
 import io.wauction.core.channels.entity.MessageType;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -29,12 +31,12 @@ public class ChannelController {
     @SendTo("/channel/{channelId}")
     public void enter(@DestinationVariable long channelId, @Payload MessageRequest messageRequest) {
 
-        channelService.enter(channelId);
+        int headCount = channelService.enter(channelId);
 
         String destination = "/channel/" + channelId;
-        String msg = MessageType.findByTitle(messageRequest.getType()).makeFullMessage(messageRequest.getMessage());
+        MessageType messageType = MessageType.findByTitle(messageRequest.getType());
 
-        simpMessagingTemplate.convertAndSend(destination, new MessageResponse(messageRequest.getSender(), msg));
+        simpMessagingTemplate.convertAndSend(destination, new EnterMessageResponse(messageType, messageRequest.getSender(), messageType.makeFullMessage(messageRequest.getMessage()), headCount));
     }
 
     @MessageMapping("/channel/{channelId}/send")
@@ -42,20 +44,22 @@ public class ChannelController {
     public void bid(@DestinationVariable long channelId, @Payload MessageRequest messageRequest) throws JsonProcessingException {
 
         String destination = "/channel/" + channelId;
-        String msg = MessageType.findByTitle(messageRequest.getType()).makeFullMessage(messageRequest.getMessage());
+        MessageType messageType = MessageType.findByTitle(messageRequest.getType());
 
-        simpMessagingTemplate.convertAndSend(destination, new MessageResponse(messageRequest.getSender(), msg));
+        simpMessagingTemplate.convertAndSend(destination, new MessageResponse(messageType, messageRequest.getSender(), messageType.makeFullMessage(messageRequest.getMessage())));
     }
 
     @MessageMapping("/channel/{channelId}/ready")
     @SendTo("/channel/{channelId}")
     public void ready(@DestinationVariable long channelId, @Payload MessageRequest messageRequest) {
 
-        // TODO : 채널에 속한 사람들의 준비상태 check
+        int readyCount = channelService.countReady(channelId);
 
         String destination = "/channel/" + channelId;
-        String msg = MessageType.findByTitle(messageRequest.getType()).makeFullMessage(messageRequest.getMessage());
+        MessageType messageType = MessageType.findByTitle(messageRequest.getType());
 
-        simpMessagingTemplate.convertAndSend(destination, new MessageResponse(messageRequest.getSender(), msg));
+
+
+        simpMessagingTemplate.convertAndSend(destination, new ReadyMessageResponse(messageType,messageRequest.getSender(), messageType.makeFullMessage(messageRequest.getMessage()), readyCount));
     }
 }

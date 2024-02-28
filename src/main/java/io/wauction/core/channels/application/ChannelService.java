@@ -27,8 +27,18 @@ public class ChannelService {
         channelRepository.save(channel);
     }
 
-    public void enter(long channelId) {
+    public int enter(long channelId) {
         Channel channel = findOne(channelId);
         channel.enter();
+
+        return channel.getHeadCount();
+    }
+
+    public int countReady(long channelId) {
+        Channel channel = findOne(channelId);
+
+        channel.addReadyCount();
+
+        return channel.getReadyCount();
     }
 }
