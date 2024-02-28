@@ -9,4 +9,5 @@ public class ReadyMessageResponse {
     private String writer;
     private String msg;
     private int readyCount;
+    private int capacity;
 }

@@ -34,11 +34,11 @@ public class ChannelService {
         return channel.getHeadCount();
     }
 
-    public int countReady(long channelId) {
+    public Channel countReady(long channelId) {
         Channel channel = findOne(channelId);
 
         channel.addReadyCount();
 
-        return channel.getReadyCount();
+        return channel;
     }
 }

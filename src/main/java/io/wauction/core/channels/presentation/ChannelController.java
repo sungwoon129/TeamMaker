@@ -7,6 +7,7 @@ import io.wauction.core.channels.dto.EnterMessageResponse;
 import io.wauction.core.channels.dto.MessageRequest;
 import io.wauction.core.channels.dto.MessageResponse;
 import io.wauction.core.channels.dto.ReadyMessageResponse;
+import io.wauction.core.channels.entity.Channel;
 import io.wauction.core.channels.entity.MessageType;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -53,13 +54,11 @@ public class ChannelController {
     @SendTo("/channel/{channelId}")
     public void ready(@DestinationVariable long channelId, @Payload MessageRequest messageRequest) {
 
-        int readyCount = channelService.countReady(channelId);
+        Channel channel = channelService.countReady(channelId);
 
         String destination = "/channel/" + channelId;
         MessageType messageType = MessageType.findByTitle(messageRequest.getType());
 
-
-
-        simpMessagingTemplate.convertAndSend(destination, new ReadyMessageResponse(messageType,messageRequest.getSender(), messageType.makeFullMessage(messageRequest.getMessage()), readyCount));
+        simpMessagingTemplate.convertAndSend(destination, new ReadyMessageResponse(messageType,messageRequest.getSender(), messageType.makeFullMessage(messageRequest.getMessage()), channel.getReadyCount(), channel.getCapacity()));
     }
 }
