@@ -111,17 +111,18 @@ class Channel {
 
     updateParticipants(message) {
         const inActiveTeam = this.teams.find(team => team.isActive === false);
+        const overlays = document.querySelector(".overlay-inactive")
 
         inActiveTeam.isActive = true;
 
-        this.teams = this.teams.map({
-            ...,
+        this.teams = this.teams.map(team => ({
+            ...team,
             inActiveTeam
-        })
+        }));
 
         this.teams.forEach(team => {
             if(this.user !== team.name && team.isActive === true) {
-                // TODO 입장 효과 UI
+                overlays.find(overlay => overlay.classList.contains("overlay-inactive")).classList.remove("overlay-inactive");
             }
         })
 
@@ -153,11 +154,11 @@ class Channel {
     }
 }
 
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", async () => {
 
     const channel = new Channel(extractChannelIdFromUrl());
 
-    const channelData = getChannelData(channel.id);
+    const channelData = await getChannelData(channel.id);
 
     channel.connect();
 

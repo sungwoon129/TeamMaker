@@ -39,7 +39,7 @@
                             <div th:text="${'남은 포인트 ' + participant.getPoint()}" class="remaining-point text-custom-orange text-bold"></div>
                         </div>
                     </div>
-                    <div class="row">
+                    <div class="row overlay-inactive">
                         <div class="successful-bid-box d-flex p-2">
                             <div th:each="position : ${channel.getAuctionRuleResponse().getPositions()}" class="successful-bid">
                                 <div class="profile-image">
