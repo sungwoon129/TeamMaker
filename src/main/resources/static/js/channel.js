@@ -88,18 +88,19 @@ class Channel {
     updateUi(message) {
 
         if(message.messageType === "PRICE") {
-            this.showPrice(message)
+            this.showMessage(message)
         }
         else if(message.messageType === "READY") {
             if(this.isReadyAll(message)) this.enableStartUi(message);
         }
         else if(message.messageType === "JOIN") {
             this.updateParticipants(message);
+            this.showMessage(message)
         }
     }
 
-    showPrice(message) {
-        const writer = this.teams.find(team => team.name === message.writer);
+    showMessage(message) {
+        const writer = this.teams.find(team => team.name === message.writer) !== undefined ? this.teams.find(team => team.name === message.writer) : {id:0, name: message.writer, color: "#FEFEFE"};
 
         const displayElement = document.getElementById("display");
         const newRow = document.createElement("div");
@@ -134,13 +135,17 @@ class Channel {
         }
 
         console.log(this.teams);
-        console.log(overlays)
 
         this.teams.forEach(team => {
             if(team.isActive === true) {
                 overlays[firstInActiveTeamIndex].classList.remove("overlay-inactive");
             }
         })
+
+        if(this.teams[firstInActiveTeamIndex].name === this.user) {
+
+        }
+
     }
 
     setTeamColor() {
@@ -148,14 +153,16 @@ class Channel {
         const shuffleColors = shuffleArray(this.colorArray);
 
         const teamNames = document.querySelectorAll(".random-color-element");
+        const teams = this.channelData.data.auctionRuleResponse.roles;
+
+        this.teams = teams.map((team,idx) => ({
+            ...team,
+            color:shuffleColors[idx],
+            isActive:false
+        }))
+
         teamNames.forEach((title,idx) => {
             title.style.color = shuffleColors[idx];
-
-            this.teams.push({
-                color: shuffleColors[idx],
-                name:title.textContent,
-                isActive: false
-            });
         })
     }
 
@@ -230,3 +237,4 @@ const shuffleArray = (array) => {
     }
     return array;
 };
+

@@ -37,7 +37,7 @@ public class ChannelController {
         String destination = "/channel/" + channelId;
         MessageType messageType = MessageType.findByTitle(messageRequest.getType());
 
-        EnterMessageResponse response = new EnterMessageResponse(messageType, messageRequest.getSender(), messageType.makeFullMessage(messageRequest.getSender()), headCount);
+        EnterMessageResponse response = new EnterMessageResponse(messageType, "SYSTEM", messageType.makeFullMessage(messageRequest.getSender()), headCount);
 
         String resultMsg = objectMapper.writeValueAsString(response);
 
