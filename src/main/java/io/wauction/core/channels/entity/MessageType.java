@@ -41,7 +41,7 @@ public enum MessageType {
 
     public static MessageType findByTitle(String title) {
         return Arrays.stream(MessageType.values())
-                .filter(type -> type.getTitle().equals(title))
+                .filter(type -> type.getTitle().toUpperCase().equals(title))
                 .findAny()
                 .orElseThrow(() -> new NoSuchElementException("존재하지 않는 메시지 타입입니다."));
     }

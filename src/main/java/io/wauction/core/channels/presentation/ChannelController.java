@@ -25,19 +25,23 @@ public class ChannelController {
 
     private final SimpMessagingTemplate simpMessagingTemplate;
     private final ChannelService channelService;
-    //private final ObjectMapper objectMapper = new ObjectMapper();
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
 
     @MessageMapping("/channel/{channelId}/enter")
     @SendTo("/channel/{channelId}")
-    public void enter(@DestinationVariable long channelId, @Payload MessageRequest messageRequest) {
+    public void enter(@DestinationVariable long channelId, @Payload MessageRequest messageRequest) throws JsonProcessingException {
 
         int headCount = channelService.enter(channelId);
 
         String destination = "/channel/" + channelId;
         MessageType messageType = MessageType.findByTitle(messageRequest.getType());
 
-        simpMessagingTemplate.convertAndSend(destination, new EnterMessageResponse(messageType, messageRequest.getSender(), messageType.makeFullMessage(messageRequest.getMessage()), headCount));
+        EnterMessageResponse response = new EnterMessageResponse(messageType, messageRequest.getSender(), messageType.makeFullMessage(messageRequest.getSender()), headCount);
+
+        String resultMsg = objectMapper.writeValueAsString(response);
+
+        simpMessagingTemplate.convertAndSend(destination, resultMsg);
     }
 
     @MessageMapping("/channel/{channelId}/send")
@@ -47,18 +51,22 @@ public class ChannelController {
         String destination = "/channel/" + channelId;
         MessageType messageType = MessageType.findByTitle(messageRequest.getType());
 
-        simpMessagingTemplate.convertAndSend(destination, new MessageResponse(messageType, messageRequest.getSender(), messageType.makeFullMessage(messageRequest.getMessage())));
+        String resultMsg = objectMapper.writeValueAsString(new MessageResponse(messageType, messageRequest.getSender(), messageType.makeFullMessage(messageRequest.getMessage())));
+
+        simpMessagingTemplate.convertAndSend(destination, resultMsg);
     }
 
     @MessageMapping("/channel/{channelId}/ready")
     @SendTo("/channel/{channelId}")
-    public void ready(@DestinationVariable long channelId, @Payload MessageRequest messageRequest) {
+    public void ready(@DestinationVariable long channelId, @Payload MessageRequest messageRequest) throws JsonProcessingException {
 
         Channel channel = channelService.countReady(channelId);
 
         String destination = "/channel/" + channelId;
         MessageType messageType = MessageType.findByTitle(messageRequest.getType());
 
-        simpMessagingTemplate.convertAndSend(destination, new ReadyMessageResponse(messageType,messageRequest.getSender(), messageType.makeFullMessage(messageRequest.getMessage()), channel.getReadyCount(), channel.getCapacity()));
+        String resultMsg = objectMapper.writeValueAsString(new ReadyMessageResponse(messageType,messageRequest.getSender(), messageType.makeFullMessage(messageRequest.getMessage()), channel.getReadyCount(), channel.getCapacity()));
+
+        simpMessagingTemplate.convertAndSend(destination, resultMsg);
     }
 }

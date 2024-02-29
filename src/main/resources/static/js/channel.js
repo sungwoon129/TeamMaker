@@ -6,6 +6,7 @@ class Channel {
     teams;
     colorArray = ["#ffd700","#ffa500","#40e0d0","#ff7373","#00ff7f","#794044","#ff80ed","#c39797","#808080","#daa520"];
     user;
+    channelData;
 
     constructor(channelId) {
         const socket = new SockJS('/wauction');
@@ -14,9 +15,24 @@ class Channel {
         this.teams = [];
     }
 
+    async init() {
+        await this.setUser();
+        this.connect();
+    }
+
+    async getChannelDataFromServer() {
+        const apiUrl = `/api/channel/${this.id}`;
+        const response = await fetch(apiUrl, {
+            method: "GET",
+        })
+        this.channelData = await response.json();
+    }
+
+
     connect() {
         this.stompClient.connect({}, frame => {
             this.onMessage();
+            this.enter();
         });
     }
 
@@ -110,24 +126,22 @@ class Channel {
     }
 
     updateParticipants(message) {
-        const inActiveTeam = this.teams.find(team => team.isActive === false);
-        const overlays = document.querySelector(".overlay-inactive")
+        const overlays = document.querySelectorAll(".overlay-inactive")
+        const firstInActiveTeamIndex = this.teams.findIndex(team => team.isActive === false);
 
-        inActiveTeam.isActive = true;
+        if (firstInActiveTeamIndex !== -1) {
+            this.teams[firstInActiveTeamIndex].isActive = true;
+        }
 
-        this.teams = this.teams.map(team => ({
-            ...team,
-            inActiveTeam
-        }));
+        console.log(this.teams);
+        console.log(overlays)
 
         this.teams.forEach(team => {
-            if(this.user !== team.name && team.isActive === true) {
-                overlays.find(overlay => overlay.classList.contains("overlay-inactive")).classList.remove("overlay-inactive");
+            if(team.isActive === true) {
+                overlays[firstInActiveTeamIndex].classList.remove("overlay-inactive");
             }
         })
-
     }
-
 
     setTeamColor() {
 
@@ -149,21 +163,18 @@ class Channel {
         return this.user;
     }
 
-    setUser(user) {
-        this.user = user;
+    async setUser(user) {
+        await this.getChannelDataFromServer();
+        this.user = this.channelData.data.auctionRuleResponse.roles[0].name;
     }
+
 }
 
 document.addEventListener("DOMContentLoaded", async () => {
 
     const channel = new Channel(extractChannelIdFromUrl());
 
-    const channelData = await getChannelData(channel.id);
-
-    channel.connect();
-
-    channel.setUser(channelData.data.auctionRuleResponse.roles[0].name);
-    channel.enter();
+    await channel.init();
 
     document.querySelector('form').addEventListener('submit', function (e) {
         e.preventDefault();
@@ -188,14 +199,6 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 
 });
-
-const getChannelData = async (channelId) => {
-    const apiUrl = `/api/channel/${channelId}`;
-    const response = await fetch(apiUrl, {
-        method: "GET",
-    })
-    return response.json();
-}
 
 const extractChannelIdFromUrl = () => {
 
