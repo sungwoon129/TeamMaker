@@ -39,7 +39,16 @@
                             <div th:text="${'남은 포인트 ' + participant.getPoint()}" class="remaining-point text-custom-orange text-bold"></div>
                         </div>
                     </div>
+                    <!--TODO : 오버레이 ui 활성화 상태에 따라 자리 바꾸기 기능, 준비상태 체크후 알림메시지 추가필요. 활성화 - 자기자신: 준비안내, 타인: 자리바꾸기 -->
                     <div class="row overlay-inactive">
+                        <div class="interact-display d-none">
+                            <div class="d-none">
+                                <button type="button" class="btn btn-outline-success exchange-seat">자리교환 요청</button>
+                            </div>
+                            <div class="d-none ready-alarm">
+                                <p>준비 버튼을 눌러주세요.</p>
+                            </div>
+                        </div>
                         <div class="successful-bid-box d-flex p-2">
                             <div th:each="position : ${channel.getAuctionRuleResponse().getPositions()}" class="successful-bid">
                                 <div class="profile-image">
