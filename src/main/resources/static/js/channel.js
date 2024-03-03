@@ -1,10 +1,9 @@
-
 class Channel {
 
     stompClient;
     id;
     teams;
-    colorArray = ["#ffd700","#ffa500","#40e0d0","#ff7373","#00ff7f","#794044","#ff80ed","#c39797","#808080","#daa520"];
+    colorArray = ["#ffd700", "#ffa500", "#40e0d0", "#ff7373", "#00ff7f", "#794044", "#ff80ed", "#c39797", "#808080", "#daa520"];
     user;
     channelData;
 
@@ -16,7 +15,7 @@ class Channel {
     }
 
     async init() {
-        await this.setUser();
+        await this.getChannelDataFromServer();
         this.connect();
     }
 
@@ -32,25 +31,24 @@ class Channel {
     connect() {
         this.stompClient.connect({}, frame => {
             this.onMessage();
-            this.enter();
         });
     }
 
-    enter() {
-        const data = {
-            sender: this.user,
-            message: "JOIN",
-            type: "JOIN",
-        }
-        this.stompClient.send(`/wauction/channel/${this.id}/enter`, {}, JSON.stringify(data));
-    }
-
-
     leave() {
+        const headers = {
+            id: this.id,
+        }
+
         if (this.stompClient !== null) {
-            this.stompClient.disconnect();
+            this.stompClient.disconnect(() => window.location.href = "/", headers);
         }
         console.log("Disconnected");
+
+    }
+
+    exchangeSeat(idx) {
+        const targetId = this.teams[idx].id;
+        this.stompClient.send(`/wauction/channel/${this.id}/enter`, {}, JSON.stringify(data));
 
     }
 
@@ -79,28 +77,38 @@ class Channel {
 
     onMessage() {
         const topic = "/channel/" + this.id;
+        const headers = {
+            id: this.id,
+        }
 
         this.stompClient.subscribe(topic, msg => {
+
             this.updateUi(JSON.parse(msg.body));
-        });
+        }, headers);
     }
 
     updateUi(message) {
 
-        if(message.messageType === "PRICE") {
+        if (message.messageType === "PRICE") {
             this.showMessage(message)
-        }
-        else if(message.messageType === "READY") {
-            if(this.isReadyAll(message)) this.enableStartUi(message);
-        }
-        else if(message.messageType === "JOIN") {
+        } else if (message.messageType === "READY") {
+            if (this.isReadyAll(message)) this.enableStartUi(message);
+        } else if (message.messageType === "JOIN") {
+            this.setUser(message.sender);
+            this.updateParticipants(message);
+            this.showMessage(message)
+        } else if (message.messageType === "LEAVE") {
             this.updateParticipants(message);
             this.showMessage(message)
         }
     }
 
     showMessage(message) {
-        const writer = this.teams.find(team => team.name === message.writer) !== undefined ? this.teams.find(team => team.name === message.writer) : {id:0, name: message.writer, color: "#FEFEFE"};
+        const writer = this.teams.find(team => team.name === message.writer) !== undefined ? this.teams.find(team => team.name === message.writer) : {
+            id: 0,
+            name: message.writer,
+            color: "#FEFEFE"
+        };
 
         const displayElement = document.getElementById("display");
         const newRow = document.createElement("div");
@@ -127,41 +135,55 @@ class Channel {
     }
 
     updateParticipants(message) {
-        const overlays = document.querySelectorAll(".overlay-inactive")
-        const firstInActiveTeamIndex = this.teams.findIndex(team => team.isActive === false);
+        const overlays = document.querySelectorAll(".overlay")
+        const targetTeamIdx = this.teams.findIndex(team => team.name === message.sender);
 
-        if (firstInActiveTeamIndex !== -1) {
-            this.teams[firstInActiveTeamIndex].isActive = true;
-        }
+        if (message.messageType === "JOIN") {
+            if (targetTeamIdx !== -1) {
+                this.teams.forEach((team, idx) => {
+                    if (message.activeRoles.includes(team.name)) {
+                        team.isActive = true;
+                        overlays[idx].classList.remove("overlay-inactive");
+                    }
+                })
 
-        console.log(this.teams);
+                //overlays[targetTeamIdx].classList.remove("overlay-inactive");
 
-        this.teams.forEach(team => {
-            if(team.isActive === true) {
-                overlays[firstInActiveTeamIndex].classList.remove("overlay-inactive");
+                if (this.teams[targetTeamIdx].name === this.user) {
+                    overlays[targetTeamIdx].querySelector(".ready-alarm").classList.remove("d-none")
+                } else {
+                    overlays[targetTeamIdx].querySelector(".exchange-display").classList.remove("d-none")
+                }
             }
-        })
+        } else if (message.messageType === "LEAVE") {
+            if (targetTeamIdx !== -1) {
+                this.teams[targetTeamIdx].isActive = false;
+                overlays[targetTeamIdx].classList.add("overlay-inactive");
 
-        if(this.teams[firstInActiveTeamIndex].name === this.user) {
-
+                if (this.teams[targetTeamIdx].name === this.user) {
+                    overlays[targetTeamIdx].querySelector(".ready-alarm").classList.add("d-none")
+                } else {
+                    overlays[targetTeamIdx].querySelector(".exchange-display").classList.add("d-none")
+                }
+            }
         }
 
     }
 
-    setTeamColor() {
+    setTeam() {
 
         const shuffleColors = shuffleArray(this.colorArray);
 
         const teamNames = document.querySelectorAll(".random-color-element");
         const teams = this.channelData.data.auctionRuleResponse.roles;
 
-        this.teams = teams.map((team,idx) => ({
+        this.teams = teams.map((team, idx) => ({
             ...team,
-            color:shuffleColors[idx],
-            isActive:false
+            color: shuffleColors[idx],
+            isActive: false
         }))
 
-        teamNames.forEach((title,idx) => {
+        teamNames.forEach((title, idx) => {
             title.style.color = shuffleColors[idx];
         })
     }
@@ -170,18 +192,19 @@ class Channel {
         return this.user;
     }
 
-    async setUser(user) {
-        await this.getChannelDataFromServer();
-        this.user = this.channelData.data.auctionRuleResponse.roles[0].name;
+    setUser(username) {
+        this.setTeam();
+        this.user = username;
     }
+
 
 }
 
 document.addEventListener("DOMContentLoaded", async () => {
 
     const channel = new Channel(extractChannelIdFromUrl());
-
     await channel.init();
+
 
     document.querySelector('form').addEventListener('submit', function (e) {
         e.preventDefault();
@@ -189,7 +212,6 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     document.querySelector("#leave").addEventListener("click", () => {
         channel.leave();
-        window.location.href = "/";
     })
 
     document.querySelector("#ready").addEventListener("click", () => {
@@ -202,7 +224,12 @@ document.addEventListener("DOMContentLoaded", async () => {
         channel.bid(messageType);
     })
 
-    channel.setTeamColor()
+    document.querySelectorAll(".exchange-seat").forEach((btn, idx) => {
+        btn.addEventListener("click", (event) => {
+
+            channel.exchangeSeat(idx);
+        })
+    })
 
 
 });
@@ -218,12 +245,10 @@ const extractChannelIdFromUrl = () => {
 }
 
 
-
-
 const getYoutubeEmbedLink = (url) => {
     var videoId = url.split('v=')[1];
     var ampersandPosition = videoId.indexOf('&');
-    if(ampersandPosition !== -1) {
+    if (ampersandPosition !== -1) {
         videoId = videoId.substring(0, ampersandPosition);
     }
     return 'https://www.youtube.com/embed/' + videoId;

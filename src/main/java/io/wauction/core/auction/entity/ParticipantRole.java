@@ -4,8 +4,10 @@ import io.wauction.core.auction.dto.ParticipantRoleResponse;
 import io.wauction.core.common.entity.BaseTimeEntity;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+@Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Entity
 public class ParticipantRole extends BaseTimeEntity {
