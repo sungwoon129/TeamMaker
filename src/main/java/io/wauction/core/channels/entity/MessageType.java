@@ -31,6 +31,11 @@ public enum MessageType {
         public String makeFullMessage(String sender) {
             return sender + "님이 채널을 떠났습니다.";
         }
+    },
+    EXCHANGE("exchange") {
+        public String makeFullMessage(String sender) {
+            return sender + "님이 자리교환을 요청합니다. 수락하시겠습니까?";
+        }
     };
 
     private final String title;
