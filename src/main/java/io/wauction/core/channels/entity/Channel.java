@@ -87,4 +87,13 @@ public class Channel extends BaseTimeEntity {
 
         this.readyCount += 1;
     }
+
+    public void leave() {
+        this.headCount -= 1;
+        if(this.state != ChannelState.PLAYING) this.state = ChannelState.WAITING;
+        if(this.headCount <= 0) {
+            this.state = ChannelState.END;
+            this.deleted = true;
+        }
+    }
 }
