@@ -1,10 +1,9 @@
 package io.wauction.core.channels.dto;
 
-import lombok.Getter;
+import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
-import org.springframework.util.StringUtils;
 
-
+@AllArgsConstructor
 @NoArgsConstructor
 public class MessageRequest {
 
