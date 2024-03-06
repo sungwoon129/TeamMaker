@@ -16,7 +16,7 @@ class Channel {
 
     async init() {
         await this.getChannelDataFromServer();
-        this.connect();
+        await this.connect();
     }
 
     async getChannelDataFromServer() {
@@ -25,13 +25,20 @@ class Channel {
             method: "GET",
         })
         this.channelData = await response.json();
+
     }
 
 
     connect() {
-        this.stompClient.connect({}, frame => {
-            this.onMessage();
-        });
+        if(!!this.stompClient) {
+            this.stompClient.heartbeat.outgoing = 20000;
+            this.stompClient.heartbeat.incoming = 0;
+            this.stompClient.reconnect_delay = 3000;
+            this.stompClient.connect({}, frame => {
+                console.log("1")
+                this.onMessage();
+            });
+        }
     }
 
     leave() {
@@ -82,7 +89,6 @@ class Channel {
         }
 
         this.stompClient.subscribe(topic, msg => {
-
             this.updateUi(JSON.parse(msg.body));
         }, headers);
     }
