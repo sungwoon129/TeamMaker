@@ -103,7 +103,8 @@ body {
     padding: 0.5rem !important;
     border: var(--bs-border-width) var(--bs-border-style) var(--default-border-color) !important;
     border-radius: var(--bs-border-radius-lg) !important;
-    min-height: 300px;
+    height:250px;
+    overflow-y: scroll;
 
 }
 
@@ -186,4 +187,15 @@ body {
     height: 100%;
     background-color: rgba(0, 0, 0, 0.5); /* 검은색 반투명한 막 */
     z-index: 1; /* 다른 요소들보다 위에 나타나도록 설정 */
+}
+
+
+::-webkit-scrollbar-thumb {
+    background: #e89a3e; /* 스크롤바 막대 색상 */
+    border: 2px solid #9b6a2f; /* 스크롤바 막대 테두리 설정  */
+    border-radius: 12px 12px 12px 12px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background-color:#a0a0a5;
 }
