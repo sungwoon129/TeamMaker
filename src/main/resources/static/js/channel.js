@@ -35,7 +35,6 @@ class Channel {
             this.stompClient.heartbeat.incoming = 0;
             this.stompClient.reconnect_delay = 3000;
             this.stompClient.connect({}, frame => {
-                console.log("1")
                 this.onMessage();
             });
         }
@@ -100,7 +99,7 @@ class Channel {
         } else if (message.messageType === "READY") {
             if (this.isReadyAll(message)) this.enableStartUi(message);
         } else if (message.messageType === "JOIN") {
-            this.setUser(message.sender);
+            if(this.getUser() === null || this.getUser() === undefined) this.setUser(message.sender);
             this.updateParticipants(message);
             this.showMessage(message)
         } else if (message.messageType === "LEAVE") {
@@ -141,43 +140,39 @@ class Channel {
     }
 
     updateParticipants(message) {
-        const overlays = document.querySelectorAll(".overlay")
-        const targetTeamIdx = this.teams.findIndex(team => team.name === message.sender);
+        const overlays = document.querySelectorAll(".overlay");
+        const participantBox = document.querySelectorAll(".participant-info");
 
-        if (message.messageType === "JOIN") {
-            if (targetTeamIdx !== -1) {
-                this.teams.forEach((team, idx) => {
-                    if (message.activeRoles.includes(team.name)) {
-                        team.isActive = true;
-                        overlays[idx].classList.remove("overlay-inactive");
-                    }
-                })
+        Array.isArray(message.activeRoles) && message.activeRoles.forEach(activeRole => {
+            const targetTeamIdx = this.teams.findIndex(team => team.name === activeRole);
 
-                //overlays[targetTeamIdx].classList.remove("overlay-inactive");
+            if(targetTeamIdx === -1 ) throw Error("활성화된 팀 정보를 팀 목록에서 찾을 수 없습니다.");
 
-                if (this.teams[targetTeamIdx].name === this.user) {
+            if (message.messageType === "JOIN" ) {
+                this.teams[targetTeamIdx].isActive = true;
+                overlays[targetTeamIdx].classList.remove("overlay-inactive");
+
+                if(this.teams[targetTeamIdx].name === this.user && message.sender === this.user) {
                     overlays[targetTeamIdx].querySelector(".ready-alarm").classList.remove("d-none")
-                } else {
+                    if(!participantBox[targetTeamIdx].classList.contains("emphasis-user")) participantBox[targetTeamIdx].classList.add("emphasis-user");
+
+                } else if(this.teams[targetTeamIdx].name !== this.user) {
                     overlays[targetTeamIdx].querySelector(".exchange-display").classList.remove("d-none")
                 }
-            }
-        } else if (message.messageType === "LEAVE") {
-            if (targetTeamIdx !== -1) {
+
+            } else if (message.messageType === "LEAVE") {
+
                 this.teams[targetTeamIdx].isActive = false;
                 overlays[targetTeamIdx].classList.add("overlay-inactive");
-
-                if (this.teams[targetTeamIdx].name === this.user) {
-                    overlays[targetTeamIdx].querySelector(".ready-alarm").classList.add("d-none")
-                } else {
-                    overlays[targetTeamIdx].querySelector(".exchange-display").classList.add("d-none")
-                }
+                overlays[targetTeamIdx].querySelector(".exchange-display").classList.add("d-none")
+                overlays[targetTeamIdx].querySelector(".ready-alarm").classList.remove("d-none")
             }
-        }
-
+        })
     }
 
     setTeam() {
 
+        // TODO : 모든 클라이언트에서 동일한 색상이여야 하므로 서버에서 생성후 반환하도록 변경
         const shuffleColors = shuffleArray(this.colorArray);
 
         const teamNames = document.querySelectorAll(".random-color-element");
@@ -249,6 +244,7 @@ const extractChannelIdFromUrl = () => {
 
     return match ? match[1] : null;
 }
+
 
 
 const getYoutubeEmbedLink = (url) => {
