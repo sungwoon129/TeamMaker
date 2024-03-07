@@ -4,7 +4,7 @@ import io.wauction.core.auction.application.AuctionRuleService;
 import io.wauction.core.auction.entity.AuctionRule;
 import io.wauction.core.channels.dto.ChannelRequest;
 import io.wauction.core.channels.dto.ChannelResponse;
-import io.wauction.core.channels.exception.ExcessCapacityException;
+import io.wauction.core.channels.exception.UnAcceptableChannelJoinException;
 import io.wauction.core.common.entity.BaseTimeEntity;
 import jakarta.persistence.*;
 import lombok.*;
@@ -72,7 +72,7 @@ public class Channel extends BaseTimeEntity {
 
     public void enter() {
         if(!isAdmissionStatus()) {
-            throw new ExcessCapacityException("해당 채널이 가득차 입장할 수 없습니다.");
+            throw new UnAcceptableChannelJoinException("해당 채널은 현재 입장할 수 없는 상태입니다.");
         }
 
         this.headCount += 1;
