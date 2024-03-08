@@ -53,8 +53,12 @@ class Channel {
     }
 
     exchangeSeat(idx) {
-        const targetId = this.teams[idx].id;
-        this.stompClient.send(`/wauction/channel/${this.id}/enter`, {}, JSON.stringify(data));
+        const data = {
+            sender: this.user,
+            type: "EXCHANGE",
+            message: this.teams[idx].name
+        }
+        this.stompClient.send(`/wauction/channel/${this.id}/exchange`, {}, JSON.stringify(data));
 
     }
 
