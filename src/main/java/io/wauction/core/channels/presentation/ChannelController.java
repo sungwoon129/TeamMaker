@@ -17,6 +17,7 @@ import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
 
+import java.security.Principal;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -34,24 +35,17 @@ public class ChannelController {
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     @MessageMapping("/channel/{channelId}/exchangeSeat")
-    public void exchangeSeatRequest(@DestinationVariable long channelId, @Payload MessageRequest messageRequest , SimpMessageHeaderAccessor accessor) throws JsonProcessingException {
-
-        List<String> roleNames = Optional
-                .ofNullable(accessor.getNativeHeader("role"))
-                .orElseGet(Collections::emptyList);
+    public void exchangeSeatRequest(@DestinationVariable long channelId, @Payload MessageRequest messageRequest) throws JsonProcessingException {
 
         MessageType messageType = MessageType.findByTitle(messageRequest.getType());
 
-        if(messageType != MessageType.EXCHANGE) throw new IllegalArgumentException("잘못된 요청입니다.");
-
-        Optional<String> role = roleNames.stream().filter(roleName -> roleName.equals(messageRequest.getMessage())).findFirst();
-
-        if(role.isEmpty()) throw new IllegalArgumentException("존재하지 않는 참여자입니다.");
+        if(messageType != MessageType.EXCHANGE) throw new IllegalArgumentException("올바른 메시지 타입이 아닙니다.");
 
         String destination = "/channel/" + channelId;
-        String resultMsg = objectMapper.writeValueAsString(messageType.makeFullMessage(messageRequest.getSender()));
+        MessageResponse messageResponse = new MessageResponse(MessageType.EXCHANGE, messageRequest.getSender(), messageType.makeFullMessage(messageRequest.getSender()), messageRequest.getTargetUsername());
+        String resultMsg = objectMapper.writeValueAsString(messageResponse);
 
-        simpMessagingTemplate.convertAndSendToUser(role.get(),destination, resultMsg);
+        simpMessagingTemplate.convertAndSendToUser(messageRequest.getTargetUsername(),destination, resultMsg);
     }
 
 

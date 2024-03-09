@@ -31,10 +31,15 @@ class Channel {
 
     connect() {
         if(!!this.stompClient) {
+
+            const headers = {
+                id: this.id,
+            }
+
             this.stompClient.heartbeat.outgoing = 20000;
             this.stompClient.heartbeat.incoming = 0;
             this.stompClient.reconnect_delay = 3000;
-            this.stompClient.connect({}, frame => {
+            this.stompClient.connect(headers, frame => {
                 this.onMessage();
             });
         }
@@ -56,9 +61,10 @@ class Channel {
         const data = {
             sender: this.user,
             type: "EXCHANGE",
-            message: this.teams[idx].name
+            message: "자리교환 요청",
+            targetUsername: this.teams[idx].name
         }
-        this.stompClient.send(`/wauction/channel/${this.id}/exchange`, {}, JSON.stringify(data));
+        this.stompClient.send(`/wauction/channel/${this.id}/exchangeSeat`, {}, JSON.stringify(data));
 
     }
 
@@ -87,16 +93,25 @@ class Channel {
 
     onMessage() {
         const topic = "/channel/" + this.id;
-        const headers = {
-            id: this.id,
+        const header = {
+            id: this.id
         }
 
         this.stompClient.subscribe(topic, msg => {
             this.updateUi(JSON.parse(msg.body));
-        }, headers);
+        },header);
+
+        this.stompClient.subscribe("/user" + topic, msg => {
+            this.updateUi(JSON.parse(msg.body));
+        },header);
     }
 
     updateUi(message) {
+
+        if(!!message.targetUsername) {
+            this.enableStartUi(message);
+            return;
+        }
 
         if (message.messageType === "PRICE") {
             this.showMessage(message)
@@ -139,11 +154,11 @@ class Channel {
     }
 
     enableStartUi(message) {
-
-
+        alert("체인지할래?");
     }
 
     updateParticipants(message) {
+        console.log("1");
         const overlays = document.querySelectorAll(".overlay");
         const participantBox = document.querySelectorAll(".participant-info");
 
@@ -174,6 +189,10 @@ class Channel {
         })
     }
 
+    showExchangeModal(msg) {
+        console.log("2");
+    }
+
     setTeam() {
 
         // TODO : 모든 클라이언트에서 동일한 색상이여야 하므로 서버에서 생성후 반환하도록 변경
@@ -201,6 +220,7 @@ class Channel {
         this.setTeam();
         this.user = username;
     }
+
 
 
 }

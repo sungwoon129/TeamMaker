@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 
@@ -47,7 +48,11 @@ public class ChannelService {
         channel.enter();
 
         List<String> roles = channel.getAuctionRule().getRoles().stream().map(ParticipantRole::getName).collect(Collectors.toList());
-        List<String> activeRoles = connections.stream().map(ChannelConnection::getRole).collect(Collectors.toList());
+        List<String> activeRoles = connections.stream()
+                .map(ChannelConnection::getRole)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
+
         roles.removeAll(activeRoles);
 
         String sender = roles.get(0);
