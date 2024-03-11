@@ -19,7 +19,7 @@ import java.util.stream.Collectors;
 @Component
 public class StompEventHandler {
 
-    private static final Map<String, List<ChannelConnection>> subscribeMap = new ConcurrentHashMap<>();
+    public static final Map<String, List<ChannelConnection>> subscribeMap = new ConcurrentHashMap<>();
     private final ChannelService channelService;
 
 
