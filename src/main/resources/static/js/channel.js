@@ -6,12 +6,14 @@ class Channel {
     colorArray = ["#ffd700", "#ffa500", "#40e0d0", "#ff7373", "#00ff7f", "#794044", "#ff80ed", "#c39797", "#808080", "#daa520"];
     user;
     channelData;
+    isCompleteSubscription;
 
     constructor(channelId) {
         const socket = new SockJS('/wauction');
         this.stompClient = Stomp.over(socket);
         this.id = channelId;
         this.teams = [];
+        this.isCompleteSubscription = false;
     }
 
     async init() {
@@ -99,12 +101,18 @@ class Channel {
 
         this.stompClient.subscribe(topic, msg => {
             this.updateUi(JSON.parse(msg.body));
+            if(!this.isCompleteSubscription) {
+                const securedTopic = `/user/private`
+                this.stompClient.subscribe(securedTopic , msg => {
+                    this.updateUi(JSON.parse(msg.body));
+                    this.isCompleteSubscription = true;
+                },header);
+            }
         },header);
 
-        this.stompClient.subscribe("/user" + topic, msg => {
-            this.updateUi(JSON.parse(msg.body));
-        },header);
     }
+
+
 
     updateUi(message) {
 
@@ -158,7 +166,6 @@ class Channel {
     }
 
     updateParticipants(message) {
-        console.log("1");
         const overlays = document.querySelectorAll(".overlay");
         const participantBox = document.querySelectorAll(".participant-info");
 
