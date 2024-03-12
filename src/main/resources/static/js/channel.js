@@ -116,8 +116,9 @@ class Channel {
 
     updateUi(message) {
 
-        if(!!message.targetUsername) {
-            this.enableStartUi(message);
+        if(!!message.targetUsername && (message.targetUsername === this.user || message.sender === this.user )) {
+            if(message.messageType === "EXCHANGE") this.showExchangeModal(message);
+            else if(message.messageType === "EXCHANGE_RES") this.showExchangeResult(message);
             return;
         }
 
@@ -162,7 +163,7 @@ class Channel {
     }
 
     enableStartUi(message) {
-        alert("체인지할래?");
+        // TODO : 채널의 모든 구성원이 '준비완료'상태가 되면 시작 버튼 활성화
     }
 
     updateParticipants(message) {
@@ -197,8 +198,40 @@ class Channel {
     }
 
     showExchangeModal(msg) {
-        console.log("2");
+
+        const res = confirm(msg.msg);
+
+        const data = {
+            sender : this.user,
+            type : "exchangeRes",
+            message : res,
+            targetUsername : msg.sender
+        }
+
+        this.stompClient.send(`/wauction/channel/${this.id}/acceptChange`, {}, JSON.stringify(data));
+
     }
+
+    showExchangeResult(msg) {
+        if(!!msg.resultYne && msg.resultYne === "Y") {
+            this.swapUser(msg)
+        } else {
+            alert(msg.msg);
+        }
+    }
+
+    swapUser(msg) {
+        if(msg.sender === this. user) {
+            this.user = msg.targetUsername;
+
+        } else if(msg.targetUsername === this.user) {
+            this.user = msg.sender;
+        }
+
+        // TODO : 자기자신 표시하는 테두리 변경
+
+    }
+
 
     setTeam() {
 

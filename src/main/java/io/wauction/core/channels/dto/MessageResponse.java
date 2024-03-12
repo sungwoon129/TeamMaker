@@ -13,11 +13,19 @@ public class MessageResponse {
     private String writer;
     private String msg;
     private String targetUsername;
+    private String resultYne;
 
 
     public MessageResponse(MessageType messageType, String writer, String msg) {
         this.messageType = messageType;
         this.writer = writer;
         this.msg = msg;
+    }
+
+    public MessageResponse(MessageType messageType, String writer, String msg, String targetUsername) {
+        this.messageType = messageType;
+        this.writer = writer;
+        this.msg = msg;
+        this.targetUsername = targetUsername;
     }
 }

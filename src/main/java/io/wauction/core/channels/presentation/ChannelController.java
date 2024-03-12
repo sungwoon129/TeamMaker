@@ -59,6 +59,31 @@ public class ChannelController {
         simpMessagingTemplate.convertAndSendToUser(channelConnection.getSessionId(),destination, resultMsg,headerAccessor.getMessageHeaders());
     }
 
+    @MessageMapping("/channel/{channelId}/acceptChange")
+    public void acceptExchange(@DestinationVariable long channelId, @Payload MessageRequest messageRequest) throws JsonProcessingException {
+        MessageType messageType = MessageType.findByTitle(messageRequest.getType());
+
+        if(messageType != MessageType.EXCHANGE) throw new IllegalArgumentException("올바른 메시지 타입이 아닙니다.");
+
+        String destination = "/private";
+        MessageResponse messageResponse = new MessageResponse(MessageType.EXCHANGE, messageRequest.getSender(), messageType.makeFullMessage(messageRequest.getMessage()), messageRequest.getTargetUsername(), messageRequest.getMessage());
+        String resultMsg = objectMapper.writeValueAsString(messageResponse);
+
+        List<ChannelConnection> connections = subscribeMap.get(String.valueOf(channelId));
+        ChannelConnection channelConnection = connections.stream()
+                .filter(connection -> connection.getRole().equals(messageRequest.getTargetUsername()))
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("요청한 역할을 수행하는 사용자가 존재하지 않습니다."));
+
+        // TODO : 만약 변경 동의했다면 connections 내부의 세션값 스왑.
+
+        SimpMessageHeaderAccessor headerAccessor = SimpMessageHeaderAccessor.create(SimpMessageType.MESSAGE);
+        headerAccessor.setSessionId(channelConnection.getSessionId());
+        headerAccessor.setLeaveMutable(true);
+
+        simpMessagingTemplate.convertAndSendToUser(channelConnection.getSessionId(),destination, resultMsg,headerAccessor.getMessageHeaders());
+    }
+
 
 
     @MessageMapping("/channel/{channelId}/send")

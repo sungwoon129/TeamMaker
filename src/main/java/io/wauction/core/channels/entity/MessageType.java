@@ -36,6 +36,11 @@ public enum MessageType {
         public String makeFullMessage(String sender) {
             return sender + "님이 자리교환을 요청합니다. 수락하시겠습니까?";
         }
+    },
+    EXCHANGE_RES("exchangeRes") {
+        public String makeFullMessage(String resultYne) {
+            return resultYne.equals("Y") ? "요청이 수락되었습니다." : "교환 요청이 거절되었습니다.";
+        }
     };
 
     private final String title;
@@ -46,7 +51,7 @@ public enum MessageType {
 
     public static MessageType findByTitle(String title) {
         return Arrays.stream(MessageType.values())
-                .filter(type -> type.getTitle().toUpperCase().equals(title))
+                .filter(type -> type.getTitle().equalsIgnoreCase(title))
                 .findAny()
                 .orElseThrow(() -> new NoSuchElementException("존재하지 않는 메시지 타입입니다."));
     }
