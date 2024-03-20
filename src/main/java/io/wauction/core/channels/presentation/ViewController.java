@@ -6,6 +6,8 @@ import io.wauction.core.channels.dto.ChannelRequest;
 import io.wauction.core.channels.dto.ChannelResponse;
 import io.wauction.core.channels.entity.Channel;
 import io.wauction.core.common.dto.CommonResponse;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -36,10 +38,16 @@ public class ViewController {
     }
 
     @GetMapping("/channel/{id}")
-    public ModelAndView getDetailView(@PathVariable Long id) {
+    public ModelAndView getDetailView(@PathVariable Long id, HttpServletResponse response) {
         ModelAndView mv = new ModelAndView("channel/channel");
         Channel channel = channelService.findOne(id);
-        mv.addObject("channel",channel.toResponseDto());
+        ChannelResponse channelResponse = channel.toResponseDto();
+        mv.addObject("channel",channelResponse);
+
+        Cookie cookie = new Cookie("rname", channelResponse.getClientRole().getName());
+        cookie.setMaxAge(7200);
+        cookie.setPath("/");
+        response.addCookie(cookie);
 
         return mv;
     }

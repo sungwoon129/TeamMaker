@@ -2,12 +2,15 @@ package io.wauction.core.channels.entity;
 
 import io.wauction.core.auction.application.AuctionRuleService;
 import io.wauction.core.auction.entity.AuctionRule;
+import io.wauction.core.auction.entity.ParticipantRole;
 import io.wauction.core.channels.dto.ChannelRequest;
 import io.wauction.core.channels.dto.ChannelResponse;
 import io.wauction.core.channels.exception.UnAcceptableChannelJoinException;
 import io.wauction.core.common.entity.BaseTimeEntity;
 import jakarta.persistence.*;
 import lombok.*;
+
+import java.util.Optional;
 
 @Getter
 @Builder
@@ -57,12 +60,17 @@ public class Channel extends BaseTimeEntity {
 
 
     public ChannelResponse toResponseDto() {
+
+        Optional<ParticipantRole> role = auctionRule.getRoles().stream().skip(headCount).findFirst();
+        if(role.isEmpty()) throw new IndexOutOfBoundsException("현재 접속한 클라이언트에게 부여할 역할을 찾을 수 없습니다.");
+
         return ChannelResponse.builder()
                 .channelId(id)
                 .name(name)
                 .headCount(headCount)
                 .capacity(capacity)
                 .auctionRuleResponse(auctionRule.toResponseDto())
+                .clientRole(role.get().toResponseDto())
                 .build();
     }
 
@@ -96,4 +104,5 @@ public class Channel extends BaseTimeEntity {
             this.deleted = true;
         }
     }
+
 }

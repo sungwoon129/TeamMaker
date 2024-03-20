@@ -32,10 +32,11 @@
     <div class="row">
         <div class="col-md-3">
             <div class="participant-container">
-                <div th:each="participant : ${channel.getAuctionRuleResponse().getRoles()}" class="participant-info mb-1">
+                <div th:each="participant : ${channel.getAuctionRuleResponse().getRoles()}" class="participant-info mb-1" th:classappend="${participant.getName() eq channel.getClientRole().getName() ? 'emphasis-user' : ''}">
+
                     <div class="row">
                         <div class="d-flex p-2 flex-side">
-                            <div th:text="${participant.getName()}" class="text-bold random-color-element"></div>
+                            <div th:text="${participant.getName() }" class="text-bold random-color-element"></div>
                             <div th:text="${'남은 포인트 ' + participant.getPoint()}" class="remaining-point text-custom-orange text-bold"></div>
                         </div>
                     </div>
