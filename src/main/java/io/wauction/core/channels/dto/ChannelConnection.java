@@ -17,4 +17,10 @@ public class ChannelConnection {
         this.channelId = channelId;
     }
 
+    public ChannelConnection(String sessionId, String channelId, String role) {
+        this.sessionId = sessionId;
+        this.channelId = channelId;
+        this.role = role;
+    }
+
 }

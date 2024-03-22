@@ -9,7 +9,6 @@ import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.messaging.SessionConnectEvent;
 import org.springframework.web.socket.messaging.SessionDisconnectEvent;
-import org.springframework.web.socket.messaging.SessionSubscribeEvent;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -19,6 +18,7 @@ import java.util.stream.Collectors;
 @Component
 public class StompEventHandler {
 
+    // TODO : public으로 모든 클래스에서 접근하는 것이 아니라 접근 가능클래스를 제한해야할 필요 있음
     public static final Map<String, List<ChannelConnection>> subscribeMap = new ConcurrentHashMap<>();
     private final ChannelService channelService;
 
@@ -28,36 +28,19 @@ public class StompEventHandler {
         StompHeaderAccessor headerAccessor = StompHeaderAccessor.wrap(event.getMessage());
 
         String channelId = Objects.requireNonNull(headerAccessor.getNativeHeader("id")).stream().findFirst().orElseThrow(() -> new IllegalArgumentException("접속한 채널 정보가 올바르지 않습니다."));
+        String sender = Objects.requireNonNull(headerAccessor.getNativeHeader("user")).stream().findFirst().orElseThrow(() -> new IllegalArgumentException("접속한 채널 정보가 올바르지 않습니다."));
 
         List<ChannelConnection> connections = subscribeMap.getOrDefault(channelId, new ArrayList<>());
 
-        ChannelConnection channelConnection = new ChannelConnection(headerAccessor.getSessionId(), channelId);
+        String role = channelService.enter(Long.parseLong(channelId), sender);
+
+        ChannelConnection channelConnection = new ChannelConnection(headerAccessor.getSessionId(), channelId, role);
         connections.add(channelConnection);
+
+        headerAccessor.setUser(new CustomPrincipal(role, channelId));
 
         subscribeMap.put(channelId, connections);
 
-    }
-
-    @EventListener
-    public void handleWebSocketSubscribeListener(SessionSubscribeEvent event) {
-        StompHeaderAccessor headerAccessor = StompHeaderAccessor.wrap(event.getMessage());
-
-        String channelId = headerAccessor.getSubscriptionId();
-
-
-        assert channelId != null;
-
-        if(!Objects.requireNonNull(headerAccessor.getDestination()).contains("user")) {
-            List<ChannelConnection> connections = subscribeMap.get(channelId);
-            String role = channelService.enter(Long.parseLong(channelId), connections);
-
-            ChannelConnection client = connections.stream().filter(connection -> connection.getSessionId().equals(headerAccessor.getSessionId())).findAny().orElseThrow(() -> new NullPointerException("연결된 세션을 찾을 수 없습니다."));
-            client.setRole(role);
-
-            headerAccessor.setUser(new CustomPrincipal(role, channelId));
-
-            subscribeMap.put(channelId, connections);
-        }
     }
 
     @EventListener

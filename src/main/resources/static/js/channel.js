@@ -1,10 +1,6 @@
 const socket = new SockJS('/wauction');
 const stompClient = Stomp.over(socket);
 
-const header = {
-    id: "1",
-}
-
 class Channel {
     id;
     user;
@@ -13,35 +9,51 @@ class Channel {
         this.id = channelId;
         this.user = user
     }
+
+    connect() {
+        const header = {
+            id: this.id,
+            user: this.user
+        }
+
+        stompClient.connect(header, frame => {
+            this.onMessage();
+        });
+    }
+
+    onMessage() {
+        const topic = "/channel/" + this.id;
+        const securedTopic = `/user/private`
+
+        const header = {
+            id: this.id
+        }
+
+
+        stompClient.subscribe(topic, msg => {
+            this.showPublicMsg(JSON.parse(msg.body));
+        },header);
+
+        stompClient.subscribe(securedTopic , msg => {
+            this.showPrivateMsg(JSON.parse(msg.body));
+        },header);
+    }
+
+    showPublicMsg(msg)  {
+        console.log(msg);
+    }
+
+    showPrivateMsg(msg)  {
+        console.log(msg);
+    }
 }
 
-stompClient.connect(header, frame => {
-    onMessage();
-});
-
-const onMessage = () => {
-    const topic = "/channel/" + this.id;
-    const securedTopic = `/user/private`
-
-    stompClient.subscribe(topic, msg => {
-        showMsg(JSON.parse(msg.body));
-
-    },header);
-
-    stompClient.subscribe(securedTopic , msg => {
-        showMsg(JSON.parse(msg.body));
-
-    },header);
-}
-
-const showMsg = (msg) => {
-    console.log(msg);
-
-}
 
 document.addEventListener("DOMContentLoaded",  () => {
     const username = getCookie("rname");
     const channel = new Channel(extractChannelIdFromUrl(),username);
+
+    channel.connect();
 
     document.querySelector('form').addEventListener('submit', function (e) {
         e.preventDefault();

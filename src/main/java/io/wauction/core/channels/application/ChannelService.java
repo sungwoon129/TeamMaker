@@ -15,8 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.Objects;
-import java.util.stream.Collectors;
+import java.util.NoSuchElementException;
 
 
 
@@ -43,25 +42,22 @@ public class ChannelService {
     }
 
     @Transactional
-    public String enter(long channelId, List<ChannelConnection> connections) {
+    public String enter(long channelId, String sender) {
         Channel channel = findOne(channelId);
         channel.enter();
 
-        List<String> roles = channel.getAuctionRule().getRoles().stream().map(ParticipantRole::getName).collect(Collectors.toList());
-        List<String> activeRoles = connections.stream()
-                .map(ChannelConnection::getRole)
-                .filter(Objects::nonNull)
-                .collect(Collectors.toList());
+        ParticipantRole role = channel.getAuctionRule().getRoles().stream().filter(r -> r.getName().equals(sender)).findFirst().orElseThrow(() -> new NoSuchElementException("메시지 전송자를 유효한 역할에서 찾을 수 없습니다."));
 
-        roles.removeAll(activeRoles);
+        EnterMessageResponse responseDto = EnterMessageResponse.builder()
+                .messageType(MessageType.JOIN)
+                .writer("SYSTEM")
+                .sender(role.getName().toUpperCase())
+                .msg(MessageType.JOIN.makeFullMessage(sender))
+                .build();
 
-        String sender = roles.get(0);
-        activeRoles.add(sender);
-
-        EnterMessageResponse responseDto = new EnterMessageResponse(MessageType.JOIN, "SYSTEM", sender.toUpperCase(), MessageType.JOIN.makeFullMessage(sender), activeRoles);
         sendMessageToChannel(channel, responseDto);
 
-        return sender;
+        return role.getName();
 
     }
 

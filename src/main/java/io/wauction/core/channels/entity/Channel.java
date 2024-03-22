@@ -3,6 +3,7 @@ package io.wauction.core.channels.entity;
 import io.wauction.core.auction.application.AuctionRuleService;
 import io.wauction.core.auction.entity.AuctionRule;
 import io.wauction.core.auction.entity.ParticipantRole;
+import io.wauction.core.channels.dto.ChannelConnection;
 import io.wauction.core.channels.dto.ChannelRequest;
 import io.wauction.core.channels.dto.ChannelResponse;
 import io.wauction.core.channels.exception.UnAcceptableChannelJoinException;
@@ -10,7 +11,13 @@ import io.wauction.core.common.entity.BaseTimeEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.Collectors;
+
+import static io.wauction.core.channels.event.StompEventHandler.subscribeMap;
 
 @Getter
 @Builder
@@ -61,8 +68,23 @@ public class Channel extends BaseTimeEntity {
 
     public ChannelResponse toResponseDto() {
 
-        Optional<ParticipantRole> role = auctionRule.getRoles().stream().skip(headCount).findFirst();
-        if(role.isEmpty()) throw new IndexOutOfBoundsException("현재 접속한 클라이언트에게 부여할 역할을 찾을 수 없습니다.");
+        List<ChannelConnection> connections = subscribeMap.getOrDefault(id.toString(), new ArrayList<>());
+
+        List<String> roles = auctionRule.getRoles().stream().map(ParticipantRole::getName).collect(Collectors.toList());
+        List<String> activeRoles = connections.stream()
+                .map(ChannelConnection::getRole)
+                .filter(Objects::nonNull)
+                .toList();
+
+        roles.removeAll(activeRoles);
+
+        String emptyRole = roles.get(0);
+
+        Optional<ParticipantRole> role = auctionRule.getRoles().stream().filter(r -> r.getName().equals(emptyRole)).findFirst();
+
+        if(role.isEmpty()) {
+            throw new IndexOutOfBoundsException("현재 접속한 클라이언트에게 부여할 역할을 찾을 수 없습니다.");
+        }
 
         return ChannelResponse.builder()
                 .channelId(id)
