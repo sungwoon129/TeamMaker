@@ -60,7 +60,7 @@ public class ChannelService {
         List<String> activeRoles = connections.stream().map(ChannelConnection::getRole).toList();
 
         EnterMessageResponse responseDto = new EnterMessageResponse(MessageType.LEAVE, "SYSTEM", sender, MessageType.LEAVE.makeFullMessage(sender), activeRoles);
-        //publishMessageToChannel(channel.getId(), responseDto);
+        publishMessageToChannel(channel.getId(), responseDto);
     }
 
     public Channel countReady(long channelId) {

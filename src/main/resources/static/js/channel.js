@@ -24,7 +24,7 @@ class Channel {
     onMessage() {
         const topic = {
             public : `/channel/${this.id}`,
-            secured : `/user/private`
+            secured : `/channel/${this.id}/${this.user}/secured`
         }
 
 

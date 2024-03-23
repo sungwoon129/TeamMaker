@@ -52,7 +52,7 @@ public class StompEventHandler {
     public void handleWebSocketSubscribeListener(SessionSubscribeEvent event) {
         StompHeaderAccessor headerAccessor = StompHeaderAccessor.wrap(event.getMessage());
 
-        if(Objects.requireNonNull(headerAccessor.getDestination()).contains("channel")) {
+        if(!Objects.requireNonNull(headerAccessor.getDestination()).contains("secured")) {
 
             String channelId = extractChannelId(headerAccessor.getSubscriptionId());
 
@@ -71,15 +71,14 @@ public class StompEventHandler {
             channelService.publishMessageToChannel(Long.parseLong(channelId), responseDto);
 
         }
-
-
     }
 
     @EventListener
     public void handleWebSocketDisconnectListener(SessionDisconnectEvent event) {
         StompHeaderAccessor headerAccessor = StompHeaderAccessor.wrap(event.getMessage());
-        String channelId = headerAccessor.getSubscriptionId();
+        String channelId = extractChannelId(headerAccessor.getSubscriptionId());
 
+        // 나가기 버튼을 이용하지 않고 브라우저 종료, 새로고침등의 이유로 disconnect 된 경우, connectionMap을 순회하면서 session 조회해 id 찾기
         if (channelId == null) {
             for (Map.Entry<String, List<ChannelConnection>> entry : subscribeMap.entrySet()) {
                 for (ChannelConnection connection : entry.getValue()) {
