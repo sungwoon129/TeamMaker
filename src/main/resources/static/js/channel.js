@@ -22,25 +22,44 @@ class Channel {
     }
 
     onMessage() {
-        const topic = "/channel/" + this.id;
-        const securedTopic = `/user/private`
-
-        const header = {
-            id: this.id
+        const topic = {
+            public : `/channel/${this.id}`,
+            secured : `/user/private`
         }
 
 
-        stompClient.subscribe(topic, msg => {
+        stompClient.subscribe(topic.public, msg => {
             this.showPublicMsg(JSON.parse(msg.body));
-        },header);
+        },{
+            id: topic.public
+        });
 
-        stompClient.subscribe(securedTopic , msg => {
+        stompClient.subscribe(topic.secured , msg => {
             this.showPrivateMsg(JSON.parse(msg.body));
-        },header);
+        }, {
+            id: topic.secured
+        });
     }
 
     showPublicMsg(msg)  {
-        console.log(msg);
+        const displayElement = document.getElementById("display");
+        const newRow = document.createElement("div");
+        newRow.className = "message-line";
+
+        const writerElement = document.createElement("div");
+        //writerElement.style.color = msg.writer.color;
+        writerElement.textContent = msg.writer;
+        writerElement.className = "writer"
+
+        const messageElement = document.createElement("div");
+        messageElement.textContent = msg.msg;
+        messageElement.className = "message";
+
+        newRow.appendChild(writerElement);
+        newRow.appendChild(messageElement);
+
+
+        displayElement.appendChild(newRow);
     }
 
     showPrivateMsg(msg)  {

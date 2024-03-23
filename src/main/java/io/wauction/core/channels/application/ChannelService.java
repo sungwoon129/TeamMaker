@@ -48,15 +48,6 @@ public class ChannelService {
 
         ParticipantRole role = channel.getAuctionRule().getRoles().stream().filter(r -> r.getName().equals(sender)).findFirst().orElseThrow(() -> new NoSuchElementException("메시지 전송자를 유효한 역할에서 찾을 수 없습니다."));
 
-        EnterMessageResponse responseDto = EnterMessageResponse.builder()
-                .messageType(MessageType.JOIN)
-                .writer("SYSTEM")
-                .sender(role.getName().toUpperCase())
-                .msg(MessageType.JOIN.makeFullMessage(sender))
-                .build();
-
-        sendMessageToChannel(channel, responseDto);
-
         return role.getName();
 
     }
@@ -69,7 +60,7 @@ public class ChannelService {
         List<String> activeRoles = connections.stream().map(ChannelConnection::getRole).toList();
 
         EnterMessageResponse responseDto = new EnterMessageResponse(MessageType.LEAVE, "SYSTEM", sender, MessageType.LEAVE.makeFullMessage(sender), activeRoles);
-        sendMessageToChannel(channel, responseDto);
+        //publishMessageToChannel(channel.getId(), responseDto);
     }
 
     public Channel countReady(long channelId) {
@@ -80,8 +71,8 @@ public class ChannelService {
         return channel;
     }
 
-    private void sendMessageToChannel(Channel channel, Object messageResponseDto)  {
-        String destination = "/channel/" + channel.getId();
+    public void publishMessageToChannel(long channelId, Object messageResponseDto)  {
+        String destination = "/channel/" + channelId;
 
         try {
             String resultMsg = objectMapper.writeValueAsString(messageResponseDto);

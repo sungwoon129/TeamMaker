@@ -2,6 +2,8 @@ package io.wauction.core.channels.event;
 
 import io.wauction.core.channels.application.ChannelService;
 import io.wauction.core.channels.dto.ChannelConnection;
+import io.wauction.core.channels.dto.EnterMessageResponse;
+import io.wauction.core.channels.entity.MessageType;
 import io.wauction.core.config.CustomPrincipal;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.event.EventListener;
@@ -9,9 +11,12 @@ import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.messaging.SessionConnectEvent;
 import org.springframework.web.socket.messaging.SessionDisconnectEvent;
+import org.springframework.web.socket.messaging.SessionSubscribeEvent;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
@@ -28,7 +33,7 @@ public class StompEventHandler {
         StompHeaderAccessor headerAccessor = StompHeaderAccessor.wrap(event.getMessage());
 
         String channelId = Objects.requireNonNull(headerAccessor.getNativeHeader("id")).stream().findFirst().orElseThrow(() -> new IllegalArgumentException("접속한 채널 정보가 올바르지 않습니다."));
-        String sender = Objects.requireNonNull(headerAccessor.getNativeHeader("user")).stream().findFirst().orElseThrow(() -> new IllegalArgumentException("접속한 채널 정보가 올바르지 않습니다."));
+        String sender = Objects.requireNonNull(headerAccessor.getNativeHeader("user")).stream().findFirst().orElseThrow(() -> new IllegalArgumentException("메시지 헤더 정보가 올바르지 않습니다."));
 
         List<ChannelConnection> connections = subscribeMap.getOrDefault(channelId, new ArrayList<>());
 
@@ -40,6 +45,33 @@ public class StompEventHandler {
         headerAccessor.setUser(new CustomPrincipal(role, channelId));
 
         subscribeMap.put(channelId, connections);
+
+    }
+
+    @EventListener
+    public void handleWebSocketSubscribeListener(SessionSubscribeEvent event) {
+        StompHeaderAccessor headerAccessor = StompHeaderAccessor.wrap(event.getMessage());
+
+        if(Objects.requireNonNull(headerAccessor.getDestination()).contains("channel")) {
+
+            String channelId = extractChannelId(headerAccessor.getSubscriptionId());
+
+            if(channelId == null) throw new NullPointerException("메시지 헤더 정보가 올바르지 않습니다.");
+
+            ChannelConnection channelConnection = subscribeMap.get(channelId).stream().filter(connection -> connection.getSessionId().equals(headerAccessor.getSessionId())).findFirst().orElseThrow(() -> new IllegalArgumentException("클라이언트의 세션 정보를 찾을 수 없습니다."));
+
+
+            EnterMessageResponse responseDto = EnterMessageResponse.builder()
+                    .messageType(MessageType.JOIN)
+                    .writer("SYSTEM")
+                    .sender(channelConnection.getRole().toUpperCase())
+                    .msg(MessageType.JOIN.makeFullMessage(channelConnection.getRole()))
+                    .build();
+
+            channelService.publishMessageToChannel(Long.parseLong(channelId), responseDto);
+
+        }
+
 
     }
 
@@ -70,6 +102,15 @@ public class StompEventHandler {
         }
 
 
+    }
+
+    private String extractChannelId(String subId) {
+        Pattern pattern = Pattern.compile("\\d+");
+        Matcher matcher = pattern.matcher(subId);
+        if (matcher.find()) {
+            return matcher.group();
+        }
+        return null;
     }
 
 
