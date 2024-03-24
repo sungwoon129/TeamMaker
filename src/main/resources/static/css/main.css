@@ -208,3 +208,7 @@ body {
     border-radius: 10px;
     border: 2px solid #ffa500;
 }
+
+.active-user {
+    color : #e5e5e5;
+}

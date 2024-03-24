@@ -7,7 +7,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 
-import java.util.Optional;
+import java.util.List;
 
 @Getter
 @Builder
@@ -21,6 +21,7 @@ public class ChannelResponse {
     private ChannelState channelState;
     private AuctionRuleResponse auctionRuleResponse;
     private ParticipantRoleResponse clientRole;
+    private List<String> activeRoles;
 
 
 }

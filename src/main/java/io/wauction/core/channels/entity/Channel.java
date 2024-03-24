@@ -93,6 +93,7 @@ public class Channel extends BaseTimeEntity {
                 .capacity(capacity)
                 .auctionRuleResponse(auctionRule.toResponseDto())
                 .clientRole(role.get().toResponseDto())
+                .activeRoles(activeRoles)
                 .build();
     }
 

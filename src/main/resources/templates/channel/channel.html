@@ -36,7 +36,7 @@
 
                     <div class="row">
                         <div class="d-flex p-2 flex-side">
-                            <div th:text="${participant.getName() }" class="text-bold random-color-element"></div>
+                            <div th:text="${participant.getName() }" class="text-bold random-color-element" th:classappend="${channel.getActiveRoles().contains(participant.getName()) ? 'active-user' : '' }"></div>
                             <div th:text="${'남은 포인트 ' + participant.getPoint()}" class="remaining-point text-custom-orange text-bold"></div>
                         </div>
                     </div>
