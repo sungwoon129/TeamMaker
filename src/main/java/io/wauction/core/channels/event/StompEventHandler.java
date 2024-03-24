@@ -30,10 +30,15 @@ public class StompEventHandler {
 
     @EventListener
     public void handleWebSocketConnectListener(SessionConnectEvent event) {
+
         StompHeaderAccessor headerAccessor = StompHeaderAccessor.wrap(event.getMessage());
 
-        String channelId = Objects.requireNonNull(headerAccessor.getNativeHeader("id")).stream().findFirst().orElseThrow(() -> new IllegalArgumentException("접속한 채널 정보가 올바르지 않습니다."));
-        String sender = Objects.requireNonNull(headerAccessor.getNativeHeader("user")).stream().findFirst().orElseThrow(() -> new IllegalArgumentException("메시지 헤더 정보가 올바르지 않습니다."));
+        CustomPrincipal user = (CustomPrincipal) event.getUser();
+
+        assert user != null;
+
+        String channelId = user.getChannelId();
+        String sender = user.getName();
 
         List<ChannelConnection> connections = subscribeMap.getOrDefault(channelId, new ArrayList<>());
 
@@ -42,7 +47,6 @@ public class StompEventHandler {
         ChannelConnection channelConnection = new ChannelConnection(headerAccessor.getSessionId(), channelId, role);
         connections.add(channelConnection);
 
-        headerAccessor.setUser(new CustomPrincipal(role, channelId));
 
         subscribeMap.put(channelId, connections);
 
@@ -75,19 +79,9 @@ public class StompEventHandler {
 
     @EventListener
     public void handleWebSocketDisconnectListener(SessionDisconnectEvent event) {
-        StompHeaderAccessor headerAccessor = StompHeaderAccessor.wrap(event.getMessage());
-        String channelId = extractChannelId(headerAccessor.getSubscriptionId());
 
-        // 나가기 버튼을 이용하지 않고 브라우저 종료, 새로고침등의 이유로 disconnect 된 경우, connectionMap을 순회하면서 session 조회해 id 찾기
-        if (channelId == null) {
-            for (Map.Entry<String, List<ChannelConnection>> entry : subscribeMap.entrySet()) {
-                for (ChannelConnection connection : entry.getValue()) {
-                    if (connection.getSessionId().equals(headerAccessor.getSessionId())) {
-                        channelId = entry.getKey();
-                    }
-                }
-            }
-        }
+        StompHeaderAccessor headerAccessor = StompHeaderAccessor.wrap(event.getMessage());
+        String channelId = findChannelIdFromMap(event, headerAccessor);
 
         List<ChannelConnection> connections = subscribeMap.get(channelId);
         Optional<ChannelConnection> disConnectSession = connections.stream().filter(connection -> connection.getSessionId().equals(headerAccessor.getSessionId())).findFirst();
@@ -101,6 +95,25 @@ public class StompEventHandler {
         }
 
 
+    }
+
+    private String findChannelIdFromMap(SessionDisconnectEvent event, StompHeaderAccessor headerAccessor) {
+        CustomPrincipal user = (CustomPrincipal) event.getUser();
+
+        assert user != null;
+        String channelId = user.getChannelId();
+
+        // 나가기 버튼을 이용하지 않고 브라우저 종료, 새로고침등의 이유로 disconnect 된 경우, connectionMap을 순회하면서 session 조회해 id 찾기
+        if (channelId == null) {
+            for (Map.Entry<String, List<ChannelConnection>> entry : subscribeMap.entrySet()) {
+                for (ChannelConnection connection : entry.getValue()) {
+                    if (connection.getSessionId().equals(headerAccessor.getSessionId())) {
+                        channelId = entry.getKey();
+                    }
+                }
+            }
+        }
+        return channelId;
     }
 
     private String extractChannelId(String subId) {
