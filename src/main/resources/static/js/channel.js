@@ -18,6 +18,7 @@ class Channel {
 
         stompClient.connect(header, frame => {
             this.onMessage();
+            document.querySelector(".emphasis-user").querySelector(".random-color-element").classList.add("active-user")
         });
     }
 
