@@ -21,6 +21,13 @@ class Channel {
         });
     }
 
+    leave() {
+        if (stompClient !== null) {
+            stompClient.disconnect(() => window.location.href = "/");
+        }
+        console.log("Disconnected");
+    }
+
     onMessage() {
         const topic = {
             public : `/channel/${this.id}`,
@@ -79,7 +86,7 @@ document.addEventListener("DOMContentLoaded",  () => {
     });
 
     document.querySelector("#leave").addEventListener("click", () => {
-        //channel.leave();
+        channel.leave();
     })
 
     document.querySelector("#ready").addEventListener("click", () => {
