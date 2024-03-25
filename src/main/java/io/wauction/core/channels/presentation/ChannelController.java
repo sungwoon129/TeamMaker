@@ -42,7 +42,13 @@ public class ChannelController {
 
         if(messageType != MessageType.EXCHANGE) throw new IllegalArgumentException("올바른 메시지 타입이 아닙니다.");
 
-        String destination = "/private";
+        String destination = "/channel" +
+                "/" +
+                channelId +
+                "/" +
+                messageRequest.getTargetUsername() +
+                "/secured";
+
         MessageResponse messageResponse = new MessageResponse(MessageType.EXCHANGE, messageRequest.getSender(), messageType.makeFullMessage(messageRequest.getSender()), messageRequest.getTargetUsername());
         String resultMsg = objectMapper.writeValueAsString(messageResponse);
 
@@ -52,11 +58,11 @@ public class ChannelController {
                 .findFirst()
                 .orElseThrow(() -> new IllegalArgumentException("요청한 역할을 수행하는 사용자가 존재하지 않습니다."));
 
-        SimpMessageHeaderAccessor headerAccessor = SimpMessageHeaderAccessor.create(SimpMessageType.MESSAGE);
+/*        SimpMessageHeaderAccessor headerAccessor = SimpMessageHeaderAccessor.create(SimpMessageType.MESSAGE);
         headerAccessor.setSessionId(channelConnection.getSessionId());
-        headerAccessor.setLeaveMutable(true);
+        headerAccessor.setLeaveMutable(true);*/
 
-        simpMessagingTemplate.convertAndSendToUser(channelConnection.getSessionId(),destination, resultMsg,headerAccessor.getMessageHeaders());
+        simpMessagingTemplate.convertAndSend(destination, resultMsg);
     }
 
     @MessageMapping("/channel/{channelId}/acceptChange")
