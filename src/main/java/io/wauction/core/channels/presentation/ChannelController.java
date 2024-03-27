@@ -53,10 +53,10 @@ public class ChannelController {
         String resultMsg = objectMapper.writeValueAsString(messageResponse);
 
         List<ChannelConnection> connections = subscribeMap.get(String.valueOf(channelId));
-        ChannelConnection channelConnection = connections.stream()
+/*        ChannelConnection channelConnection = connections.stream()
                 .filter(connection -> connection.getRole().equals(messageRequest.getTargetUsername()))
                 .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException("요청한 역할을 수행하는 사용자가 존재하지 않습니다."));
+                .orElseThrow(() -> new IllegalArgumentException("요청한 역할을 수행하는 사용자가 존재하지 않습니다."));*/
 
 /*        SimpMessageHeaderAccessor headerAccessor = SimpMessageHeaderAccessor.create(SimpMessageType.MESSAGE);
         headerAccessor.setSessionId(channelConnection.getSessionId());

@@ -18,7 +18,6 @@ class Channel {
 
         stompClient.connect(header, frame => {
             this.onMessage();
-            document.querySelector(".emphasis-user").querySelector(".random-color-element").classList.add("active-user")
         });
     }
 
@@ -29,12 +28,12 @@ class Channel {
         console.log("Disconnected");
     }
 
-    exchangeSeat(idx) {
+    exchangeSeat(targetUser) {
         const data = {
             sender: this.user,
             type: "EXCHANGE",
             message: "자리교환 요청",
-            targetUsername: document.querySelectorAll(".active-user").item(idx).textContent
+            targetUsername: targetUser
         }
         stompClient.send(`/wauction/channel/${this.id}/exchangeSeat`, {}, JSON.stringify(data));
 
@@ -66,17 +65,28 @@ class Channel {
                 console.log("JOIN MESSAGE");
 
                 document.querySelectorAll(".random-color-element").forEach((el,idx) => {
-                    // TODO: 인덱스와 일치하는 overlay 클래스를 가진 엘리먼트에서 overlay-inactive 제거, 그 자식 요소중 .exchange-display 찾아서 d-none 클래스 제거
+
                     if(el.textContent === msg.sender && this.user !== msg.sender) {
                         const target = document.querySelectorAll(".overlay").item(idx);
                         if(!target) console.error("메시지 작성자와 일치하는 참가자를 찾을 수 없습니다.");
                         target.classList.remove("overlay-inactive");
+                        target.classList.add("active");
                         target.querySelector(".exchange-display").classList.remove("d-none");
                     }
                 })
                 this.showPublicMsg(msg);
                 break;
             case 'LEAVE' :
+                document.querySelectorAll(".random-color-element").forEach((el,idx) => {
+
+                    if(el.textContent === msg.sender && this.user !== msg.sender) {
+                        const target = document.querySelectorAll(".overlay").item(idx);
+                        if(!target) console.error("메시지 작성자와 일치하는 참가자를 찾을 수 없습니다.");
+                        target.classList.add("overlay-inactive");
+                        target.classList.remove("active");
+                        target.querySelector(".exchange-display").classList.add("d-none");
+                    }
+                })
                 this.showPublicMsg(msg);
                 break;
             default:
@@ -139,8 +149,7 @@ document.addEventListener("DOMContentLoaded",  () => {
 
     document.querySelectorAll(".exchange-seat").forEach((btn, idx) => {
         btn.addEventListener("click", (event) => {
-
-            channel.exchangeSeat(idx);
+            channel.exchangeSeat(btn.closest(".participant-info").querySelector(".role-name").textContent);
         })
     });
 

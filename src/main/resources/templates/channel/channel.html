@@ -36,12 +36,12 @@
 
                     <div class="row">
                         <div class="d-flex p-2 flex-side">
-                            <div th:text="${participant.getName() }" class="text-bold random-color-element" th:classappend="${channel.getActiveRoles().contains(participant.getName()) || participant.getName() eq channel.getClientRole().getName()  ? 'active-user' : '' }"></div>
+                            <div th:text="${participant.getName() }" class="text-bold random-color-element role-name"></div>
                             <div th:text="${'남은 포인트 ' + participant.getPoint()}" class="remaining-point text-custom-orange text-bold"></div>
                         </div>
                     </div>
                     <!--TODO : 오버레이 ui 활성화 상태에 따라 자리 바꾸기 기능, 준비상태 체크후 알림메시지 추가필요. 활성화 - 자기자신: 준비안내, 타인: 자리바꾸기 -->
-                    <div class="row overlay" th:classappend="${channel.getActiveRoles().contains(participant.getName()) || participant.getName() eq channel.getClientRole().getName() ? '' : 'overlay-inactive'}">
+                    <div class="row overlay" th:classappend="${channel.getActiveRoles().contains(participant.getName()) || participant.getName() eq channel.getClientRole().getName() ? 'active' : 'overlay-inactive'}">
                         <div class="interact-display">
                             <div class="exchange-display" th:classappend="${channel.getActiveRoles().contains(participant.getName()) ? '' : 'd-none'}">
                                 <button type="button" class="btn btn-outline-success exchange-seat">자리교환 요청</button>
