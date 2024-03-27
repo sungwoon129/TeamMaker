@@ -29,15 +29,25 @@ class Channel {
         console.log("Disconnected");
     }
 
+    exchangeSeat(idx) {
+        const data = {
+            sender: this.user,
+            type: "EXCHANGE",
+            message: "자리교환 요청",
+            targetUsername: document.querySelectorAll(".active-user").item(idx).textContent
+        }
+        stompClient.send(`/wauction/channel/${this.id}/exchangeSeat`, {}, JSON.stringify(data));
+
+    }
+
     onMessage() {
         const topic = {
             public : `/channel/${this.id}`,
             secured : `/channel/${this.id}/${this.user}/secured`
         }
 
-
         stompClient.subscribe(topic.public, msg => {
-            this.showPublicMsg(JSON.parse(msg.body));
+            this.updateUi(JSON.parse(msg.body));
         },{
             id: topic.public
         });
@@ -49,7 +59,34 @@ class Channel {
         });
     }
 
-    showPublicMsg(msg)  {
+    updateUi(msg)  {
+
+        switch (msg.messageType) {
+            case 'JOIN' :
+                console.log("JOIN MESSAGE");
+
+                document.querySelectorAll(".random-color-element").forEach((el,idx) => {
+                    // TODO: 인덱스와 일치하는 overlay 클래스를 가진 엘리먼트에서 overlay-inactive 제거, 그 자식 요소중 .exchange-display 찾아서 d-none 클래스 제거
+                    if(el.textContent === msg.sender && this.user !== msg.sender) {
+                        const target = document.querySelectorAll(".overlay").item(idx);
+                        if(!target) console.error("메시지 작성자와 일치하는 참가자를 찾을 수 없습니다.");
+                        target.classList.remove("overlay-inactive");
+                        target.querySelector(".exchange-display").classList.remove("d-none");
+                    }
+                })
+                this.showPublicMsg(msg);
+                break;
+            case 'LEAVE' :
+                this.showPublicMsg(msg);
+                break;
+            default:
+                console.error("잘못된 메시지 타입입니다.")
+
+        }
+
+    }
+
+    showPublicMsg(msg) {
         const displayElement = document.getElementById("display");
         const newRow = document.createElement("div");
         newRow.className = "message-line";
