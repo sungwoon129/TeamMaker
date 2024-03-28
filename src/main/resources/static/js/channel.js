@@ -118,7 +118,19 @@ class Channel {
     }
 
     showPrivateMsg(msg)  {
+        if(msg.messageType === "EXCHANGE") {
+            const modal = new bootstrap.Modal(document.getElementById('exchange-modal'), {
+                keyboard: false
+            })
+            document.getElementById("exchange-modal-message").textContent = msg.msg;
+            modal.show();
+        }
+
         console.log(msg);
+    }
+
+    acceptExchange() {
+
     }
 }
 
@@ -152,6 +164,10 @@ document.addEventListener("DOMContentLoaded",  () => {
             channel.exchangeSeat(btn.closest(".participant-info").querySelector(".role-name").textContent);
         })
     });
+
+    document.querySelector("#accept-exchange").addEventListener("click", () => {
+        channel.acceptExchange();
+    })
 
 });
 
