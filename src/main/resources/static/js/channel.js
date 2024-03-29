@@ -1,9 +1,12 @@
 const socket = new SockJS('/wauction');
 const stompClient = Stomp.over(socket);
 
+
+
 class Channel {
     id;
     user;
+    latestSenderToMe; // 마지막으로 나에게 개인 메시지를 발송한 사람
 
     constructor(channelId, user) {
         this.id = channelId;
@@ -118,19 +121,38 @@ class Channel {
     }
 
     showPrivateMsg(msg)  {
-        if(msg.messageType === "EXCHANGE") {
-            const modal = new bootstrap.Modal(document.getElementById('exchange-modal'), {
-                keyboard: false
-            })
-            document.getElementById("exchange-modal-message").textContent = msg.msg;
-            modal.show();
+
+        switch (msg.messageType) {
+            // TODO : 하나의 교환 요청에 응답하기 전 새로운 요청이 들어온 경우 고려 필요
+            case "EXCHANGE" :
+                const modal = new bootstrap.Modal(document.getElementById('exchange-modal'), {
+                    keyboard: false
+                })
+                document.getElementById("exchange-modal-message").textContent = msg.msg;
+                this.latestSenderToMe = msg.writer;
+                modal.show();
+                break;
+
+            case "EXCHANGE_RES" :
+                this.user = msg.writer;
+                const idx = getParticipantIdx(msg.writer);
+                const origin = document.querySelector(".emphasis-user");
+                const target = document.querySelectorAll(".participant-info").item(idx);
+
+                swapRole(origin, target);
+
         }
 
-        console.log(msg);
     }
 
     acceptExchange() {
-
+        const data = {
+            sender: this.user,
+            type: "EXCHANGE_RES",
+            message: "Y",
+            targetUsername: this.latestSenderToMe
+        }
+        stompClient.send(`/wauction/channel/${this.id}/acceptChange`, {}, JSON.stringify(data));
     }
 }
 
@@ -161,11 +183,19 @@ document.addEventListener("DOMContentLoaded",  () => {
 
     document.querySelectorAll(".exchange-seat").forEach((btn, idx) => {
         btn.addEventListener("click", (event) => {
+            // TODO : Timer 필요. 자리교환 요청 후 일정 시간내에 상대 응답이 오지않으면 요청 취소되야함.
             channel.exchangeSeat(btn.closest(".participant-info").querySelector(".role-name").textContent);
         })
     });
 
     document.querySelector("#accept-exchange").addEventListener("click", () => {
+
+        // TODO : Timer 필요. 자리교환 요청 후 일정 시간내에 응답하지 않으면 스왑하지 않고 취소해야함.
+
+        const idx = getParticipantIdx(channel.latestSenderToMe);
+        const origin = document.querySelector(".emphasis-user");
+        const target = document.querySelectorAll(".participant-info").item(idx);
+        swapRole(origin, target);
         channel.acceptExchange();
     })
 
@@ -186,3 +216,20 @@ const getCookie = (name) => {
     const parts = value.split(`; ${name}=`);
     return parts.length === 2 ? parts.pop().split(';').shift() : null;
 };
+
+const getParticipantIdx = (roleName) => {
+    let resultIdx = -1;
+    document.querySelectorAll(".role-name").forEach((el,idx) => {
+        if(el.textContent === roleName) resultIdx = idx;
+    })
+
+    return resultIdx;
+}
+
+const swapRole = (origin, target) => {
+    origin.classList.remove("emphasis-user");
+    target.classList.add("emphasis-user");
+
+    target.querySelector(".exchange-display").classList.add("d-none");
+    origin.querySelector(".exchange-display").classList.remove("d-none");
+}

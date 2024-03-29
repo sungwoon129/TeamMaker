@@ -17,6 +17,7 @@ import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessageType;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.stereotype.Controller;
 
 import java.util.List;
@@ -60,25 +61,36 @@ public class ChannelController {
     public void acceptExchange(@DestinationVariable long channelId, @Payload MessageRequest messageRequest) throws JsonProcessingException {
         MessageType messageType = MessageType.findByTitle(messageRequest.getType());
 
-        if(messageType != MessageType.EXCHANGE) throw new IllegalArgumentException("올바른 메시지 타입이 아닙니다.");
+        if(messageType != MessageType.EXCHANGE_RES) throw new IllegalArgumentException("올바른 메시지 타입이 아닙니다.");
 
-        String destination = "/private";
-        MessageResponse messageResponse = new MessageResponse(MessageType.EXCHANGE, messageRequest.getSender(), messageType.makeFullMessage(messageRequest.getMessage()), messageRequest.getTargetUsername(), messageRequest.getMessage());
+
+        MessageResponse messageResponse = new MessageResponse(MessageType.EXCHANGE_RES, messageRequest.getSender(), messageType.makeFullMessage(messageRequest.getMessage()), messageRequest.getTargetUsername(), messageRequest.getMessage());
         String resultMsg = objectMapper.writeValueAsString(messageResponse);
 
+        String destination = "/channel" +
+                "/" +
+                channelId +
+                "/" +
+                messageRequest.getTargetUsername() +
+                "/secured";
+
         List<ChannelConnection> connections = subscribeMap.get(String.valueOf(channelId));
-        ChannelConnection channelConnection = connections.stream()
-                .filter(connection -> connection.getRole().equals(messageRequest.getTargetUsername()))
-                .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException("요청한 역할을 수행하는 사용자가 존재하지 않습니다."));
 
-        // TODO : 만약 변경 동의했다면 connections 내부의 세션값 스왑.
+        subscribeMap.get(String.valueOf(channelId)).forEach(c -> log.debug("before swap = " + c.getSessionId() + " : " + c.getRole()));
 
-        SimpMessageHeaderAccessor headerAccessor = SimpMessageHeaderAccessor.create(SimpMessageType.MESSAGE);
-        headerAccessor.setSessionId(channelConnection.getSessionId());
-        headerAccessor.setLeaveMutable(true);
+        for(ChannelConnection connection : connections) {
+            if(connection.getRole().equals(messageRequest.getTargetUsername())) {
+                connection.setRole(messageRequest.getSender());
+            } else if(connection.getRole().equals(messageRequest.getSender())) {
+                connection.setRole(messageRequest.getTargetUsername());
+            }
+        }
 
-        simpMessagingTemplate.convertAndSendToUser(channelConnection.getSessionId(),destination, resultMsg,headerAccessor.getMessageHeaders());
+        subscribeMap.put(String.valueOf(channelId), connections);
+
+        subscribeMap.get(String.valueOf(channelId)).forEach(c -> log.debug("after swap = " + c.getSessionId() + " : " + c.getRole()));
+
+        simpMessagingTemplate.convertAndSend(destination, resultMsg);
     }
 
 
