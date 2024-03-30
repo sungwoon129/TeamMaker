@@ -7,10 +7,12 @@ class Channel {
     id;
     user;
     latestSenderToMe; // 마지막으로 나에게 개인 메시지를 발송한 사람
+    exchangeRequestList;
 
     constructor(channelId, user) {
         this.id = channelId;
         this.user = user
+        this.exchangeRequestList = [];
     }
 
     connect() {
@@ -123,24 +125,39 @@ class Channel {
     showPrivateMsg(msg)  {
 
         switch (msg.messageType) {
-            // TODO : 하나의 교환 요청에 응답하기 전 새로운 요청이 들어온 경우 고려 필요
+            // bug : 1회 자리 교환 후, 동일한 사람에게 다시 교환 요청하면 나에게 요청 모달이 나타남.
+            // TODO : 하나의 교환 요청에 응답하기 전 새로운 요청이 들어온 경우 고려 필요 => 모달창이 여러개 생성되어야 함. 지금은 하나의 창을 재활용하고 있음.
             case "EXCHANGE" :
+                this.exchangeRequestList.push({proposer : msg.writer})
                 const modal = new bootstrap.Modal(document.getElementById('exchange-modal'), {
                     keyboard: false
                 })
                 document.getElementById("exchange-modal-message").textContent = msg.msg;
                 this.latestSenderToMe = msg.writer;
                 modal.show();
+
+                // 타이머 시작(5초)
+                document.querySelector(".timer").classList.add("round-time-bar");
+
+                // 타이머 종료
+                setTimeout(() => {
+                    modal.hide();
+                    if(this.exchangeRequestList.filter(req => req.proposer === msg.writer).length > 0) this.declineExchange()
+                }, 5000);
                 break;
 
             case "EXCHANGE_RES" :
-                this.user = msg.writer;
-                const idx = getParticipantIdx(msg.writer);
-                const origin = document.querySelector(".emphasis-user");
-                const target = document.querySelectorAll(".participant-info").item(idx);
+                if(msg.resultYne === "Y") {
+                    this.user = msg.writer;
+                    const idx = getParticipantIdx(msg.writer);
+                    const origin = document.querySelector(".emphasis-user");
+                    const target = document.querySelectorAll(".participant-info").item(idx);
 
-                swapRole(origin, target);
-
+                    swapRole(origin, target);
+                } else if(msg.resultYne === "N") {
+                    alert(msg.msg);
+                }
+                break;
         }
 
     }
@@ -152,7 +169,22 @@ class Channel {
             message: "Y",
             targetUsername: this.latestSenderToMe
         }
-        stompClient.send(`/wauction/channel/${this.id}/acceptChange`, {}, JSON.stringify(data));
+        this.exchangeRequestList = this.exchangeRequestList.filter(req => req.proposer !== this.latestSenderToMe);
+
+        stompClient.send(`/wauction/channel/${this.id}/role-exchange/response`, {}, JSON.stringify(data));
+    }
+
+    declineExchange() {
+        const data = {
+            sender: this.user,
+            type: "EXCHANGE_RES",
+            message: "N",
+            targetUsername: this.latestSenderToMe
+        }
+
+        this.exchangeRequestList = this.exchangeRequestList.filter(req => req.proposer === this.latestSenderToMe);
+
+        stompClient.send(`/wauction/channel/${this.id}/role-exchange/response`, {}, JSON.stringify(data));
     }
 }
 
@@ -190,7 +222,6 @@ document.addEventListener("DOMContentLoaded",  () => {
 
     document.querySelector("#accept-exchange").addEventListener("click", () => {
 
-        // TODO : Timer 필요. 자리교환 요청 후 일정 시간내에 응답하지 않으면 스왑하지 않고 취소해야함.
 
         const idx = getParticipantIdx(channel.latestSenderToMe);
         const origin = document.querySelector(".emphasis-user");

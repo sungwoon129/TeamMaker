@@ -28,4 +28,5 @@ public class MessageResponse {
         this.msg = msg;
         this.targetUsername = targetUsername;
     }
+
 }

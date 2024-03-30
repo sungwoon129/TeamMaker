@@ -216,3 +216,26 @@ body {
 #exchange-modal-message {
     color : #00ced1
 }
+
+.round-time-bar {
+    margin: 1rem;
+    overflow: hidden;
+}
+.round-time-bar div {
+    height: 10px;
+    animation: roundtime calc(var(--duration) * 1s) steps(var(--duration))
+    forwards;
+    transform-origin: left center;
+    background: linear-gradient(to bottom, #00ced1, var(--default-border-color));
+}
+
+.round-time-bar[data-style="smooth"] div {
+    animation: roundtime calc(var(--duration) * 1s) linear forwards;
+}
+
+@keyframes roundtime {
+    to {
+        /* More performant than `width` */
+        transform: scaleX(0);
+    }
+}

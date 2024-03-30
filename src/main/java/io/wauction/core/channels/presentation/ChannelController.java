@@ -57,8 +57,9 @@ public class ChannelController {
         simpMessagingTemplate.convertAndSend(destination, resultMsg);
     }
 
-    @MessageMapping("/channel/{channelId}/acceptChange")
+    @MessageMapping("/channel/{channelId}/role-exchange/response")
     public void acceptExchange(@DestinationVariable long channelId, @Payload MessageRequest messageRequest) throws JsonProcessingException {
+
         MessageType messageType = MessageType.findByTitle(messageRequest.getType());
 
         if(messageType != MessageType.EXCHANGE_RES) throw new IllegalArgumentException("올바른 메시지 타입이 아닙니다.");
@@ -74,21 +75,23 @@ public class ChannelController {
                 messageRequest.getTargetUsername() +
                 "/secured";
 
-        List<ChannelConnection> connections = subscribeMap.get(String.valueOf(channelId));
+        if(messageRequest.getMessage().equals("Y")) {
+            List<ChannelConnection> connections = subscribeMap.get(String.valueOf(channelId));
 
-        subscribeMap.get(String.valueOf(channelId)).forEach(c -> log.debug("before swap = " + c.getSessionId() + " : " + c.getRole()));
+            subscribeMap.get(String.valueOf(channelId)).forEach(c -> log.debug("before swap = " + c.getSessionId() + " : " + c.getRole()));
 
-        for(ChannelConnection connection : connections) {
-            if(connection.getRole().equals(messageRequest.getTargetUsername())) {
-                connection.setRole(messageRequest.getSender());
-            } else if(connection.getRole().equals(messageRequest.getSender())) {
-                connection.setRole(messageRequest.getTargetUsername());
+            for(ChannelConnection connection : connections) {
+                if(connection.getRole().equals(messageRequest.getTargetUsername())) {
+                    connection.setRole(messageRequest.getSender());
+                } else if(connection.getRole().equals(messageRequest.getSender())) {
+                    connection.setRole(messageRequest.getTargetUsername());
+                }
             }
+
+            subscribeMap.put(String.valueOf(channelId), connections);
+
+            subscribeMap.get(String.valueOf(channelId)).forEach(c -> log.debug("after swap = " + c.getSessionId() + " : " + c.getRole()));
         }
-
-        subscribeMap.put(String.valueOf(channelId), connections);
-
-        subscribeMap.get(String.valueOf(channelId)).forEach(c -> log.debug("after swap = " + c.getSessionId() + " : " + c.getRole()));
 
         simpMessagingTemplate.convertAndSend(destination, resultMsg);
     }
