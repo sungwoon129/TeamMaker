@@ -6,10 +6,13 @@ import io.wauction.core.auction.application.AuctionRuleService;
 import io.wauction.core.auction.entity.ParticipantRole;
 import io.wauction.core.channels.dto.ChannelConnection;
 import io.wauction.core.channels.dto.EnterMessageResponse;
+import io.wauction.core.channels.dto.MessageRequest;
+import io.wauction.core.channels.dto.MessageResponse;
 import io.wauction.core.channels.entity.Channel;
 import io.wauction.core.channels.entity.MessageType;
 import io.wauction.core.channels.infrastructure.ChannelRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.messaging.simp.SimpMessageSendingOperations;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -17,8 +20,10 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 import java.util.NoSuchElementException;
 
+import static io.wauction.core.channels.event.StompEventHandler.subscribeMap;
 
 
+@Slf4j
 @RequiredArgsConstructor
 @Service
 public class ChannelService {
@@ -71,8 +76,59 @@ public class ChannelService {
         return channel;
     }
 
-    public void publishMessageToChannel(long channelId, Object messageResponseDto)  {
+    public void requestForRoleExchange(long channelId, MessageRequest messageRequest, MessageType messageType) {
+
+        MessageResponse messageResponse = new MessageResponse(MessageType.EXCHANGE, messageRequest.getSender(), messageType.makeFullMessage(messageRequest.getSender()), messageRequest.getTargetUsername());
+
+        publishMessageToUser(channelId, messageRequest.getTargetUsername(), messageResponse);
+
+    }
+
+    public void responseRoleExchangeRequest(long channelId, MessageRequest messageRequest, MessageType messageType) {
+
+        MessageResponse messageResponse = new MessageResponse(MessageType.EXCHANGE_RES, messageRequest.getSender(), messageType.makeFullMessage(messageRequest.getMessage()), messageRequest.getTargetUsername(), messageRequest.getMessage());
+
+
+        if (messageRequest.getMessage().equals("Y")) {
+            List<ChannelConnection> connections = subscribeMap.get(String.valueOf(channelId));
+
+            subscribeMap.get(String.valueOf(channelId)).forEach(c -> log.debug("before swap = " + c.getSessionId() + " : " + c.getRole()));
+
+            for (ChannelConnection connection : connections) {
+                if (connection.getRole().equals(messageRequest.getTargetUsername())) {
+                    connection.setRole(messageRequest.getSender());
+                } else if (connection.getRole().equals(messageRequest.getSender())) {
+                    connection.setRole(messageRequest.getTargetUsername());
+                }
+            }
+
+            subscribeMap.put(String.valueOf(channelId), connections);
+
+            subscribeMap.get(String.valueOf(channelId)).forEach(c -> log.debug("after swap = " + c.getSessionId() + " : " + c.getRole()));
+        }
+
+        publishMessageToUser(channelId, messageRequest.getTargetUsername(), messageResponse);
+    }
+
+    public void publishMessageToChannel(long channelId, Object messageResponseDto) {
         String destination = "/channel/" + channelId;
+
+        try {
+            String resultMsg = objectMapper.writeValueAsString(messageResponseDto);
+            simpMessageSendingOperations.convertAndSend(destination, resultMsg);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException(e);
+        }
+
+    }
+
+    public void publishMessageToUser(long channelId, String targetUser, Object messageResponseDto) {
+        String destination = "/channel" +
+                "/" +
+                channelId +
+                "/" +
+                targetUser +
+                "/secured";
 
         try {
             String resultMsg = objectMapper.writeValueAsString(messageResponseDto);

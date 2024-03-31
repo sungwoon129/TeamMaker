@@ -14,10 +14,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
-import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
-import org.springframework.messaging.simp.SimpMessageType;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
-import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.stereotype.Controller;
 
 import java.util.List;
@@ -37,63 +34,26 @@ public class ChannelController {
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     @MessageMapping("/channel/{channelId}/exchangeSeat")
-    public void exchangeSeatRequest(@DestinationVariable long channelId, @Payload MessageRequest messageRequest) throws JsonProcessingException {
+    public void requestForRoleExchange(@DestinationVariable long channelId, @Payload MessageRequest messageRequest) {
 
         MessageType messageType = MessageType.findByTitle(messageRequest.getType());
 
         if(messageType != MessageType.EXCHANGE) throw new IllegalArgumentException("올바른 메시지 타입이 아닙니다.");
 
-        String destination = "/channel" +
-                "/" +
-                channelId +
-                "/" +
-                messageRequest.getTargetUsername() +
-                "/secured";
-
-        MessageResponse messageResponse = new MessageResponse(MessageType.EXCHANGE, messageRequest.getSender(), messageType.makeFullMessage(messageRequest.getSender()), messageRequest.getTargetUsername());
-        String resultMsg = objectMapper.writeValueAsString(messageResponse);
-
-
-        simpMessagingTemplate.convertAndSend(destination, resultMsg);
+        channelService.requestForRoleExchange(channelId, messageRequest, messageType);
     }
 
     @MessageMapping("/channel/{channelId}/role-exchange/response")
-    public void acceptExchange(@DestinationVariable long channelId, @Payload MessageRequest messageRequest) throws JsonProcessingException {
+    public void responseRoleExchangeRequest(@DestinationVariable long channelId, @Payload MessageRequest messageRequest) {
 
         MessageType messageType = MessageType.findByTitle(messageRequest.getType());
 
         if(messageType != MessageType.EXCHANGE_RES) throw new IllegalArgumentException("올바른 메시지 타입이 아닙니다.");
 
 
-        MessageResponse messageResponse = new MessageResponse(MessageType.EXCHANGE_RES, messageRequest.getSender(), messageType.makeFullMessage(messageRequest.getMessage()), messageRequest.getTargetUsername(), messageRequest.getMessage());
-        String resultMsg = objectMapper.writeValueAsString(messageResponse);
+        channelService.responseRoleExchangeRequest(channelId, messageRequest, messageType);
 
-        String destination = "/channel" +
-                "/" +
-                channelId +
-                "/" +
-                messageRequest.getTargetUsername() +
-                "/secured";
 
-        if(messageRequest.getMessage().equals("Y")) {
-            List<ChannelConnection> connections = subscribeMap.get(String.valueOf(channelId));
-
-            subscribeMap.get(String.valueOf(channelId)).forEach(c -> log.debug("before swap = " + c.getSessionId() + " : " + c.getRole()));
-
-            for(ChannelConnection connection : connections) {
-                if(connection.getRole().equals(messageRequest.getTargetUsername())) {
-                    connection.setRole(messageRequest.getSender());
-                } else if(connection.getRole().equals(messageRequest.getSender())) {
-                    connection.setRole(messageRequest.getTargetUsername());
-                }
-            }
-
-            subscribeMap.put(String.valueOf(channelId), connections);
-
-            subscribeMap.get(String.valueOf(channelId)).forEach(c -> log.debug("after swap = " + c.getSessionId() + " : " + c.getRole()));
-        }
-
-        simpMessagingTemplate.convertAndSend(destination, resultMsg);
     }
 
 
