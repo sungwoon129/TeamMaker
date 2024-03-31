@@ -169,6 +169,8 @@ class Channel {
             message: "Y",
             targetUsername: this.latestSenderToMe
         }
+
+        this.user = data.targetUsername;
         this.exchangeRequestList = this.exchangeRequestList.filter(req => req.proposer !== this.latestSenderToMe);
 
         stompClient.send(`/wauction/channel/${this.id}/role-exchange/response`, {}, JSON.stringify(data));
