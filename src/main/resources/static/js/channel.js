@@ -6,7 +6,6 @@ const stompClient = Stomp.over(socket);
 class Channel {
     id;
     user;
-    latestSenderToMe; // 마지막으로 나에게 개인 메시지를 발송한 사람
     exchangeRequestList;
 
     constructor(channelId, user) {
@@ -42,6 +41,16 @@ class Channel {
         }
         stompClient.send(`/wauction/channel/${this.id}/exchangeSeat`, {}, JSON.stringify(data));
 
+    }
+
+    ready() {
+        const data = {
+            sender: this.user,
+            type: "READY",
+            message: "준비완료"
+        }
+
+        stompClient.send(`/wauction/channel/${this.id}/ready`, {}, JSON.stringify(data));
     }
 
     onMessage() {
@@ -94,6 +103,10 @@ class Channel {
                 })
                 this.showPublicMsg(msg);
                 break;
+
+            case 'READY' :
+                console.log(msg.writer + "님 준비완료");
+                break;
             default:
                 console.error("잘못된 메시지 타입입니다.")
 
@@ -125,26 +138,33 @@ class Channel {
     showPrivateMsg(msg)  {
 
         switch (msg.messageType) {
-            // bug : 1회 자리 교환 후, 동일한 사람에게 다시 교환 요청하면 나에게 요청 모달이 나타남.
             // TODO : 하나의 교환 요청에 응답하기 전 새로운 요청이 들어온 경우 고려 필요 => 모달창이 여러개 생성되어야 함. 지금은 하나의 창을 재활용하고 있음.
             case "EXCHANGE" :
                 this.exchangeRequestList.push({proposer : msg.writer})
-                const modal = new bootstrap.Modal(document.getElementById('exchange-modal'), {
+ /*               const modal = new bootstrap.Modal(document.getElementById('exchange-modal'), {
                     keyboard: false
-                })
-                document.getElementById("exchange-modal-message").textContent = msg.msg;
-                this.latestSenderToMe = msg.writer;
-                modal.show();
+                });*/
 
-                // 타이머 시작(5초)
-                document.querySelector(".timer").classList.add("round-time-bar");
+                const modal = Modal.getOrCreateInstance(document.getElementById('exchange-modal'));
 
-                // 타이머 종료
-                setTimeout(() => {
-                    modal.hide();
-                    if(this.exchangeRequestList.filter(req => req.proposer === msg.writer).length > 0) this.declineExchange()
-                }, 5000);
-                break;
+                if(modal.show()) {
+
+                } else {
+                    document.getElementById("exchange-modal-message").textContent = msg.msg;
+
+
+                    modal.show();
+
+                    // 타이머 시작(5초)
+                    document.querySelector(".timer").classList.add("round-time-bar");
+
+                    // 타이머 종료
+                    setTimeout(() => {
+                        modal.hide();
+                        if(this.exchangeRequestList.filter(req => req.proposer === msg.writer).length > 0) this.declineExchange()
+                    }, 5000);
+                    break;
+                }
 
             case "EXCHANGE_RES" :
                 if(msg.resultYne === "Y") {
@@ -167,13 +187,17 @@ class Channel {
             sender: this.user,
             type: "EXCHANGE_RES",
             message: "Y",
-            targetUsername: this.latestSenderToMe
+            targetUsername: this.exchangeRequestList[0].proposer
         }
 
         this.user = data.targetUsername;
-        this.exchangeRequestList = this.exchangeRequestList.filter(req => req.proposer !== this.latestSenderToMe);
+        this.exchangeRequestList = this.exchangeRequestList.filter(((req,idx) => idx !== 0));
 
         stompClient.send(`/wauction/channel/${this.id}/role-exchange/response`, {}, JSON.stringify(data));
+
+        if(this.hasNextExchangeRequest()) {
+
+        }
     }
 
     declineExchange() {
@@ -181,12 +205,20 @@ class Channel {
             sender: this.user,
             type: "EXCHANGE_RES",
             message: "N",
-            targetUsername: this.latestSenderToMe
+            targetUsername: this.exchangeRequestList[0].proposer
         }
 
-        this.exchangeRequestList = this.exchangeRequestList.filter(req => req.proposer === this.latestSenderToMe);
+        this.exchangeRequestList = this.exchangeRequestList.filter(((req,idx) => idx !== 0));
 
         stompClient.send(`/wauction/channel/${this.id}/role-exchange/response`, {}, JSON.stringify(data));
+
+        if(this.hasNextExchangeRequest()) {
+
+        }
+    }
+
+    hasNextExchangeRequest() {
+        return this.exchangeRequestList.length > 0;
     }
 }
 
@@ -217,15 +249,13 @@ document.addEventListener("DOMContentLoaded",  () => {
 
     document.querySelectorAll(".exchange-seat").forEach((btn, idx) => {
         btn.addEventListener("click", (event) => {
-            // TODO : Timer 필요. 자리교환 요청 후 일정 시간내에 상대 응답이 오지않으면 요청 취소되야함.
             channel.exchangeSeat(btn.closest(".participant-info").querySelector(".role-name").textContent);
         })
     });
 
     document.querySelector("#accept-exchange").addEventListener("click", () => {
 
-
-        const idx = getParticipantIdx(channel.latestSenderToMe);
+        const idx = getParticipantIdx(channel.exchangeRequestList[0].proposer);
         const origin = document.querySelector(".emphasis-user");
         const target = document.querySelectorAll(".participant-info").item(idx);
         swapRole(origin, target);
