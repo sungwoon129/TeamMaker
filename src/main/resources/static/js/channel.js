@@ -5,19 +5,23 @@ const stompClient = Stomp.over(socket);
 
 class Channel {
     id;
+    role;
     user;
     exchangeRequestList;
+    isWaiting;
 
     constructor(channelId, user) {
         this.id = channelId;
-        this.user = user
+        this.user = user;
+        this.role = user;
         this.exchangeRequestList = [];
+        this.isWaiting = false;
     }
 
     connect() {
         const header = {
             id: this.id,
-            user: this.user
+            user: this.role
         }
 
         stompClient.connect(header, frame => {
@@ -33,19 +37,24 @@ class Channel {
     }
 
     exchangeSeat(targetUser) {
+
+        if(this.isWaiting === true) return;
+
         const data = {
-            sender: this.user,
+            sender: this.role,
             type: "EXCHANGE",
             message: "자리교환 요청",
             targetUsername: targetUser
         }
         stompClient.send(`/wauction/channel/${this.id}/exchangeSeat`, {}, JSON.stringify(data));
+        this.isWaiting = true;
+        document.querySelectorAll(".exchange-seat").forEach(btn => btn.disabled = true);
 
     }
 
     ready() {
         const data = {
-            sender: this.user,
+            sender: this.role,
             type: "READY",
             message: "준비완료"
         }
@@ -80,7 +89,7 @@ class Channel {
 
                 document.querySelectorAll(".random-color-element").forEach((el,idx) => {
 
-                    if(el.textContent === msg.sender && this.user !== msg.sender) {
+                    if(el.textContent === msg.sender && this.role !== msg.sender) {
                         const target = document.querySelectorAll(".overlay").item(idx);
                         if(!target) console.error("메시지 작성자와 일치하는 참가자를 찾을 수 없습니다.");
                         target.classList.remove("overlay-inactive");
@@ -93,7 +102,7 @@ class Channel {
             case 'LEAVE' :
                 document.querySelectorAll(".random-color-element").forEach((el,idx) => {
 
-                    if(el.textContent === msg.sender && this.user !== msg.sender) {
+                    if(el.textContent === msg.sender && this.role !== msg.sender) {
                         const target = document.querySelectorAll(".overlay").item(idx);
                         if(!target) console.error("메시지 작성자와 일치하는 참가자를 찾을 수 없습니다.");
                         target.classList.add("overlay-inactive");
@@ -138,20 +147,19 @@ class Channel {
     showPrivateMsg(msg)  {
 
         switch (msg.messageType) {
-            // TODO : 하나의 교환 요청에 응답하기 전 새로운 요청이 들어온 경우 고려 필요 => 모달창이 여러개 생성되어야 함. 지금은 하나의 창을 재활용하고 있음.
             case "EXCHANGE" :
-                this.exchangeRequestList.push({proposer : msg.writer})
- /*               const modal = new bootstrap.Modal(document.getElementById('exchange-modal'), {
+
+                if(this.exchangeRequestList.some(req => req.writer === msg.writer)) break;
+
+                this.exchangeRequestList.push(msg);
+                const modal = new bootstrap.Modal(document.getElementById('exchange-modal'), {
                     keyboard: false
-                });*/
+                });
 
-                const modal = Modal.getOrCreateInstance(document.getElementById('exchange-modal'));
-
-                if(modal.show()) {
-
+                if(document.getElementById('exchange-modal').classList.contains("show")) {
+                    break;
                 } else {
                     document.getElementById("exchange-modal-message").textContent = msg.msg;
-
 
                     modal.show();
 
@@ -161,14 +169,14 @@ class Channel {
                     // 타이머 종료
                     setTimeout(() => {
                         modal.hide();
-                        if(this.exchangeRequestList.filter(req => req.proposer === msg.writer).length > 0) this.declineExchange()
+                        if(this.exchangeRequestList.filter(req => req.writer === msg.writer).length > 0) this.declineExchange();
                     }, 5000);
                     break;
                 }
 
             case "EXCHANGE_RES" :
                 if(msg.resultYne === "Y") {
-                    this.user = msg.writer;
+                    this.role = msg.writer;
                     const idx = getParticipantIdx(msg.writer);
                     const origin = document.querySelector(".emphasis-user");
                     const target = document.querySelectorAll(".participant-info").item(idx);
@@ -177,6 +185,8 @@ class Channel {
                 } else if(msg.resultYne === "N") {
                     alert(msg.msg);
                 }
+                this.isWaiting = false;
+                document.querySelectorAll(".exchange-seat").forEach(btn => btn.disabled = false);
                 break;
         }
 
@@ -184,28 +194,28 @@ class Channel {
 
     acceptExchange() {
         const data = {
-            sender: this.user,
+            sender: this.role,
             type: "EXCHANGE_RES",
             message: "Y",
-            targetUsername: this.exchangeRequestList[0].proposer
+            targetUsername: this.exchangeRequestList[0].writer
         }
 
-        this.user = data.targetUsername;
+        this.role = data.targetUsername;
         this.exchangeRequestList = this.exchangeRequestList.filter(((req,idx) => idx !== 0));
 
         stompClient.send(`/wauction/channel/${this.id}/role-exchange/response`, {}, JSON.stringify(data));
 
         if(this.hasNextExchangeRequest()) {
-
+           this.showPrivateMsg(this.exchangeRequestList[0]);
         }
     }
 
     declineExchange() {
         const data = {
-            sender: this.user,
+            sender: this.role,
             type: "EXCHANGE_RES",
             message: "N",
-            targetUsername: this.exchangeRequestList[0].proposer
+            targetUsername: this.exchangeRequestList[0].writer
         }
 
         this.exchangeRequestList = this.exchangeRequestList.filter(((req,idx) => idx !== 0));
@@ -213,11 +223,12 @@ class Channel {
         stompClient.send(`/wauction/channel/${this.id}/role-exchange/response`, {}, JSON.stringify(data));
 
         if(this.hasNextExchangeRequest()) {
-
+            this.showPrivateMsg(this.exchangeRequestList[0]);
         }
     }
 
     hasNextExchangeRequest() {
+        console.log(this.exchangeRequestList);
         return this.exchangeRequestList.length > 0;
     }
 }
@@ -249,13 +260,13 @@ document.addEventListener("DOMContentLoaded",  () => {
 
     document.querySelectorAll(".exchange-seat").forEach((btn, idx) => {
         btn.addEventListener("click", (event) => {
-            channel.exchangeSeat(btn.closest(".participant-info").querySelector(".role-name").textContent);
+            channel.exchangeSeat(event.target.closest(".participant-info").querySelector(".role-name").textContent);
         })
     });
 
     document.querySelector("#accept-exchange").addEventListener("click", () => {
 
-        const idx = getParticipantIdx(channel.exchangeRequestList[0].proposer);
+        const idx = getParticipantIdx(channel.exchangeRequestList[0].writer);
         const origin = document.querySelector(".emphasis-user");
         const target = document.querySelectorAll(".participant-info").item(idx);
         swapRole(origin, target);

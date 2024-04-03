@@ -89,7 +89,7 @@ public class ChannelService {
         MessageResponse messageResponse = new MessageResponse(MessageType.EXCHANGE_RES, messageRequest.getSender(), messageType.makeFullMessage(messageRequest.getMessage()), messageRequest.getTargetUsername(), messageRequest.getMessage());
 
 
-        if (messageRequest.getMessage().equals("Y")) {
+/*        if (messageRequest.getMessage().equals("Y")) {
             List<ChannelConnection> connections = subscribeMap.get(String.valueOf(channelId));
 
             subscribeMap.get(String.valueOf(channelId)).forEach(c -> log.debug("before swap = " + c.getSessionId() + " : " + c.getRole()));
@@ -105,7 +105,7 @@ public class ChannelService {
             subscribeMap.put(String.valueOf(channelId), connections);
 
             subscribeMap.get(String.valueOf(channelId)).forEach(c -> log.debug("after swap = " + c.getSessionId() + " : " + c.getRole()));
-        }
+        }*/
 
         publishMessageToUser(channelId, messageRequest.getTargetUsername(), messageResponse);
     }

@@ -15,6 +15,7 @@ import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.stereotype.Controller;
 
 import java.util.List;
@@ -40,6 +41,7 @@ public class ChannelController {
 
         if(messageType != MessageType.EXCHANGE) throw new IllegalArgumentException("올바른 메시지 타입이 아닙니다.");
 
+
         channelService.requestForRoleExchange(channelId, messageRequest, messageType);
     }
 
@@ -49,6 +51,8 @@ public class ChannelController {
         MessageType messageType = MessageType.findByTitle(messageRequest.getType());
 
         if(messageType != MessageType.EXCHANGE_RES) throw new IllegalArgumentException("올바른 메시지 타입이 아닙니다.");
+
+
 
 
         channelService.responseRoleExchangeRequest(channelId, messageRequest, messageType);
