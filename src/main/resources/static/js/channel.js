@@ -10,10 +10,10 @@ class Channel {
     exchangeRequestList;
     isWaiting;
 
-    constructor(channelId, user) {
+    constructor(channelId, role, uid) {
         this.id = channelId;
-        this.user = user;
-        this.role = user;
+        this.user = Object.freeze(uid);
+        this.role = role;
         this.exchangeRequestList = [];
         this.isWaiting = false;
     }
@@ -21,7 +21,8 @@ class Channel {
     connect() {
         const header = {
             id: this.id,
-            user: this.role
+            user: this.user,
+            role: this.role
         }
 
         stompClient.connect(header, frame => {
@@ -236,7 +237,8 @@ class Channel {
 
 document.addEventListener("DOMContentLoaded",  () => {
     const username = getCookie("rname");
-    const channel = new Channel(extractChannelIdFromUrl(),username);
+    const uid = getCookie("uid");
+    const channel = new Channel(extractChannelIdFromUrl(),username,uid);
 
     channel.connect();
 

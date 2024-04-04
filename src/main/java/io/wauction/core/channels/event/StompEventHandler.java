@@ -38,13 +38,13 @@ public class StompEventHandler {
         assert user != null;
 
         String channelId = user.getChannelId();
-        String sender = user.getName();
+        String sender = user.getRole();
 
         List<ChannelConnection> connections = subscribeMap.getOrDefault(channelId, new ArrayList<>());
 
         String role = channelService.enter(Long.parseLong(channelId), sender);
 
-        ChannelConnection channelConnection = new ChannelConnection(headerAccessor.getSessionId(), channelId, role);
+        ChannelConnection channelConnection = new ChannelConnection(headerAccessor.getSessionId(), user.getName(), channelId, role);
         connections.add(channelConnection);
 
 

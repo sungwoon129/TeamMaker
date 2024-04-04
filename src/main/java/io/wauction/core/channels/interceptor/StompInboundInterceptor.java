@@ -23,9 +23,11 @@ public class StompInboundInterceptor implements ChannelInterceptor {
         // StompHeaderAccessor 클래스에 user를 설정하는 위치가 preSend인 이유는 ChannelInterceptor는 security context에서 관리하는 영역이기 때문
         if (StompCommand.CONNECT.equals(accessor.getCommand())) {
             String channelId = Objects.requireNonNull(accessor.getNativeHeader("id")).stream().findFirst().orElseThrow(() -> new IllegalArgumentException("접속한 채널 정보가 올바르지 않습니다."));
-            String role = Objects.requireNonNull(accessor.getNativeHeader("user")).stream().findFirst().orElseThrow(() -> new IllegalArgumentException("메시지 헤더 정보가 올바르지 않습니다."));
+            String name = Objects.requireNonNull(accessor.getNativeHeader("user")).stream().findFirst().orElseThrow(() -> new IllegalArgumentException("메시지 헤더 정보가 올바르지 않습니다."));
+            String role = Objects.requireNonNull(accessor.getNativeHeader("role")).stream().findFirst().orElseThrow(() -> new IllegalArgumentException("메시지 헤더 정보가 올바르지 않습니다."));
+
             if (channelId != null) {
-                accessor.setUser(new CustomPrincipal(role, channelId));
+                accessor.setUser(new CustomPrincipal(name, channelId, role));
             }
         }
 

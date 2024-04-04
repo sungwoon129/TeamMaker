@@ -3,7 +3,6 @@ package io.wauction.core.channels.presentation;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.wauction.core.channels.application.ChannelService;
-import io.wauction.core.channels.dto.ChannelConnection;
 import io.wauction.core.channels.dto.MessageRequest;
 import io.wauction.core.channels.dto.MessageResponse;
 import io.wauction.core.channels.dto.ReadyMessageResponse;
@@ -15,12 +14,7 @@ import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
-import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.stereotype.Controller;
-
-import java.util.List;
-
-import static io.wauction.core.channels.event.StompEventHandler.subscribeMap;
 
 @RequiredArgsConstructor
 @Slf4j
@@ -40,7 +34,6 @@ public class ChannelController {
         MessageType messageType = MessageType.findByTitle(messageRequest.getType());
 
         if(messageType != MessageType.EXCHANGE) throw new IllegalArgumentException("올바른 메시지 타입이 아닙니다.");
-
 
         channelService.requestForRoleExchange(channelId, messageRequest, messageType);
     }

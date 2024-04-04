@@ -14,6 +14,8 @@ public class CustomPrincipal implements Principal {
 
     private String name;
     private String channelId;
+    private String role;
+
     @Override
     public String getName() {
         return this.name;

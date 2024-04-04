@@ -19,6 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Optional;
 
 import static io.wauction.core.channels.event.StompEventHandler.subscribeMap;
 
@@ -76,21 +77,26 @@ public class ChannelService {
         return channel;
     }
 
+
     public void requestForRoleExchange(long channelId, MessageRequest messageRequest, MessageType messageType) {
 
         MessageResponse messageResponse = new MessageResponse(MessageType.EXCHANGE, messageRequest.getSender(), messageType.makeFullMessage(messageRequest.getSender()), messageRequest.getTargetUsername());
 
-        publishMessageToUser(channelId, messageRequest.getTargetUsername(), messageResponse);
+        List<ChannelConnection> connections = subscribeMap.get(String.valueOf(channelId));
+
+        Optional<ChannelConnection> connection = connections.stream().filter(connect -> connect.getRole().equals(messageRequest.getTargetUsername())).findAny();
+        if(connection.isEmpty()) throw new IllegalArgumentException(messageRequest.getTargetUsername() + " 은(는) 올바른 메시지 수신자가 아닙니다.");
+
+        publishMessageToUser(channelId, connection.get().getUid(), messageResponse);
 
     }
 
     public void responseRoleExchangeRequest(long channelId, MessageRequest messageRequest, MessageType messageType) {
 
         MessageResponse messageResponse = new MessageResponse(MessageType.EXCHANGE_RES, messageRequest.getSender(), messageType.makeFullMessage(messageRequest.getMessage()), messageRequest.getTargetUsername(), messageRequest.getMessage());
+        List<ChannelConnection> connections = subscribeMap.get(String.valueOf(channelId));
 
-
-/*        if (messageRequest.getMessage().equals("Y")) {
-            List<ChannelConnection> connections = subscribeMap.get(String.valueOf(channelId));
+        if (messageRequest.getMessage().equals("Y")) {
 
             subscribeMap.get(String.valueOf(channelId)).forEach(c -> log.debug("before swap = " + c.getSessionId() + " : " + c.getRole()));
 
@@ -105,9 +111,13 @@ public class ChannelService {
             subscribeMap.put(String.valueOf(channelId), connections);
 
             subscribeMap.get(String.valueOf(channelId)).forEach(c -> log.debug("after swap = " + c.getSessionId() + " : " + c.getRole()));
-        }*/
+        }
 
-        publishMessageToUser(channelId, messageRequest.getTargetUsername(), messageResponse);
+        Optional<ChannelConnection> connection = connections.stream().filter(connect -> connect.getRole().equals(messageRequest.getTargetUsername())).findAny();
+        if(connection.isEmpty()) throw new IllegalArgumentException(messageRequest.getTargetUsername() + " 은(는) 올바른 메시지 수신자가 아닙니다.");
+
+
+        publishMessageToUser(channelId, connection.get().getUid(), messageResponse);
     }
 
     public void publishMessageToChannel(long channelId, Object messageResponseDto) {

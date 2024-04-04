@@ -1,6 +1,5 @@
 package io.wauction.core.channels.dto;
 
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -8,6 +7,7 @@ import lombok.Setter;
 @Getter
 public class ChannelConnection {
     private String sessionId;
+    private String uid;
     private String channelId;
     private String role;
 
@@ -17,8 +17,9 @@ public class ChannelConnection {
         this.channelId = channelId;
     }
 
-    public ChannelConnection(String sessionId, String channelId, String role) {
+    public ChannelConnection(String sessionId, String uid, String channelId, String role) {
         this.sessionId = sessionId;
+        this.uid = uid;
         this.channelId = channelId;
         this.role = role;
     }

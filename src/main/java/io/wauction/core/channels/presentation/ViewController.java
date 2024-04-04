@@ -6,6 +6,7 @@ import io.wauction.core.channels.dto.ChannelRequest;
 import io.wauction.core.channels.dto.ChannelResponse;
 import io.wauction.core.channels.entity.Channel;
 import io.wauction.core.common.dto.CommonResponse;
+import io.wauction.core.common.utils.EncryptService;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -44,9 +45,17 @@ public class ViewController {
         ChannelResponse channelResponse = channel.toResponseDto();
         mv.addObject("channel",channelResponse);
 
+        String plain = channel.getId() + channelResponse.getClientRole().getName() + channel.getName();
+
+
         Cookie cookie = new Cookie("rname", channelResponse.getClientRole().getName());
+        Cookie cookie2 = new Cookie("uid", plain);
+
         cookie.setMaxAge(7200);
         cookie.setPath("/");
+
+        cookie2.setMaxAge(7200);
+        cookie2.setPath("/");
         response.addCookie(cookie);
 
         return mv;
