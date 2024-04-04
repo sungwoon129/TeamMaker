@@ -96,9 +96,12 @@ public class ChannelService {
         MessageResponse messageResponse = new MessageResponse(MessageType.EXCHANGE_RES, messageRequest.getSender(), messageType.makeFullMessage(messageRequest.getMessage()), messageRequest.getTargetUsername(), messageRequest.getMessage());
         List<ChannelConnection> connections = subscribeMap.get(String.valueOf(channelId));
 
+        Optional<ChannelConnection> targetConnection = connections.stream().filter(connect -> connect.getRole().equals(messageRequest.getTargetUsername())).findAny();
+        if(targetConnection.isEmpty()) throw new IllegalArgumentException(messageRequest.getTargetUsername() + " 은(는) 올바른 메시지 수신자가 아닙니다.");
+
         if (messageRequest.getMessage().equals("Y")) {
 
-            subscribeMap.get(String.valueOf(channelId)).forEach(c -> log.debug("before swap = " + c.getSessionId() + " : " + c.getRole()));
+            subscribeMap.get(String.valueOf(channelId)).forEach(c -> log.info("before swap = {} : {}", c.getRole(), c.getSessionId()));
 
             for (ChannelConnection connection : connections) {
                 if (connection.getRole().equals(messageRequest.getTargetUsername())) {
@@ -110,14 +113,11 @@ public class ChannelService {
 
             subscribeMap.put(String.valueOf(channelId), connections);
 
-            subscribeMap.get(String.valueOf(channelId)).forEach(c -> log.debug("after swap = " + c.getSessionId() + " : " + c.getRole()));
+            subscribeMap.get(String.valueOf(channelId)).forEach(c -> log.info("after swap = {} : {}", c.getRole(), c.getSessionId()));
         }
 
-        Optional<ChannelConnection> connection = connections.stream().filter(connect -> connect.getRole().equals(messageRequest.getTargetUsername())).findAny();
-        if(connection.isEmpty()) throw new IllegalArgumentException(messageRequest.getTargetUsername() + " 은(는) 올바른 메시지 수신자가 아닙니다.");
 
-
-        publishMessageToUser(channelId, connection.get().getUid(), messageResponse);
+        publishMessageToUser(channelId, targetConnection.get().getUid(), messageResponse);
     }
 
     public void publishMessageToChannel(long channelId, Object messageResponseDto) {

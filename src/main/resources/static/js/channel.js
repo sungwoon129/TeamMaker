@@ -186,8 +186,10 @@ class Channel {
                 } else if(msg.resultYne === "N") {
                     alert(msg.msg);
                 }
+
                 this.isWaiting = false;
                 document.querySelectorAll(".exchange-seat").forEach(btn => btn.disabled = false);
+
                 break;
         }
 

@@ -19,6 +19,8 @@ import org.springframework.web.servlet.ModelAndView;
 import java.net.URISyntaxException;
 import java.util.List;
 
+import static io.wauction.core.common.utils.EncryptService.encrypt;
+
 @Controller
 @RequiredArgsConstructor
 public class ViewController {
@@ -45,11 +47,11 @@ public class ViewController {
         ChannelResponse channelResponse = channel.toResponseDto();
         mv.addObject("channel",channelResponse);
 
-        String plain = channel.getId() + channelResponse.getClientRole().getName() + channel.getName();
+        String plain = channel.getId() + channelResponse.getClientRole().getName();
 
 
         Cookie cookie = new Cookie("rname", channelResponse.getClientRole().getName());
-        Cookie cookie2 = new Cookie("uid", plain);
+        Cookie cookie2 = new Cookie("uid", encrypt(plain));
 
         cookie.setMaxAge(7200);
         cookie.setPath("/");
@@ -57,6 +59,7 @@ public class ViewController {
         cookie2.setMaxAge(7200);
         cookie2.setPath("/");
         response.addCookie(cookie);
+        response.addCookie(cookie2);
 
         return mv;
     }

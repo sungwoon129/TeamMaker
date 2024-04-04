@@ -6,7 +6,7 @@ import java.security.SecureRandom;
 import java.util.Base64;
 
 public class EncryptService {
-    public static String createSalt() throws NoSuchAlgorithmException {
+    private static String createSalt() throws NoSuchAlgorithmException {
         SecureRandom random = SecureRandom.getInstance("SHA1PRNG");
         byte [] bytes = new byte[16];
         random.nextBytes(bytes);
@@ -18,11 +18,11 @@ public class EncryptService {
         return salt;
     }
 
-    public static String encrypt(String plainText, String salt) {
+    public static String encrypt(String plainText) {
         try {
 
             MessageDigest md = MessageDigest.getInstance("SHA-256");
-            String rawAndSalt = plainText + salt;
+            String rawAndSalt = plainText + createSalt();
 
 
 
