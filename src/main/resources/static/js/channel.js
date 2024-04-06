@@ -115,8 +115,18 @@ class Channel {
                 break;
 
             case 'READY' :
-                console.log(msg.writer + "님 준비완료");
+
+                if(msg.readyCount === msg.capacity) {
+                    this.start();
+                }
+
+                const idx= getParticipantIdx(msg.writer);
+                document.querySelectorAll(".participant-info").item(idx).classList.add('ready');
+                document.querySelectorAll(".exchange-display").item(idx).classList.add('d-none');
+
                 break;
+
+             // TODO : UNREADY 처리 필요.
             default:
                 console.error("잘못된 메시지 타입입니다.")
 
@@ -230,6 +240,25 @@ class Channel {
         }
     }
 
+    start() {
+
+        let count = 5;
+        const countDown = () => {
+
+            this.showPublicMsg({writer: "SYSTEM", msg: `시작 ${count}초 전...`})
+
+            count --;
+
+            if(count > 0) {
+                setTimeout(countDown, 1000)
+            }
+        }
+
+        countDown();
+
+
+    }
+
     hasNextExchangeRequest() {
         console.log(this.exchangeRequestList);
         return this.exchangeRequestList.length > 0;
@@ -254,7 +283,7 @@ document.addEventListener("DOMContentLoaded",  () => {
 
     document.querySelector("#ready").addEventListener("click", () => {
         const messageType = "READY";
-        //channel.ready(messageType);
+        channel.ready(messageType);
     })
 
     document.querySelector("#bid").addEventListener("click", () => {

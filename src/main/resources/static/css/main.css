@@ -217,6 +217,11 @@ body {
     color : #00ced1
 }
 
+.ready {
+    background: url(../icon/ready.png) no-repeat center;
+    background-size: contain;
+}
+
 .round-time-bar {
     margin: 1rem;
     overflow: hidden;

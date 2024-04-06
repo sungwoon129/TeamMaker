@@ -4,10 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.wauction.core.auction.application.AuctionRuleService;
 import io.wauction.core.auction.entity.ParticipantRole;
-import io.wauction.core.channels.dto.ChannelConnection;
-import io.wauction.core.channels.dto.EnterMessageResponse;
-import io.wauction.core.channels.dto.MessageRequest;
-import io.wauction.core.channels.dto.MessageResponse;
+import io.wauction.core.channels.dto.*;
 import io.wauction.core.channels.entity.Channel;
 import io.wauction.core.channels.entity.MessageType;
 import io.wauction.core.channels.infrastructure.ChannelRepository;
@@ -69,12 +66,15 @@ public class ChannelService {
         publishMessageToChannel(channel.getId(), responseDto);
     }
 
-    public Channel countReady(long channelId) {
+    @Transactional
+    public void countReady(long channelId, MessageRequest messageRequest) {
         Channel channel = findOne(channelId);
 
         channel.addReadyCount();
 
-        return channel;
+        MessageType messageType = MessageType.findByTitle(messageRequest.getType());
+
+        this.publishMessageToChannel(channelId, new ReadyMessageResponse(messageType,messageRequest.getSender(), messageType.makeFullMessage(messageRequest.getMessage()), channel.getReadyCount(), channel.getCapacity()));
     }
 
 

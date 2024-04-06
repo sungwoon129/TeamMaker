@@ -45,11 +45,7 @@ public class ChannelController {
 
         if(messageType != MessageType.EXCHANGE_RES) throw new IllegalArgumentException("올바른 메시지 타입이 아닙니다.");
 
-
-
-
         channelService.responseRoleExchangeRequest(channelId, messageRequest, messageType);
-
 
     }
 
@@ -67,15 +63,13 @@ public class ChannelController {
     }
 
     @MessageMapping("/channel/{channelId}/ready")
-    public void ready(@DestinationVariable long channelId, @Payload MessageRequest messageRequest) throws JsonProcessingException {
+    public void ready(@DestinationVariable long channelId, @Payload MessageRequest messageRequest) {
 
-        Channel channel = channelService.countReady(channelId);
-
-        String destination = "/channel/" + channelId;
         MessageType messageType = MessageType.findByTitle(messageRequest.getType());
 
-        String resultMsg = objectMapper.writeValueAsString(new ReadyMessageResponse(messageType,messageRequest.getSender(), messageType.makeFullMessage(messageRequest.getMessage()), channel.getReadyCount(), channel.getCapacity()));
+        if(messageType != MessageType.READY) throw new IllegalArgumentException("올바른 메시지 타입이 아닙니다.");
 
-        simpMessagingTemplate.convertAndSend(destination, resultMsg);
+        channelService.countReady(channelId, messageRequest);
+
     }
 }
