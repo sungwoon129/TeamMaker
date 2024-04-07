@@ -69,7 +69,18 @@ public class ChannelController {
 
         if(messageType != MessageType.READY) throw new IllegalArgumentException("올바른 메시지 타입이 아닙니다.");
 
-        channelService.countReady(channelId, messageRequest);
+        channelService.countReady(channelId, messageRequest, true);
+
+    }
+
+    @MessageMapping("/channel/{channelId}/unready")
+    public void unready(@DestinationVariable long channelId, @Payload MessageRequest messageRequest) {
+
+        MessageType messageType = MessageType.findByTitle(messageRequest.getType());
+
+        if(messageType != MessageType.UNREADY) throw new IllegalArgumentException("올바른 메시지 타입이 아닙니다.");
+
+        channelService.countReady(channelId, messageRequest, false);
 
     }
 }

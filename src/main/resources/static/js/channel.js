@@ -63,6 +63,16 @@ class Channel {
         stompClient.send(`/wauction/channel/${this.id}/ready`, {}, JSON.stringify(data));
     }
 
+    unready() {
+        const data = {
+            sender: this.role,
+            type: "UNREADY",
+            message: "준비완료 취소"
+        }
+
+        stompClient.send(`/wauction/channel/${this.id}/unready`, {}, JSON.stringify(data));
+    }
+
     onMessage() {
         const topic = {
             public : `/channel/${this.id}`,
@@ -120,13 +130,22 @@ class Channel {
                     this.start();
                 }
 
-                const idx= getParticipantIdx(msg.writer);
-                document.querySelectorAll(".participant-info").item(idx).classList.add('ready');
-                document.querySelectorAll(".exchange-display").item(idx).classList.add('d-none');
+                const readyTargetIdx= getParticipantIdx(msg.writer);
+                document.querySelectorAll(".participant-info").item(readyTargetIdx).classList.add('ready');
+                document.querySelectorAll(".exchange-display").item(readyTargetIdx).classList.add('d-none');
+                document.getElementById("ready").classList.add('d-none');
+                document.getElementById("unready").classList.remove('d-none');
 
                 break;
 
-             // TODO : UNREADY 처리 필요.
+            case 'UNREADY' :
+                const unreadyTargetIdx= getParticipantIdx(msg.writer);
+                document.querySelectorAll(".participant-info").item(unreadyTargetIdx).classList.remove('ready');
+                document.querySelectorAll(".exchange-display").item(unreadyTargetIdx).classList.remove('d-none');
+                document.getElementById("ready").classList.remove('d-none');
+                document.getElementById("unready").classList.add('d-none');
+
+                break;
             default:
                 console.error("잘못된 메시지 타입입니다.")
 
@@ -284,7 +303,12 @@ document.addEventListener("DOMContentLoaded",  () => {
     document.querySelector("#ready").addEventListener("click", () => {
         const messageType = "READY";
         channel.ready(messageType);
-    })
+    });
+
+    document.querySelector("#unready").addEventListener("click", () => {
+        const messageType = "UNREADY";
+        channel.unready(messageType);
+    });
 
     document.querySelector("#bid").addEventListener("click", () => {
         const messageType = "PRICE";

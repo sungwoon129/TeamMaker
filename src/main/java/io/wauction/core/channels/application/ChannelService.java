@@ -67,10 +67,10 @@ public class ChannelService {
     }
 
     @Transactional
-    public void countReady(long channelId, MessageRequest messageRequest) {
+    public void countReady(long channelId, MessageRequest messageRequest, boolean isPlus) {
         Channel channel = findOne(channelId);
 
-        channel.addReadyCount();
+        channel.updateReadyCount(isPlus);
 
         MessageType messageType = MessageType.findByTitle(messageRequest.getType());
 

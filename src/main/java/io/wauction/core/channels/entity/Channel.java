@@ -114,9 +114,10 @@ public class Channel extends BaseTimeEntity {
         return (capacity > headCount) && state.equals(ChannelState.WAITING);
     }
 
-    public void addReadyCount() {
+    public void updateReadyCount(boolean isPlus) {
 
-        this.readyCount += 1;
+        this.readyCount = isPlus ? this.readyCount + 1 : this.readyCount - 1;
+
     }
 
     public void leave() {
