@@ -62,10 +62,17 @@ public class ChannelService {
 
         List<String> activeRoles = connections.stream().map(ChannelConnection::getRole).toList();
 
-        EnterMessageResponse responseDto = new EnterMessageResponse(MessageType.LEAVE, "SYSTEM", sender, MessageType.LEAVE.makeFullMessage(sender), activeRoles);
+        EnterMessageResponse responseDto = EnterMessageResponse.builder()
+                .messageType(MessageType.LEAVE)
+                .writer(sender)
+                .msg(MessageType.LEAVE.makeFullMessage(sender))
+                .activeRoles(activeRoles)
+                .build();
+
         publishMessageToChannel(channel.getId(), responseDto);
     }
 
+    // TODO : 준비상태를 변경하는 기능을 엔티티레벨에서 구현하면, 너무 잦은 엔티티변경이 발생하고 저장할필요가 없음. JVM 내의 다른 곳(Map)에서 처리하는 것이 더 나아보임
     @Transactional
     public void countReady(long channelId, MessageRequest messageRequest, boolean isPlus) {
         Channel channel = findOne(channelId);
