@@ -44,7 +44,6 @@ public class ChannelService {
         channelRepository.save(channel);
     }
 
-    @Transactional
     public String enter(long channelId, String sender) {
         Channel channel = findOne(channelId);
         channel.enter();
@@ -55,7 +54,6 @@ public class ChannelService {
 
     }
 
-    @Transactional
     public void leave(long channelId, String sender, List<ChannelConnection> connections) {
         Channel channel = findOne(channelId);
         channel.leave();
@@ -65,6 +63,7 @@ public class ChannelService {
         EnterMessageResponse responseDto = EnterMessageResponse.builder()
                 .messageType(MessageType.LEAVE)
                 .writer("SYSTEM")
+                .sender(sender)
                 .msg(MessageType.LEAVE.makeFullMessage(sender))
                 .activeRoles(activeRoles)
                 .build();
@@ -72,7 +71,6 @@ public class ChannelService {
         publishMessageToChannel(channel.getId(), responseDto);
     }
 
-    @Transactional
     public void countReady(long channelId, String sessionId, MessageRequest messageRequest, boolean isPlus) {
 
         Channel channel = this.findOne(channelId);
