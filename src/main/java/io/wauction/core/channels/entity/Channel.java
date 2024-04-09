@@ -86,7 +86,7 @@ public class Channel extends BaseTimeEntity {
         return ChannelResponse.builder()
                 .channelId(id)
                 .name(name)
-                .headCount(subscribeMap.get(String.valueOf(id)).size())
+                .headCount(getHeadCount())
                 .capacity(capacity)
                 .auctionRuleResponse(auctionRule.toResponseDto())
                 .clientRole(role.get().toResponseDto())
@@ -104,20 +104,24 @@ public class Channel extends BaseTimeEntity {
             throw new UnAcceptableChannelJoinException("해당 채널은 현재 입장할 수 없는 상태입니다.");
         }
 
-        if(capacity == subscribeMap.get(String.valueOf(id)).size()) this.state = ChannelState.FULL;
+        if(capacity == getHeadCount()) this.state = ChannelState.FULL;
     }
 
     private boolean isAdmissionStatus() {
-        return (capacity > subscribeMap.get(String.valueOf(id)).size()) && state.equals(ChannelState.WAITING);
+        return (capacity > getHeadCount()) && state.equals(ChannelState.WAITING);
     }
 
     public void leave() {
 
         if(this.state != ChannelState.PLAYING) this.state = ChannelState.WAITING;
-        if(subscribeMap.get(String.valueOf(this.id)).isEmpty()) {
+        if(subscribeMap.get(String.valueOf(this.id)).isEmpty() || getHeadCount() == 0) {
             this.state = ChannelState.END;
             this.deleted = true;
         }
+    }
+
+    private int getHeadCount() {
+        return subscribeMap.get(String.valueOf(this.id)) == null ? 0 : subscribeMap.get(String.valueOf(this.id)).size();
     }
 
 }

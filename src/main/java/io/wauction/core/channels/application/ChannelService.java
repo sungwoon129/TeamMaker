@@ -44,6 +44,7 @@ public class ChannelService {
         channelRepository.save(channel);
     }
 
+    @Transactional
     public String enter(long channelId, String sender) {
         Channel channel = findOne(channelId);
         channel.enter();
