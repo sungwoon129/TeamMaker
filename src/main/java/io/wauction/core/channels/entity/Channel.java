@@ -37,9 +37,6 @@ public class Channel extends BaseTimeEntity {
     @Column
     private int capacity;
 
-    @Column(name = "head_count")
-    private int headCount;
-
     @Column(name = "ready_count")
     private int readyCount;
 
@@ -89,7 +86,7 @@ public class Channel extends BaseTimeEntity {
         return ChannelResponse.builder()
                 .channelId(id)
                 .name(name)
-                .headCount(headCount)
+                .headCount(subscribeMap.get(String.valueOf(id)).size())
                 .capacity(capacity)
                 .auctionRuleResponse(auctionRule.toResponseDto())
                 .clientRole(role.get().toResponseDto())
@@ -107,12 +104,11 @@ public class Channel extends BaseTimeEntity {
             throw new UnAcceptableChannelJoinException("해당 채널은 현재 입장할 수 없는 상태입니다.");
         }
 
-        this.headCount += 1;
-        if(capacity == headCount) this.state = ChannelState.FULL;
+        if(capacity == subscribeMap.get(String.valueOf(id)).size()) this.state = ChannelState.FULL;
     }
 
     private boolean isAdmissionStatus() {
-        return (capacity > headCount) && state.equals(ChannelState.WAITING);
+        return (capacity > subscribeMap.get(String.valueOf(id)).size()) && state.equals(ChannelState.WAITING);
     }
 
     public void leave() {
