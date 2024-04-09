@@ -22,6 +22,5 @@ public class EnterMessageResponse {
     private String sender;
     private String msg;
     private List<String> activeRoles;
-    //TODO : 입장한 클라이언트 정보 일부 제공 필요한지 고민
 
 }

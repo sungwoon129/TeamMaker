@@ -5,8 +5,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import io.wauction.core.channels.application.ChannelService;
 import io.wauction.core.channels.dto.MessageRequest;
 import io.wauction.core.channels.dto.MessageResponse;
-import io.wauction.core.channels.dto.ReadyMessageResponse;
-import io.wauction.core.channels.entity.Channel;
 import io.wauction.core.channels.entity.MessageType;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -14,6 +12,7 @@ import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.stereotype.Controller;
 
 @RequiredArgsConstructor
@@ -63,24 +62,24 @@ public class ChannelController {
     }
 
     @MessageMapping("/channel/{channelId}/ready")
-    public void ready(@DestinationVariable long channelId, @Payload MessageRequest messageRequest) {
+    public void ready(@DestinationVariable long channelId, @Payload MessageRequest messageRequest, StompHeaderAccessor headerAccessor) {
 
         MessageType messageType = MessageType.findByTitle(messageRequest.getType());
 
         if(messageType != MessageType.READY) throw new IllegalArgumentException("올바른 메시지 타입이 아닙니다.");
 
-        channelService.countReady(channelId, messageRequest, true);
+        channelService.countReady(channelId, headerAccessor.getSessionId(), messageRequest, true);
 
     }
 
     @MessageMapping("/channel/{channelId}/unready")
-    public void unready(@DestinationVariable long channelId, @Payload MessageRequest messageRequest) {
+    public void unready(@DestinationVariable long channelId, @Payload MessageRequest messageRequest, StompHeaderAccessor headerAccessor) {
 
         MessageType messageType = MessageType.findByTitle(messageRequest.getType());
 
         if(messageType != MessageType.UNREADY) throw new IllegalArgumentException("올바른 메시지 타입이 아닙니다.");
 
-        channelService.countReady(channelId, messageRequest, false);
+        channelService.countReady(channelId, headerAccessor.getSessionId(), messageRequest, false);
 
     }
 }

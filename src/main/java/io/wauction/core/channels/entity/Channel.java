@@ -94,6 +94,7 @@ public class Channel extends BaseTimeEntity {
                 .auctionRuleResponse(auctionRule.toResponseDto())
                 .clientRole(role.get().toResponseDto())
                 .activeRoles(activeRoles)
+                .readyRoles(connections.stream().filter(ChannelConnection::isReady).map(ChannelConnection::getRole).toList())
                 .build();
     }
 
@@ -114,16 +115,10 @@ public class Channel extends BaseTimeEntity {
         return (capacity > headCount) && state.equals(ChannelState.WAITING);
     }
 
-    public void updateReadyCount(boolean isPlus) {
-
-        this.readyCount = isPlus ? this.readyCount + 1 : this.readyCount - 1;
-
-    }
-
     public void leave() {
-        this.headCount -= 1;
+
         if(this.state != ChannelState.PLAYING) this.state = ChannelState.WAITING;
-        if(this.headCount <= 0) {
+        if(subscribeMap.get(String.valueOf(this.id)).isEmpty()) {
             this.state = ChannelState.END;
             this.deleted = true;
         }

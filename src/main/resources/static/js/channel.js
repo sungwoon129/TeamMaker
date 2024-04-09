@@ -100,7 +100,7 @@ class Channel {
 
                 document.querySelectorAll(".random-color-element").forEach((el,idx) => {
 
-                    if(el.textContent === msg.sender && this.role !== msg.sender) {
+                    if(el.textContent === msg.sender && this.role !== msg.sender && msg.readyRoles) {
                         const target = document.querySelectorAll(".overlay").item(idx);
                         if(!target) console.error("메시지 작성자와 일치하는 참가자를 찾을 수 없습니다.");
                         target.classList.remove("overlay-inactive");

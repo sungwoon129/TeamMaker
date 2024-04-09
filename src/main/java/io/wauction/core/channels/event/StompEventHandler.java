@@ -23,7 +23,7 @@ import java.util.stream.Collectors;
 @Component
 public class StompEventHandler {
 
-    // TODO : public으로 모든 클래스에서 접근하는 것이 아니라 접근 가능클래스를 제한해야할 필요 있음
+    // TODO : public으로 모든 클래스에서 접근하는 것이 아니라 접근 가능클래스를 제한해야할 필요 있음 (자리교환 기능과 같이 map에 변경이 필요한 경우 event로 처리하는것이 좋아보임 )
     public static final Map<String, List<ChannelConnection>> subscribeMap = new ConcurrentHashMap<>();
     private final ChannelService channelService;
 
@@ -93,7 +93,6 @@ public class StompEventHandler {
 
             channelService.leave(Long.parseLong(channelId), disConnectSession.get().getRole(), subscribeMap.get(channelId));
         }
-
 
     }
 

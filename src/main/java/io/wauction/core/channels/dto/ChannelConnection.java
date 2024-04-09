@@ -10,6 +10,7 @@ public class ChannelConnection {
     private String uid;
     private String channelId;
     private String role;
+    private boolean isReady;
 
 
     public ChannelConnection(String sessionId, String channelId) {
@@ -22,6 +23,7 @@ public class ChannelConnection {
         this.uid = uid;
         this.channelId = channelId;
         this.role = role;
+        this.isReady = false;
     }
 
 }

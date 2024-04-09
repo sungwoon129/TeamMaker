@@ -32,8 +32,9 @@
     <div class="row">
         <div class="col-md-3">
             <div class="participant-container">
-                <div th:each="participant : ${channel.getAuctionRuleResponse().getRoles()}" class="participant-info mb-1" th:classappend="${participant.getName() eq channel.getClientRole().getName() ? 'emphasis-user' : ''}">
-
+                <div th:each="participant : ${channel.getAuctionRuleResponse().getRoles()}" class="participant-info mb-1"
+                     th:classappend="${participant.getName() eq channel.getClientRole().getName() ? 'emphasis-user' :  channel.getReadyRoles().contains(participant.getName()) ? 'ready' : ''}"
+                >
                     <div class="row">
                         <div class="d-flex p-2 flex-side">
                             <div th:text="${participant.getName() }" class="text-bold random-color-element role-name"></div>

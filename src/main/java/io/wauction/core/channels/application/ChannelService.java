@@ -64,7 +64,7 @@ public class ChannelService {
 
         EnterMessageResponse responseDto = EnterMessageResponse.builder()
                 .messageType(MessageType.LEAVE)
-                .writer(sender)
+                .writer("SYSTEM")
                 .msg(MessageType.LEAVE.makeFullMessage(sender))
                 .activeRoles(activeRoles)
                 .build();
@@ -72,16 +72,25 @@ public class ChannelService {
         publishMessageToChannel(channel.getId(), responseDto);
     }
 
-    // TODO : 준비상태를 변경하는 기능을 엔티티레벨에서 구현하면, 너무 잦은 엔티티변경이 발생하고 저장할필요가 없음. JVM 내의 다른 곳(Map)에서 처리하는 것이 더 나아보임
     @Transactional
-    public void countReady(long channelId, MessageRequest messageRequest, boolean isPlus) {
-        Channel channel = findOne(channelId);
+    public void countReady(long channelId, String sessionId, MessageRequest messageRequest, boolean isPlus) {
 
-        channel.updateReadyCount(isPlus);
+        Channel channel = this.findOne(channelId);
+
+        List<ChannelConnection> connections = subscribeMap.get(String.valueOf(channelId));
+
+        for(ChannelConnection channelConnection : connections) {
+            if(channelConnection.getSessionId().equals(sessionId)) channelConnection.setReady(isPlus);
+        }
 
         MessageType messageType = MessageType.findByTitle(messageRequest.getType());
 
-        this.publishMessageToChannel(channelId, new ReadyMessageResponse(messageType,messageRequest.getSender(), messageType.makeFullMessage(messageRequest.getMessage()), channel.getReadyCount(), channel.getCapacity()));
+        this.publishMessageToChannel(channelId, new ReadyMessageResponse(
+                messageType,
+                messageRequest.getSender(),
+                messageType.makeFullMessage(messageRequest.getMessage()),
+                (int) connections.stream().filter(ChannelConnection::isReady).count(),
+                channel.getCapacity()));
     }
 
 

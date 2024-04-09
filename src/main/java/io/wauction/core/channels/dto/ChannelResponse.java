@@ -22,6 +22,7 @@ public class ChannelResponse {
     private AuctionRuleResponse auctionRuleResponse;
     private ParticipantRoleResponse clientRole;
     private List<String> activeRoles;
+    private List<String> readyRoles;
 
 
 }
