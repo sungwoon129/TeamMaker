@@ -41,10 +41,9 @@
                             <div th:text="${'남은 포인트 ' + participant.getPoint()}" class="remaining-point text-custom-orange text-bold"></div>
                         </div>
                     </div>
-                    <!--TODO : 준비완료된 사람 ready class 추가 -->
                     <div class="row overlay" th:classappend="${channel.getActiveRoles().contains(participant.getName()) || participant.getName() eq channel.getClientRole().getName() ? 'active' : 'overlay-inactive'}">
                         <div class="interact-display">
-                            <div class="exchange-display" th:classappend="${channel.getActiveRoles().contains(participant.getName()) ? '' : 'd-none'}">
+                            <div class="exchange-display" th:classappend="${channel.getActiveRoles().contains(participant.getName()) && !channel.getReadyRoles().contains(participant.getName()) ? '' : 'd-none'}">
                                 <button type="button" class="btn btn-outline-success exchange-seat">자리교환 요청</button>
                             </div>
                             <div class="d-none ready-alarm">
