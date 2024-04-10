@@ -1,7 +1,45 @@
 const socket = new SockJS('/wauction');
 const stompClient = Stomp.over(socket);
 
+class BarTimer {
+    initialTime;
+    timeLeft;
+    interval;
+    progressBarTextElement = document.getElementById('progress-bar-text');
+    progressBarElement = document.getElementById('progress-bar');
 
+    constructor() {
+        this.initialTime = 5;
+        this.timeLeft = this.initialTime;
+    }
+
+    render() {
+        let progressPercentage = (this.timeLeft / this.initialTime) * 100;
+
+        this.progressBarElement.style.width = progressPercentage + '%';
+        this.progressBarTextElement.innerHTML = this.timeLeft + 's';
+    }
+
+    tick = () => {
+        this.timeLeft = this.timeLeft - 1;
+        if(this.timeLeft <= 0) {
+            clearInterval(this.interval);
+        }
+
+        this.render();
+    }
+
+    startProgressBar() {
+        clearInterval(this.interval);
+        this.interval = setInterval(this.tick, 1000);
+        this.render();
+    }
+
+    init() {
+        this.timeLeft = this.initialTime;
+        this.render();
+    }
+}
 
 class Channel {
     id;
@@ -9,6 +47,7 @@ class Channel {
     user;
     exchangeRequestList;
     isWaiting;
+    timeoutFunc;
 
     constructor(channelId, role, uid) {
         this.id = channelId;
@@ -181,27 +220,29 @@ class Channel {
 
                 if(isRecursive === undefined || !isRecursive) this.exchangeRequestList.push(msg);
 
-                const modal = bootstrap.Modal.getOrCreateInstance(document.getElementById('exchange-modal'), {
+/*                const modal = bootstrap.Modal.getOrCreateInstance(document.getElementById('exchange-modal'), {
                     keyboard: false
-                });
+                });*/
 
                 if(document.getElementById('exchange-modal').classList.contains('show')) {
                     console.log("exchange modal is shown");
-                    console.table(this.exchangeRequestList);
                     break;
                 }
 
                 document.getElementById("exchange-modal-message").textContent = msg.msg;
 
-                modal.show();
+                const timer = new BarTimer();
+                timer.startProgressBar();
 
-                // 타이머 시작(5초)
-                document.querySelector(".timer").classList.add("round-time-bar");
+                openModal();
 
-                // 타이머 종료
-                setTimeout(() => {
-                    modal.hide();
-                    if(this.exchangeRequestList.filter(req => req.writer === msg.writer).length > 0) this.declineExchange(this.exchangeRequestList.shift());
+                this.timeoutFunc = setTimeout(() => {
+                    if(this.exchangeRequestList.filter(req => req.writer === msg.writer).length > 0) {
+                        console.log("응답안했음. 시간초과");
+                        console.table(this.exchangeRequestList);
+                        closeModal();
+                        this.declineExchange(this.exchangeRequestList.shift());
+                    }
                 }, 5000);
                 break;
 
@@ -228,6 +269,8 @@ class Channel {
 
     acceptExchange(item) {
 
+        if(this.timeoutFunc) clearTimeout(this.timeoutFunc);
+
         const data = {
             sender: this.role,
             type: "EXCHANGE_RES",
@@ -250,6 +293,8 @@ class Channel {
 
     declineExchange(item) {
 
+        if(this.timeoutFunc) clearTimeout(this.timeoutFunc);
+
         const data = {
             sender: this.role,
             type: "EXCHANGE_RES",
@@ -260,7 +305,7 @@ class Channel {
         stompClient.send(`/wauction/channel/${this.id}/role-exchange/response`, {}, JSON.stringify(data));
 
         if(this.hasNextExchangeRequest()) {
-            this.showPrivateMsg(this.exchangeRequestList[0], true);
+            setTimeout(() => this.showPrivateMsg(this.exchangeRequestList[0], true), 500);
         }
     }
 
@@ -293,7 +338,6 @@ document.addEventListener("DOMContentLoaded",  () => {
     const username = getCookie("rname");
     const uid = getCookie("uid");
     const channel = new Channel(extractChannelIdFromUrl(),username,uid);
-    new bootstrap.Modal(document.getElementById('exchange-modal'));
 
     channel.connect();
 
@@ -328,9 +372,7 @@ document.addEventListener("DOMContentLoaded",  () => {
 
     document.querySelector("#accept-exchange").addEventListener("click", () => {
 
-        const modal = bootstrap.Modal.getInstance(document.getElementById('exchange-modal'));
-
-        modal.hide();
+        closeModal();
 
         const data = channel.exchangeRequestList.shift();
 
@@ -344,8 +386,7 @@ document.addEventListener("DOMContentLoaded",  () => {
 
     document.querySelector("#decline-exchange").addEventListener("click", () => {
 
-        const modal = bootstrap.Modal.getInstance(document.getElementById('exchange-modal'));
-        modal.hide();
+        closeModal();
 
         const data = channel.exchangeRequestList.shift();
         channel.declineExchange(data);
@@ -386,3 +427,26 @@ const swapRole = (origin, target) => {
     target.querySelector(".exchange-display").classList.add("d-none");
     origin.querySelector(".exchange-display").classList.remove("d-none");
 }
+
+const closeModal = () => {
+
+
+    document.getElementById('exchange-modal').style.display = 'none';
+    document.getElementById('exchange-modal').classList.remove('show');
+
+}
+
+const openModal = () => {
+
+    document.getElementById('exchange-modal').style.display = 'block';
+    document.getElementById('exchange-modal').classList.add('show');
+
+
+}
+
+
+
+
+
+
+

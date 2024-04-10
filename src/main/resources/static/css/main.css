@@ -222,25 +222,32 @@ body {
     background-size: contain;
 }
 
-.round-time-bar {
-    margin: 1rem;
-    overflow: hidden;
-}
-.round-time-bar div {
-    height: 10px;
-    animation: roundtime calc(var(--duration) * 1s) steps(var(--duration))
-    forwards;
-    transform-origin: left center;
-    background: linear-gradient(to bottom, #00ced1, var(--default-border-color));
+.progress-bar-container {
+    height: 80px;
+    width: 100%;
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #406086;
 }
 
-.round-time-bar[data-style="smooth"] div {
-    animation: roundtime calc(var(--duration) * 1s) linear forwards;
+.progress-bar {
+    background-color: #1b3e80;
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    width: 0%;
+    transition: width 1s; /* Makes progressBar smooth */
+    transition-timing-function: linear; /* Try to remove this line for more tick tock feel */
+
 }
 
-@keyframes roundtime {
-    to {
-        /* More performant than `width` */
-        transform: scaleX(0);
-    }
+.progress-bar-text {
+    color: white;
+    font-size: 24px;
+    font-weight: 700;
+    position: relative;
+    z-index: 1;
 }
