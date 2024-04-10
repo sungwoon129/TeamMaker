@@ -86,7 +86,8 @@ class Channel {
         });
 
         stompClient.subscribe(topic.secured , msg => {
-            this.showPrivateMsg(JSON.parse(msg.body));
+            const data = JSON.parse(msg.body)
+            this.showPrivateMsg(data);
         }, {
             id: topic.secured
         });
@@ -173,35 +174,37 @@ class Channel {
         displayElement.appendChild(newRow);
     }
 
-    showPrivateMsg(msg)  {
+    showPrivateMsg(msg, isRecursive)  {
 
         switch (msg.messageType) {
             case "EXCHANGE" :
 
-                if(this.exchangeRequestList.some(req => req.writer === msg.writer)) break;
+                if(isRecursive === undefined || !isRecursive) this.exchangeRequestList.push(msg);
 
-                this.exchangeRequestList.push(msg);
-                const modal = new bootstrap.Modal(document.getElementById('exchange-modal'), {
+                const modal = bootstrap.Modal.getOrCreateInstance(document.getElementById('exchange-modal'), {
                     keyboard: false
                 });
 
-                if(document.getElementById('exchange-modal').classList.contains("show")) {
-                    break;
-                } else {
-                    document.getElementById("exchange-modal-message").textContent = msg.msg;
-
-                    modal.show();
-
-                    // 타이머 시작(5초)
-                    document.querySelector(".timer").classList.add("round-time-bar");
-
-                    // 타이머 종료
-                    setTimeout(() => {
-                        modal.hide();
-                        if(this.exchangeRequestList.filter(req => req.writer === msg.writer).length > 0) this.declineExchange();
-                    }, 5000);
+                if(document.getElementById('exchange-modal').classList.contains('show')) {
+                    console.log("exchange modal is shown");
+                    console.table(this.exchangeRequestList);
                     break;
                 }
+
+                document.getElementById("exchange-modal-message").textContent = msg.msg;
+
+                modal.show();
+
+                // 타이머 시작(5초)
+                document.querySelector(".timer").classList.add("round-time-bar");
+
+                // 타이머 종료
+                setTimeout(() => {
+                    modal.hide();
+                    if(this.exchangeRequestList.filter(req => req.writer === msg.writer).length > 0) this.declineExchange(this.exchangeRequestList.shift());
+                }, 5000);
+                break;
+
 
             case "EXCHANGE_RES" :
                 if(msg.resultYne === "Y") {
@@ -223,38 +226,41 @@ class Channel {
 
     }
 
-    acceptExchange() {
+    acceptExchange(item) {
+
         const data = {
             sender: this.role,
             type: "EXCHANGE_RES",
             message: "Y",
-            targetUsername: this.exchangeRequestList[0].writer
+            targetUsername: item.writer
         }
 
         this.role = data.targetUsername;
-        this.exchangeRequestList = this.exchangeRequestList.filter(((req,idx) => idx !== 0));
 
         stompClient.send(`/wauction/channel/${this.id}/role-exchange/response`, {}, JSON.stringify(data));
 
         if(this.hasNextExchangeRequest()) {
-           this.showPrivateMsg(this.exchangeRequestList[0]);
+            const copy = [...this.exchangeRequestList];
+            this.exchangeRequestList = [];
+            for(const req of copy) {
+                this.declineExchange(req);
+            }
         }
     }
 
-    declineExchange() {
+    declineExchange(item) {
+
         const data = {
             sender: this.role,
             type: "EXCHANGE_RES",
             message: "N",
-            targetUsername: this.exchangeRequestList[0].writer
+            targetUsername: item.writer
         }
-
-        this.exchangeRequestList = this.exchangeRequestList.filter(((req,idx) => idx !== 0));
 
         stompClient.send(`/wauction/channel/${this.id}/role-exchange/response`, {}, JSON.stringify(data));
 
         if(this.hasNextExchangeRequest()) {
-            this.showPrivateMsg(this.exchangeRequestList[0]);
+            this.showPrivateMsg(this.exchangeRequestList[0], true);
         }
     }
 
@@ -278,7 +284,6 @@ class Channel {
     }
 
     hasNextExchangeRequest() {
-        console.log(this.exchangeRequestList);
         return this.exchangeRequestList.length > 0;
     }
 }
@@ -288,6 +293,7 @@ document.addEventListener("DOMContentLoaded",  () => {
     const username = getCookie("rname");
     const uid = getCookie("uid");
     const channel = new Channel(extractChannelIdFromUrl(),username,uid);
+    new bootstrap.Modal(document.getElementById('exchange-modal'));
 
     channel.connect();
 
@@ -322,12 +328,29 @@ document.addEventListener("DOMContentLoaded",  () => {
 
     document.querySelector("#accept-exchange").addEventListener("click", () => {
 
-        const idx = getParticipantIdx(channel.exchangeRequestList[0].writer);
+        const modal = bootstrap.Modal.getInstance(document.getElementById('exchange-modal'));
+
+        modal.hide();
+
+        const data = channel.exchangeRequestList.shift();
+
+        channel.acceptExchange(data);
+
+        const idx = getParticipantIdx(data.writer);
         const origin = document.querySelector(".emphasis-user");
         const target = document.querySelectorAll(".participant-info").item(idx);
         swapRole(origin, target);
-        channel.acceptExchange();
-    })
+    });
+
+    document.querySelector("#decline-exchange").addEventListener("click", () => {
+
+        const modal = bootstrap.Modal.getInstance(document.getElementById('exchange-modal'));
+        modal.hide();
+
+        const data = channel.exchangeRequestList.shift();
+        channel.declineExchange(data);
+
+    });
 
 });
 
