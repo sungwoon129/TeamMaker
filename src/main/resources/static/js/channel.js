@@ -30,14 +30,22 @@ class BarTimer {
     }
 
     startProgressBar() {
-        clearInterval(this.interval);
+
+        this.progressBarElement.style.transition = 'width 1s linear';
+
+        //this.tick();
+
         this.interval = setInterval(this.tick, 1000);
         this.render();
     }
 
     init() {
+
+        clearInterval(this.interval);
+
         this.timeLeft = this.initialTime;
-        this.render();
+        this.progressBarElement.style.transition = 'none';
+        this.progressBarElement.style.width = '100%';
     }
 }
 
@@ -48,6 +56,7 @@ class Channel {
     exchangeRequestList;
     isWaiting;
     timeoutFunc;
+    timer = new BarTimer();
 
     constructor(channelId, role, uid) {
         this.id = channelId;
@@ -220,10 +229,6 @@ class Channel {
 
                 if(isRecursive === undefined || !isRecursive) this.exchangeRequestList.push(msg);
 
-/*                const modal = bootstrap.Modal.getOrCreateInstance(document.getElementById('exchange-modal'), {
-                    keyboard: false
-                });*/
-
                 if(document.getElementById('exchange-modal').classList.contains('show')) {
                     console.log("exchange modal is shown");
                     break;
@@ -231,8 +236,9 @@ class Channel {
 
                 document.getElementById("exchange-modal-message").textContent = msg.msg;
 
-                const timer = new BarTimer();
-                timer.startProgressBar();
+
+                this.timer.init();
+                this.timer.startProgressBar();
 
                 openModal();
 
@@ -305,6 +311,7 @@ class Channel {
         stompClient.send(`/wauction/channel/${this.id}/role-exchange/response`, {}, JSON.stringify(data));
 
         if(this.hasNextExchangeRequest()) {
+            this.timer.init();
             setTimeout(() => this.showPrivateMsg(this.exchangeRequestList[0], true), 500);
         }
     }
