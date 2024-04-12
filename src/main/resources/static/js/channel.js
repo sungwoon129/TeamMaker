@@ -17,11 +17,11 @@ class BarTimer {
         let progressPercentage = (this.timeLeft / this.initialTime) * 100;
 
         this.progressBarElement.style.width = progressPercentage + '%';
-        this.progressBarTextElement.innerHTML = this.timeLeft + 's';
+        //this.progressBarTextElement.innerHTML = this.timeLeft + 's';
     }
 
     tick = () => {
-        this.timeLeft = this.timeLeft - 1;
+        this.timeLeft = this.timeLeft - 0.1;
         if(this.timeLeft <= 0) {
             clearInterval(this.interval);
         }
@@ -33,9 +33,7 @@ class BarTimer {
 
         this.progressBarElement.style.transition = 'width 1s linear';
 
-        //this.tick();
-
-        this.interval = setInterval(this.tick, 1000);
+        this.interval = setInterval(this.tick, 100);
         this.render();
     }
 
