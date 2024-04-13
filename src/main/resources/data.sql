@@ -41,13 +41,13 @@ INSERT INTO `auction_item` (`item_id`,`name`,`rule_id`, `img`) VALUES (18,'SHOWM
 INSERT INTO `auction_item` (`item_id`,`name`,`rule_id`, `img`) VALUES (19,'AIMING',1, 'https://image.fmkorea.com/files/attach/new3/20230329/14339012/5169126239/5626726225/a96e8f0a4751850e1c87388575c7a195.jpg');
 INSERT INTO `auction_item` (`item_id`,`name`,`rule_id`, `img`) VALUES (20,'KELLIN',1, 'https://image.fmkorea.com/files/attach/new3/20230329/14339012/5169126239/5626726225/a96e8f0a4751850e1c87388575c7a195.jpg');
 
-INSERT INTO `highlight` (`highlight_id`,`name`,`url`,`item_id`) VALUES (1,'KIIN','https://youtu.be/t1_FVzv4l-4?si=XsPcnLvDt34yg-KK',1);
-INSERT INTO `highlight` (`highlight_id`,`name`,`url`,`item_id`) VALUES (2,'CANYON','https://youtu.be/t1_FVzv4l-4?si=XsPcnLvDt34yg-KK',2);
-INSERT INTO `highlight` (`highlight_id`,`name`,`url`,`item_id`) VALUES (3,'CHOVY','https://youtu.be/t1_FVzv4l-4?si=XsPcnLvDt34yg-KK',3);
+INSERT INTO `highlight` (`highlight_id`,`name`,`url`,`item_id`) VALUES (1,'KIIN','<iframe width="100%" height="100%" src="https://www.youtube.com/embed/d0mRzUIxvpo?autoplay=1&si=6LDBYg5TVGcNE92M" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>',1);
+INSERT INTO `highlight` (`highlight_id`,`name`,`url`,`item_id`) VALUES (2,'CANYON','<iframe width="560" height="315" src="https://www.youtube.com/embed/d0mRzUIxvpo?si=6LDBYg5TVGcNE92M" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>',2);
+INSERT INTO `highlight` (`highlight_id`,`name`,`url`,`item_id`) VALUES (3,'CHOVY','<iframe width="560" height="315" src="https://www.youtube.com/embed/d0mRzUIxvpo?si=6LDBYg5TVGcNE92M" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>',3);
 INSERT INTO `highlight` (`highlight_id`,`name`,`url`,`item_id`) VALUES (4,'PEYZ','https://youtu.be/t1_FVzv4l-4?si=XsPcnLvDt34yg-KK',4);
 INSERT INTO `highlight` (`highlight_id`,`name`,`url`,`item_id`) VALUES (5,'LEHENDS','https://youtu.be/t1_FVzv4l-4?si=XsPcnLvDt34yg-KK',5);
 
-INSERT INTO `highlight` (`highlight_id`,`name`,`url`,`item_id`) VALUES (6,'DORAN','https://youtu.be/t1_FVzv4l-4?si=XsPcnLvDt34yg-KK',6);
+INSERT INTO `highlight` (`highlight_id`,`name`,`url`,`item_id`) VALUES (6,'DORAN','<iframe width="560" height="315" src="https://www.youtube.com/embed/d0mRzUIxvpo?si=6LDBYg5TVGcNE92M" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>',6);
 INSERT INTO `highlight` (`highlight_id`,`name`,`url`,`item_id`) VALUES (7,'PEANUT','https://youtu.be/t1_FVzv4l-4?si=XsPcnLvDt34yg-KK',7);
 INSERT INTO `highlight` (`highlight_id`,`name`,`url`,`item_id`) VALUES (8,'ZEKA','https://youtu.be/t1_FVzv4l-4?si=XsPcnLvDt34yg-KK',8);
 INSERT INTO `highlight` (`highlight_id`,`name`,`url`,`item_id`) VALUES (9,'VIPER','https://youtu.be/t1_FVzv4l-4?si=XsPcnLvDt34yg-KK',9);
