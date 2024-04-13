@@ -251,3 +251,12 @@ body {
     position: relative;
     z-index: 1;
 }
+
+.item-image {
+    width: 100px;
+    height: auto;
+}
+
+#profile-img {
+    width:100%;
+}
