@@ -43,10 +43,10 @@ public class StompEventHandler {
         List<ChannelConnection> connections = subscribeMap.getOrDefault(channelId, new ArrayList<>());
 
         String role = channelService.enter(Long.parseLong(channelId), sender);
+        boolean isManager = connections.isEmpty();
 
-        ChannelConnection channelConnection = new ChannelConnection(headerAccessor.getSessionId(), user.getName(), channelId, role);
+        ChannelConnection channelConnection = new ChannelConnection(headerAccessor.getSessionId(), user.getName(), channelId, role, isManager);
         connections.add(channelConnection);
-
 
         subscribeMap.put(channelId, connections);
 
@@ -89,6 +89,7 @@ public class StompEventHandler {
         if (disConnectSession.isPresent()) {
             subscribeMap.put(channelId,
                     connections.stream().filter(connection -> !connection.getSessionId().equals(disConnectSession.get().getSessionId()))
+                            .peek(connection -> connection.setManager(true))
                             .collect(Collectors.toList()));
 
             channelService.leave(Long.parseLong(channelId), disConnectSession.get().getRole(), subscribeMap.get(channelId));
