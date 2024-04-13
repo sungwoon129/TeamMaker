@@ -330,15 +330,27 @@ class Channel {
             if(count > 0) {
                 setTimeout(countDown, 1000)
             }
+
+            if(count === 0) {
+                this.toStageNextItem();
+            }
         }
 
         countDown();
+        document.querySelector('.ready-btn-box').classList.add('d-none');
+
+
 
 
     }
 
     hasNextExchangeRequest() {
         return this.exchangeRequestList.length > 0;
+    }
+
+    toStageNextItem() {
+
+
     }
 }
 

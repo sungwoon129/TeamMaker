@@ -82,4 +82,11 @@ public class ChannelController {
         channelService.countReady(channelId, headerAccessor.getSessionId(), messageRequest, false);
 
     }
+
+    @MessageMapping("/channel/{channelId}/start")
+    public void start(@DestinationVariable long channelId, StompHeaderAccessor headerAccessor) {
+
+        channelService.start(channelId, headerAccessor.getSessionId());
+
+    }
 }

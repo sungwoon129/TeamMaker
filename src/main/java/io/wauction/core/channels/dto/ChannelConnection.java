@@ -11,6 +11,7 @@ public class ChannelConnection {
     private String channelId;
     private String role;
     private boolean isReady;
+    private boolean isManager;
 
 
     public ChannelConnection(String sessionId, String channelId) {
@@ -18,12 +19,13 @@ public class ChannelConnection {
         this.channelId = channelId;
     }
 
-    public ChannelConnection(String sessionId, String uid, String channelId, String role) {
+    public ChannelConnection(String sessionId, String uid, String channelId, String role, boolean isManager) {
         this.sessionId = sessionId;
         this.uid = uid;
         this.channelId = channelId;
         this.role = role;
         this.isReady = false;
+        this.isManager = isManager;
     }
 
 }
