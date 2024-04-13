@@ -19,6 +19,7 @@ public class Highlight extends BaseTimeEntity {
     private Long id;
 
     private String name;
+    @Lob
     private String url;
 
     public HighlightResponse toResponseDto() {
