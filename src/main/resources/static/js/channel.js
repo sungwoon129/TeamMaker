@@ -107,6 +107,9 @@ class Channel {
         }
 
         stompClient.send(`/wauction/channel/${this.id}/ready`, {}, JSON.stringify(data));
+
+        document.getElementById("ready").classList.add('d-none');
+        document.getElementById("unready").classList.remove('d-none');
     }
 
     unready() {
@@ -117,6 +120,9 @@ class Channel {
         }
 
         stompClient.send(`/wauction/channel/${this.id}/unready`, {}, JSON.stringify(data));
+
+        document.getElementById("ready").classList.remove('d-none');
+        document.getElementById("unready").classList.add('d-none');
     }
 
     onMessage() {
@@ -179,8 +185,7 @@ class Channel {
                 const readyTargetIdx= getParticipantIdx(msg.writer);
                 document.querySelectorAll(".participant-info").item(readyTargetIdx).classList.add('ready');
                 document.querySelectorAll(".exchange-display").item(readyTargetIdx).classList.add('d-none');
-                document.getElementById("ready").classList.add('d-none');
-                document.getElementById("unready").classList.remove('d-none');
+
 
                 break;
 
@@ -188,8 +193,7 @@ class Channel {
                 const unreadyTargetIdx= getParticipantIdx(msg.writer);
                 document.querySelectorAll(".participant-info").item(unreadyTargetIdx).classList.remove('ready');
                 document.querySelectorAll(".exchange-display").item(unreadyTargetIdx).classList.remove('d-none');
-                document.getElementById("ready").classList.remove('d-none');
-                document.getElementById("unready").classList.add('d-none');
+
 
                 break;
             default:
