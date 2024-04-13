@@ -46,6 +46,11 @@ public enum MessageType {
         public String makeFullMessage(String resultYne) {
             return resultYne.equals("Y") ? "요청이 수락되었습니다." : "교환 요청이 거절되었습니다.";
         }
+    },
+    START("start") {
+        public String makeFullMessage(String msg) {
+            return "경매를 시작합니다.";
+        }
     };
 
     private final String title;

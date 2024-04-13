@@ -54,6 +54,7 @@ class Channel {
     exchangeRequestList;
     isWaiting;
     timeoutFunc;
+    auctionRule;
     timer = new BarTimer();
 
     constructor(channelId, role, uid) {
@@ -62,6 +63,7 @@ class Channel {
         this.role = role;
         this.exchangeRequestList = [];
         this.isWaiting = false;
+        this.auctionRule = null;
     }
 
     connect() {
@@ -178,14 +180,9 @@ class Channel {
 
             case 'READY' :
 
-                if(msg.readyCount === msg.capacity) {
-                    this.start();
-                }
-
                 const readyTargetIdx= getParticipantIdx(msg.writer);
                 document.querySelectorAll(".participant-info").item(readyTargetIdx).classList.add('ready');
                 document.querySelectorAll(".exchange-display").item(readyTargetIdx).classList.add('d-none');
-
 
                 break;
 
@@ -194,8 +191,32 @@ class Channel {
                 document.querySelectorAll(".participant-info").item(unreadyTargetIdx).classList.remove('ready');
                 document.querySelectorAll(".exchange-display").item(unreadyTargetIdx).classList.remove('d-none');
 
-
                 break;
+
+            case 'START' :
+                document.querySelector('.ready-btn-box').classList.add('d-none');
+                this.auctionRule = msg.data;
+                let count = 5;
+                const countDown = () => {
+
+                    this.showPublicMsg({writer: "SYSTEM", msg: `시작 ${count}초 전...`})
+
+                    count --;
+
+                    if(count > 0) {
+                        setTimeout(countDown, 1000)
+                    }
+
+                    if(count === 0) {
+                        this.showPublicMsg(msg);
+                        // TODO : 셔플결과를 비쥬얼라이징해서(이미 셔플되었지만) 보여주기. 보여준 다음에 toStageNextItem 호출 -> 전략수립시간
+                        this.toStageNextItem();
+                    }
+                }
+
+                countDown();
+                break;
+
             default:
                 console.error("잘못된 메시지 타입입니다.")
 
@@ -222,6 +243,7 @@ class Channel {
 
 
         displayElement.appendChild(newRow);
+        displayElement.scrollTop = displayElement.scrollHeight;
     }
 
     showPrivateMsg(msg, isRecursive)  {
@@ -320,28 +342,9 @@ class Channel {
 
     start() {
 
-        let count = 5;
-        const countDown = () => {
+        // TODO : 시작 조건 설정
 
-            this.showPublicMsg({writer: "SYSTEM", msg: `시작 ${count}초 전...`})
-
-            count --;
-
-            if(count > 0) {
-                setTimeout(countDown, 1000)
-            }
-
-            if(count === 0) {
-                this.toStageNextItem();
-            }
-        }
-
-        countDown();
-        document.querySelector('.ready-btn-box').classList.add('d-none');
-
-
-
-
+        stompClient.send(`/wauction/channel/${this.id}/start`);
     }
 
     hasNextExchangeRequest() {
@@ -349,7 +352,14 @@ class Channel {
     }
 
     toStageNextItem() {
+        // TODO : 현재 진행중인 경매 물품 넘버링 기능 구현
+        let order = 0;
 
+        if(Array.isArray(this.auctionRule.items)) {
+            const item = this.auctionRule.items[order];
+            document.getElementById("profile-img").src=`${item.img}`;
+            document.getElementById("highlight").insertAdjacentHTML('beforeend', item.highlights[0].url);
+        }
 
     }
 }
@@ -378,6 +388,10 @@ document.addEventListener("DOMContentLoaded",  () => {
     document.querySelector("#unready").addEventListener("click", () => {
         const messageType = "UNREADY";
         channel.unready(messageType);
+    });
+
+    document.querySelector("#start").addEventListener("click", () => {
+        channel.start();
     });
 
     document.querySelector("#bid").addEventListener("click", () => {

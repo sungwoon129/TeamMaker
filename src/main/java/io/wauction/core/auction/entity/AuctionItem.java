@@ -30,6 +30,7 @@ public class AuctionItem {
                 .id(id)
                 .name(name)
                 .img(img)
+                .highlights(highlights.stream().map(Highlight::toResponseDto).toList())
                 .build();
 
     }
