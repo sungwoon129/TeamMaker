@@ -15,3 +15,8 @@
 > Socket : SockJS(1.0.2) + STOMP Web Socket(2.3.3)  
 > JPA(Hibernate) : 6.4.1    
 > DB : H2 Database
+
+
+### 구현 과정 스크린샷 ###
+
+![image](https://github.com/sungwoon129/TeamMaker/assets/43958570/4f369bb4-6914-4fb8-98ed-7ce0ba156e99)
