@@ -161,6 +161,11 @@ class Channel {
                         target.classList.add("active");
                         target.querySelector(".exchange-display").classList.remove("d-none");
                     }
+
+                    if(this.role === msg.manager) {
+                        document.getElementById("start").classList.remove("d-none");
+
+                    }
                 })
                 this.showPublicMsg(msg);
                 break;
@@ -173,6 +178,11 @@ class Channel {
                         target.classList.add("overlay-inactive");
                         target.classList.remove("active");
                         target.querySelector(".exchange-display").classList.add("d-none");
+                    }
+
+                    if(this.role === msg.manager) {
+                        document.getElementById("start").classList.remove("d-none");
+
                     }
                 })
                 this.showPublicMsg(msg);

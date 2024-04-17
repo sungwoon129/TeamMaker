@@ -62,7 +62,8 @@ public class StompEventHandler {
 
             if(channelId == null) throw new NullPointerException("메시지 헤더 정보가 올바르지 않습니다.");
 
-            ChannelConnection channelConnection = subscribeMap.get(channelId).stream().filter(connection -> connection.getSessionId().equals(headerAccessor.getSessionId())).findFirst().orElseThrow(() -> new IllegalArgumentException("클라이언트의 세션 정보를 찾을 수 없습니다."));
+            List<ChannelConnection> connections = subscribeMap.get(channelId);
+            ChannelConnection channelConnection = connections.stream().filter(connection -> connection.getSessionId().equals(headerAccessor.getSessionId())).findFirst().orElseThrow(() -> new IllegalArgumentException("클라이언트의 세션 정보를 찾을 수 없습니다."));
 
 
             EnterMessageResponse responseDto = EnterMessageResponse.builder()
@@ -70,6 +71,7 @@ public class StompEventHandler {
                     .writer("SYSTEM")
                     .sender(channelConnection.getRole().toUpperCase())
                     .msg(MessageType.JOIN.makeFullMessage(channelConnection.getRole()))
+                    .manager(connections.stream().filter(ChannelConnection::isManager).findAny().orElseThrow(() -> new NullPointerException("채널의 방장 정보를 찾을 수 없습니다")).getRole())
                     .build();
 
             channelService.publishMessageToChannel(Long.parseLong(channelId), responseDto);
@@ -83,16 +85,22 @@ public class StompEventHandler {
         StompHeaderAccessor headerAccessor = StompHeaderAccessor.wrap(event.getMessage());
         String channelId = findChannelIdFromMap(event, headerAccessor);
 
+        // TODO Map에서 get한 객체 리스트의 원소를 수정하면 Map에 들어있는 데이터도 수정되는지 확인
         List<ChannelConnection> connections = subscribeMap.get(channelId);
         Optional<ChannelConnection> disConnectSession = connections.stream().filter(connection -> connection.getSessionId().equals(headerAccessor.getSessionId())).findFirst();
 
         if (disConnectSession.isPresent()) {
-            subscribeMap.put(channelId,
-                    connections.stream().filter(connection -> !connection.getSessionId().equals(disConnectSession.get().getSessionId()))
-                            .peek(connection -> connection.setManager(true))
-                            .collect(Collectors.toList()));
+            List<ChannelConnection> updated =  connections.stream().filter(connection -> !connection.getSessionId().equals(disConnectSession.get().getSessionId()))
+                    .toList();
 
-            channelService.leave(Long.parseLong(channelId), disConnectSession.get().getRole(), subscribeMap.get(channelId));
+            if(disConnectSession.get().isManager()) {
+                updated.get(0).setManager(true);
+            }
+
+            subscribeMap.put(channelId, updated);
+
+
+            channelService.leave(Long.parseLong(channelId), disConnectSession.get().getRole(), updated);
         }
 
     }

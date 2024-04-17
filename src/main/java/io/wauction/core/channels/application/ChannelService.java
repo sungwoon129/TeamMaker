@@ -68,6 +68,7 @@ public class ChannelService {
                 .sender(sender)
                 .msg(MessageType.LEAVE.makeFullMessage(sender))
                 .activeRoles(activeRoles)
+                .manager(connections.stream().filter(ChannelConnection::isManager).findAny().orElseThrow(() -> new NullPointerException("채널의 방장 정보를 찾을 수 없습니다")).getRole())
                 .build();
 
         publishMessageToChannel(channel.getId(), responseDto);
@@ -144,6 +145,7 @@ public class ChannelService {
         ChannelConnection client = connections.stream().filter(connect -> connect.getSessionId().equals(sessionId)).findAny().orElseThrow(() -> new IllegalArgumentException("권한이 없는 클라이언트의 요청입니다."));
 
         if(!client.isManager()) throw new IllegalArgumentException("권한이 없는 클라이언트의 요청입니다.");
+        if(connections.stream().anyMatch(channelConnection -> !channelConnection.isReady())) throw new IllegalStateException("참가자 모두가 준비완료 상태여야 시작할 수 있습니다.");
 
         Channel channel = this.findOne(channelId);
 

@@ -22,5 +22,6 @@ public class EnterMessageResponse {
     private String sender;
     private String msg;
     private List<String> activeRoles;
+    private String manager;
 
 }
