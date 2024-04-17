@@ -219,6 +219,7 @@ class Channel {
 
                     if(count === 0) {
                         this.showPublicMsg(msg);
+                        document.querySelectorAll(".participant-info").forEach(el => el.classList.remove('ready'));
                         // TODO : 셔플결과를 비쥬얼라이징해서(이미 셔플되었지만) 보여주기. 보여준 다음에 toStageNextItem 호출 -> 전략수립시간
                         this.toStageNextItem();
                     }
