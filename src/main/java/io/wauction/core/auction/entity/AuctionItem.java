@@ -17,6 +17,9 @@ public class AuctionItem {
     private Long id;
     private String name;
 
+    @Comment("경매 대상의 담당 포지션(역할)")
+    private String position;
+
     @Comment("경매 대상의 이미지 url")
     private String img;
 
@@ -29,6 +32,7 @@ public class AuctionItem {
         return AuctionItemResponse.builder()
                 .id(id)
                 .name(name)
+                .position(position)
                 .img(img)
                 .highlights(highlights.stream().map(Highlight::toResponseDto).toList())
                 .build();
