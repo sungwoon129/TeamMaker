@@ -18,6 +18,7 @@ public class AuctionRuleResponse {
     private List<TeamPositionResponse> positions;
     private List<AuctionItemResponse> items;
     private ProceedWay proceedWay;
+    private int startOrder;
 
 
     public void shuffleItems() {

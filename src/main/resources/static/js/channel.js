@@ -220,8 +220,22 @@ class Channel {
                     if(count === 0) {
                         this.showPublicMsg(msg);
                         document.querySelectorAll(".participant-info").forEach(el => el.classList.remove('ready'));
-                        // TODO : 셔플결과를 비쥬얼라이징해서(이미 셔플되었지만) 보여주기. 보여준 다음에 toStageNextItem 호출 -> 전략수립시간
-                        this.toStageNextItem();
+
+
+                        setTimeout(() => {
+                            shuffle( msg.data.items, document.querySelectorAll('.item-shuffle-box'));
+                        },1000);
+
+
+                        document.getElementById("shuffle-wrapper").classList.remove('d-none');
+
+                        setTimeout(() => {
+                            document.getElementById("shuffle-wrapper").classList.add('d-none');
+                            relocationItem(msg.data.items);
+                            this.toStageNextItem(msg.data.startOrder);
+                        }, 5000)
+
+
                     }
                 }
 
@@ -353,8 +367,6 @@ class Channel {
 
     start() {
 
-        // TODO : 시작 조건 설정
-
         stompClient.send(`/wauction/channel/${this.id}/start`);
     }
 
@@ -362,12 +374,10 @@ class Channel {
         return this.exchangeRequestList.length > 0;
     }
 
-    toStageNextItem() {
-        // TODO : 현재 진행중인 경매 물품 넘버링 기능 구현
-        let order = 0;
+    toStageNextItem(order) {
 
         if(Array.isArray(this.auctionRule.items)) {
-            const item = this.auctionRule.items[order];
+            const item = this.auctionRule.items[parseInt(order)];
             document.getElementById("profile-img").src=`${item.img}`;
             document.getElementById("highlight").insertAdjacentHTML('beforeend', item.highlights[0].url);
         }
@@ -488,6 +498,43 @@ const openModal = () => {
     document.getElementById('exchange-modal').classList.add('show');
 
 
+}
+
+const shuffle = (shuffled, boxes) => {
+        boxes.forEach(box => {
+            const preOrder = box.dataset.id;
+            const newOrder = shuffled.findIndex(item => item.id === parseInt(preOrder));
+            const oriPosition = getElementPosition(box);
+
+            const targetPosition = getElementPosition(boxes[newOrder]);
+
+            const newX = targetPosition.x - oriPosition.x;
+            const newY = targetPosition.y - oriPosition.y;
+            box.style.transform = `translate(${newX}px, ${newY}px)`;
+
+        });
+}
+
+const relocationItem = (shuffled) => {
+
+    const boxes = document.querySelectorAll(".item-box");
+
+    boxes.forEach(box => {
+
+        const preOrder = box.dataset.id;
+        const target = shuffled[preOrder - 1];
+
+        box.dataset.id = target.id;
+        box.querySelector(".item-img img").src = target.img;
+        box.querySelector(".item-box-name").textContent = target.name;
+    })
+}
+
+const getElementPosition = (element) => {
+    const rect = element.getBoundingClientRect();
+    const scrollLeft =  document.documentElement.scrollLeft;
+    const scrollTop = document.documentElement.scrollTop;
+    return { x: rect.left + scrollLeft, y: rect.top + scrollTop };
 }
 
 

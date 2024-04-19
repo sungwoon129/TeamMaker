@@ -168,12 +168,12 @@
         </div>
         <div class="col-md-4 items-container">
             <div th:each="item, itemStat : ${channel.getAuctionRuleResponse().getItems()}" class="item-container">
-                <div class="item-box">
+                <div class="item-box" th:data-id="${item.getId()}">
                     <div class="item-img">
                         <img th:if="${item.getImg() != null}" th:src="${item.getImg()}" alt="Item Image">
                         <img th:unless="${item.getImg() != null}" src="/icon/item.png" alt="Default Image">
                     </div>
-                    <div th:text="${item.getName()}" class="text-small text-overflow"></div>
+                    <div th:text="${item.getName()}" class="text-small text-overflow item-box-name"></div>
 
                 </div>
                 <div th:if="${!itemStat.last}" class="arrow-box">
@@ -213,6 +213,24 @@
         </div>
     </div>
 </div>
+
+<!-- 경매 물품 shuffle div -->
+<div class="d-none" id="shuffle-wrapper">
+    <div th:each="item, itemStat : ${channel.getAuctionRuleResponse().getItems()}" class="item-container">
+        <div class="item-shuffle-box" th:data-id="${item.getId()}" >
+            <div class="item-img">
+                <img th:if="${item.getImg() != null}" th:src="${item.getImg()}" alt="Item Image">
+                <img th:unless="${item.getImg() != null}" src="/icon/item.png" alt="Default Image">
+            </div>
+            <div th:text="${item.getName()}" class="text-small text-overflow"></div>
+
+        </div>
+        <div th:if="${!itemStat.last}" class="arrow-box">
+            <img src="/icon/next.png" width="16">
+        </div>
+    </div>
+</div>
+
 
 
 <script src="/js/channel.js"></script>
