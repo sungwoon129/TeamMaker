@@ -5,6 +5,8 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 @Getter
@@ -16,5 +18,12 @@ public class AuctionRuleResponse {
     private List<TeamPositionResponse> positions;
     private List<AuctionItemResponse> items;
     private ProceedWay proceedWay;
+
+
+    public void shuffleItems() {
+        List<AuctionItemResponse> copy = new ArrayList<>(items);
+        Collections.shuffle(copy);
+        this.items = copy;
+    }
 
 }

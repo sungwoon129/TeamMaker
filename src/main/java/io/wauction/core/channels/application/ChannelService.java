@@ -3,6 +3,7 @@ package io.wauction.core.channels.application;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.wauction.core.auction.application.AuctionRuleService;
+import io.wauction.core.auction.dto.AuctionRuleResponse;
 import io.wauction.core.auction.entity.ParticipantRole;
 import io.wauction.core.channels.dto.*;
 import io.wauction.core.channels.entity.Channel;
@@ -142,6 +143,7 @@ public class ChannelService {
 
         List<ChannelConnection> connections = subscribeMap.get(String.valueOf(channelId));
 
+        // TODO : exception 발생 시 클라이언트 처리
         ChannelConnection client = connections.stream().filter(connect -> connect.getSessionId().equals(sessionId)).findAny().orElseThrow(() -> new IllegalArgumentException("권한이 없는 클라이언트의 요청입니다."));
 
         if(!client.isManager()) throw new IllegalArgumentException("권한이 없는 클라이언트의 요청입니다.");
@@ -151,8 +153,10 @@ public class ChannelService {
 
         channel.changeState(ChannelState.PLAYING);
 
-        // TODO : 순서 셔플.
-        MessageResponse messageResponse = new DataMessageResponse<>(MessageType.START, "SYSTEM", MessageType.START.makeFullMessage(""), channel.getAuctionRule().toResponseDto());
+        AuctionRuleResponse auctionRuleResponse = channel.getAuctionRule().toResponseDto();
+        auctionRuleResponse.shuffleItems();
+
+        MessageResponse messageResponse = new DataMessageResponse<>(MessageType.START, "SYSTEM", MessageType.START.makeFullMessage(""), auctionRuleResponse);
 
         this.publishMessageToChannel(channelId, messageResponse);
 
