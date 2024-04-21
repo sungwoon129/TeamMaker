@@ -8,10 +8,13 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-public class ReadyMessageResponse {
-    private MessageType messageType;
-    private String writer;
-    private String msg;
+public class ReadyMessageResponse extends MessageResponse {
     private int readyCount;
     private int capacity;
+
+    public ReadyMessageResponse(MessageType messageType, String sender, String msg, int count, int capacity) {
+        super(messageType, sender, msg);
+        this.readyCount = count;
+        this.capacity = capacity;
+    }
 }

@@ -16,12 +16,25 @@ import java.util.List;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class EnterMessageResponse {
-    private MessageType messageType;
-    private String writer;
-    private String sender;
-    private String msg;
+public class EnterMessageResponse extends MessageResponse {
     private List<String> activeRoles;
     private String manager;
+
+
+    public EnterMessageResponse(MessageType messageType, String writer, String sender, String msg, List<String> activeRoles, String manager) {
+        super(messageType, writer, sender, msg);
+        this.activeRoles = activeRoles;
+        this.manager = manager;
+    }
+
+    public EnterMessageResponse(MessageType messageType, String writer, String sender, String msg, String manager) {
+        super(messageType, writer, sender, msg);
+        this.manager = manager;
+    }
+
+    public EnterMessageResponse(MessageType messageType, String writer, String sender, List<String> activeRoles, String manager) {
+        super(messageType, writer, sender);
+        this.activeRoles = activeRoles;
+    }
 
 }

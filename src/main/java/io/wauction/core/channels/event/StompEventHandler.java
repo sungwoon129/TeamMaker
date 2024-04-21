@@ -3,6 +3,7 @@ package io.wauction.core.channels.event;
 import io.wauction.core.channels.application.ChannelService;
 import io.wauction.core.channels.dto.ChannelConnection;
 import io.wauction.core.channels.dto.EnterMessageResponse;
+import io.wauction.core.channels.dto.MessageResponse;
 import io.wauction.core.channels.entity.MessageType;
 import io.wauction.core.config.CustomPrincipal;
 import lombok.RequiredArgsConstructor;
@@ -17,7 +18,6 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @Component
@@ -43,6 +43,7 @@ public class StompEventHandler {
         List<ChannelConnection> connections = subscribeMap.getOrDefault(channelId, new ArrayList<>());
 
         String role = channelService.enter(Long.parseLong(channelId), sender);
+
         boolean isManager = connections.isEmpty();
 
         ChannelConnection channelConnection = new ChannelConnection(headerAccessor.getSessionId(), user.getName(), channelId, role, isManager);
@@ -66,13 +67,12 @@ public class StompEventHandler {
             ChannelConnection channelConnection = connections.stream().filter(connection -> connection.getSessionId().equals(headerAccessor.getSessionId())).findFirst().orElseThrow(() -> new IllegalArgumentException("클라이언트의 세션 정보를 찾을 수 없습니다."));
 
 
-            EnterMessageResponse responseDto = EnterMessageResponse.builder()
-                    .messageType(MessageType.JOIN)
-                    .writer("SYSTEM")
-                    .sender(channelConnection.getRole().toUpperCase())
-                    .msg(MessageType.JOIN.makeFullMessage(channelConnection.getRole()))
-                    .manager(connections.stream().filter(ChannelConnection::isManager).findAny().orElseThrow(() -> new NullPointerException("채널의 방장 정보를 찾을 수 없습니다")).getRole())
-                    .build();
+            MessageResponse responseDto = new EnterMessageResponse(
+                    MessageType.JOIN,
+                    "SYSTEM",
+                    channelConnection.getRole().toUpperCase(),
+                    MessageType.JOIN.makeFullMessage(channelConnection.getRole()),
+                    connections.stream().filter(ChannelConnection::isManager).findAny().orElseThrow(() -> new NullPointerException("채널의 방장 정보를 찾을 수 없습니다")).getRole());
 
             channelService.publishMessageToChannel(Long.parseLong(channelId), responseDto);
 

@@ -63,14 +63,13 @@ public class ChannelService {
 
         List<String> activeRoles = connections.stream().map(ChannelConnection::getRole).toList();
 
-        EnterMessageResponse responseDto = EnterMessageResponse.builder()
-                .messageType(MessageType.LEAVE)
-                .writer("SYSTEM")
-                .sender(sender)
-                .msg(MessageType.LEAVE.makeFullMessage(sender))
-                .activeRoles(activeRoles)
-                .manager(connections.stream().filter(ChannelConnection::isManager).findAny().orElseThrow(() -> new NullPointerException("채널의 방장 정보를 찾을 수 없습니다")).getRole())
-                .build();
+        MessageResponse responseDto = new EnterMessageResponse(
+                MessageType.LEAVE,
+                "SYSTEM",
+                sender,
+                activeRoles,
+                connections.stream().filter(ChannelConnection::isManager).findAny().orElseThrow(() -> new NullPointerException("채널의 방장 정보를 찾을 수 없습니다")).getRole()
+        );
 
         publishMessageToChannel(channel.getId(), responseDto);
     }
@@ -162,7 +161,7 @@ public class ChannelService {
 
     }
 
-    public void publishMessageToChannel(long channelId, Object messageResponseDto) {
+    public <T extends MessageResponse> void publishMessageToChannel(long channelId, T messageResponseDto) {
         String destination = "/channel/" + channelId;
 
         try {
@@ -174,7 +173,7 @@ public class ChannelService {
 
     }
 
-    public void publishMessageToUser(long channelId, String targetUser, Object messageResponseDto) {
+    public <T extends MessageResponse> void publishMessageToUser(long channelId, String targetUser, T messageResponseDto) {
         String destination = "/channel" +
                 "/" +
                 channelId +
