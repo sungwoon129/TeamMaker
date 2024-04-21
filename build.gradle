@@ -37,6 +37,9 @@ dependencies {
     implementation("org.webjars:bootstrap:5.3.0")
     implementation('org.webjars:jquery:3.7.1')
     implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
+
+    // mongodb
+    implementation 'org.springframework.boot:spring-boot-starter-data-mongodb'
 }
 
 tasks.named('test') {
