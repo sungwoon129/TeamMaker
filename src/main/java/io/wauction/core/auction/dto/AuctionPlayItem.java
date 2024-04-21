@@ -1,10 +1,10 @@
 package io.wauction.core.auction.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import lombok.*;
 
+@JsonInclude(JsonInclude.Include.NON_NULL)
+@Setter
 @Getter
 @Builder
 @AllArgsConstructor
@@ -13,6 +13,7 @@ public class AuctionPlayItem {
     private long itemId;
     private String name;
     private long price;
+    private int order;
 
     public AuctionPlayItem(final long itemId, final String name) {
         this.itemId = itemId;

@@ -233,7 +233,7 @@ class Channel {
                         setTimeout(() => {
                             document.getElementById("shuffle-wrapper").classList.add('d-none');
                             relocationItem(msg.data.items);
-                            this.next();
+                            this.toStageNextItem(msg.data.order)
                         }, 5000)
 
 
@@ -250,7 +250,7 @@ class Channel {
             case 'NEXT' :
                 // TODO : 경매 대상정보 메시지 출력, 다음 경매대상 경매 시작까지 대기시간 처리
                 this.currentItem = msg.data;
-                this.toStageNextItem(msg.data);
+                this.toStageNextItem(msg.data.order);
                 break;
             default:
                 console.error("잘못된 메시지 타입입니다.")
@@ -380,20 +380,16 @@ class Channel {
         stompClient.send(`/wauction/channel/${this.id}/start`);
     }
 
-    next() {
-        stompClient.send(`/wauction/channel/${this.id}/next`);
-    }
-
     hasNextExchangeRequest() {
         return this.exchangeRequestList.length > 0;
     }
 
-    toStageNextItem(item) {
+    toStageNextItem(order) {
 
         if(Array.isArray(this.auctionRule.items)) {
-            const target = this.auctionRule.items.find(el => el.id === item.id);
-            document.getElementById("profile-img").src=`${target.img}`;
-            document.getElementById("highlight").insertAdjacentHTML('beforeend', target.highlights[0].url);
+            const item = this.auctionRule.items[parseInt(order)];
+            document.getElementById("profile-img").src=`${item.img}`;
+            document.getElementById("highlight").insertAdjacentHTML('beforeend', item.highlights[0].url);
         }
 
     }

@@ -46,6 +46,7 @@ public class ChannelAuctionService {
         AuctionOrder auctionOrder = auctionOrderRepository.findByChannelId(channelId).orElseThrow(() -> new IllegalArgumentException(channelId + " 와 일치하는 경매순서 데이터를 찾을 수 없습니다."));
 
         AuctionPlayItem auctionPlayItem = auctionOrder.getItems().get(channel.getOrder());
+        auctionPlayItem.setOrder(channel.getOrder());
 
         MessageResponse messageResponse = new DataMessageResponse<>(
                 MessageType.NEXT,
