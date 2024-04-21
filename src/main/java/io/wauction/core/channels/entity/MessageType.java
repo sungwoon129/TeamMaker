@@ -51,7 +51,12 @@ public enum MessageType {
         public String makeFullMessage(String msg) {
             return "경매를 시작합니다.";
         }
+    }, BID("bid") {
+        public String makeFullMessage(String price) {
+            return price + " 포인트 입찰";
+        }
     };
+
 
     private final String title;
 

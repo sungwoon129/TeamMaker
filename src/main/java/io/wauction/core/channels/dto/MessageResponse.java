@@ -1,10 +1,12 @@
 package io.wauction.core.channels.dto;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import io.wauction.core.channels.entity.MessageType;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+@JsonInclude(JsonInclude.Include.NON_NULL)
 @Getter
 @AllArgsConstructor
 @NoArgsConstructor

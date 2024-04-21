@@ -2,11 +2,13 @@ package io.wauction.core.auction.entity;
 
 import io.wauction.core.auction.dto.AuctionItemResponse;
 import jakarta.persistence.*;
+import lombok.Getter;
 import org.hibernate.annotations.Comment;
 
 import java.util.ArrayList;
 import java.util.List;
 
+@Getter
 @Entity
 @Table(name = "auction_item")
 public class AuctionItem {
