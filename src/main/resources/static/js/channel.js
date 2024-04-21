@@ -232,7 +232,7 @@ class Channel {
                         setTimeout(() => {
                             document.getElementById("shuffle-wrapper").classList.add('d-none');
                             relocationItem(msg.data.items);
-                            this.toStageNextItem(msg.data.startOrder);
+                            this.toStageNextItem(msg.data.order);
                         }, 5000)
 
 
