@@ -55,6 +55,7 @@ class Channel {
     isWaiting;
     timeoutFunc;
     auctionRule;
+    currentItem; // TODO : 현재 아이템 경매가와 관련된 기능 구현 - 현재 입찰가보다 낮은 가격 입찰불가
     timer = new BarTimer();
 
     constructor(channelId, role, uid) {
@@ -232,7 +233,7 @@ class Channel {
                         setTimeout(() => {
                             document.getElementById("shuffle-wrapper").classList.add('d-none');
                             relocationItem(msg.data.items);
-                            this.toStageNextItem(msg.data.order);
+                            this.next();
                         }, 5000)
 
 
@@ -242,6 +243,15 @@ class Channel {
                 countDown();
                 break;
 
+            case 'BID' :
+                // TODO : 대기시간 초기화, 대기시간 모두 소모시까지 입찰 없을 시 유찰처리, 입찰정보에 따른 ui 업데이트
+                this.showPublicMsg(msg)
+                break;
+            case 'NEXT' :
+                // TODO : 경매 대상정보 메시지 출력, 다음 경매대상 경매 시작까지 대기시간 처리
+                this.currentItem = msg.data;
+                this.toStageNextItem(msg.data);
+                break;
             default:
                 console.error("잘못된 메시지 타입입니다.")
 
@@ -370,18 +380,34 @@ class Channel {
         stompClient.send(`/wauction/channel/${this.id}/start`);
     }
 
+    next() {
+        stompClient.send(`/wauction/channel/${this.id}/next`);
+    }
+
     hasNextExchangeRequest() {
         return this.exchangeRequestList.length > 0;
     }
 
-    toStageNextItem(order) {
+    toStageNextItem(item) {
 
         if(Array.isArray(this.auctionRule.items)) {
-            const item = this.auctionRule.items[parseInt(order)];
-            document.getElementById("profile-img").src=`${item.img}`;
-            document.getElementById("highlight").insertAdjacentHTML('beforeend', item.highlights[0].url);
+            const target = this.auctionRule.items.find(el => el.id === item.id);
+            document.getElementById("profile-img").src=`${target.img}`;
+            document.getElementById("highlight").insertAdjacentHTML('beforeend', target.highlights[0].url);
         }
 
+    }
+
+    bid(plusValue) {
+
+        const order = 0;
+
+        const data = {
+            sender: this.role,
+            type: "BID",
+            message: this.currentItemPrice + plusValue,
+            itemId: this.auctionRule.items[order].id
+        }
     }
 }
 
@@ -448,6 +474,7 @@ document.addEventListener("DOMContentLoaded",  () => {
         channel.declineExchange(data);
 
     });
+
 
 });
 

@@ -10,4 +10,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class BidRequest extends MessageRequest {
     private long itemId;
+    private String itemName;
+
 }

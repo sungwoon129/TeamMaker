@@ -22,11 +22,6 @@ public enum MessageType {
             return "준비완료상태가 취소되었습니다.";
         }
     },
-    PRICE("price") {
-        public String makeFullMessage(String price) {
-            return price + " 포인트 입찰";
-        }
-    },
     JOIN("join") {
         public String makeFullMessage(String sender) {
             return sender + "님이 채널에 입장하셨습니다";
@@ -51,9 +46,15 @@ public enum MessageType {
         public String makeFullMessage(String msg) {
             return "경매를 시작합니다.";
         }
-    }, BID("bid") {
+    },
+    BID("bid") {
         public String makeFullMessage(String price) {
             return price + " 포인트 입찰";
+        }
+    },
+    NEXT("next") {
+        public String makeFullMessage(String item) {
+            return "다음 순서 " + item;
         }
     };
 

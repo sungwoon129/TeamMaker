@@ -2,6 +2,7 @@ package io.wauction.core.channels.presentation;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.wauction.core.channels.application.ChannelAuctionService;
 import io.wauction.core.channels.application.ChannelService;
 import io.wauction.core.channels.dto.MessageRequest;
 import io.wauction.core.channels.dto.MessageResponse;
@@ -25,6 +26,7 @@ public class ChannelController {
      */
     private final SimpMessagingTemplate simpMessagingTemplate;
     private final ChannelService channelService;
+    private final ChannelAuctionService channelAuctionService;
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     @MessageMapping("/channel/{channelId}/exchangeSeat")
@@ -83,10 +85,16 @@ public class ChannelController {
 
     }
 
+    // TODO MessageType 검증
     @MessageMapping("/channel/{channelId}/start")
     public void start(@DestinationVariable long channelId, StompHeaderAccessor headerAccessor) {
 
         channelService.start(channelId, headerAccessor.getSessionId());
 
+    }
+
+    @MessageMapping("/channel/{channelId}/next")
+    public void next(@DestinationVariable long channelId) {
+        channelAuctionService.nextStep(channelId);
     }
 }

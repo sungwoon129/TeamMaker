@@ -2,9 +2,10 @@ package io.wauction.core.channels.application;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.wauction.core.auction.application.AuctionRuleService;
+import io.wauction.core.auction.dto.AuctionPlayItem;
 import io.wauction.core.auction.dto.AuctionRuleResponse;
 import io.wauction.core.auction.entity.ParticipantRole;
+import io.wauction.core.auction.infrastructure.AuctionOrderRepository;
 import io.wauction.core.channels.dto.*;
 import io.wauction.core.channels.entity.Channel;
 import io.wauction.core.channels.entity.ChannelState;
@@ -20,6 +21,7 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 
+import static io.wauction.core.auction.entity.AuctionOrder.createAuctionOrder;
 import static io.wauction.core.channels.event.StompEventHandler.subscribeMap;
 
 
@@ -30,7 +32,7 @@ public class ChannelService {
 
     private final SimpMessageSendingOperations simpMessageSendingOperations;
     private final ChannelRepository channelRepository;
-    private final AuctionRuleService auctionRuleService;
+    private final AuctionOrderRepository auctionOrderRepository;
     private final ObjectMapper objectMapper = new ObjectMapper();
 
 
@@ -152,10 +154,27 @@ public class ChannelService {
 
         channel.changeState(ChannelState.PLAYING);
 
-        AuctionRuleResponse auctionRuleResponse = channel.getAuctionRule().toResponseDto();
-        auctionRuleResponse.shuffleItems();
 
-        MessageResponse messageResponse = new DataMessageResponse<>(MessageType.START, "SYSTEM", MessageType.START.makeFullMessage(""), auctionRuleResponse);
+        AuctionRuleResponse auctionRuleResponse = channel.getAuctionRule().toResponseDto();
+
+        AuctionStartData auctionStartData = AuctionStartData.builder()
+                .positions(auctionRuleResponse.getPositions())
+                .items(auctionRuleResponse.getItems())
+                .roles(auctionRuleResponse.getRoles())
+                .proceedWay(auctionRuleResponse.getProceedWay())
+                .order(channel.getOrder())
+                .build();
+
+        // 경매순서 섞기
+        auctionStartData.shuffleItems();
+
+        // 섞인 경매순서 저장
+        auctionOrderRepository.save(createAuctionOrder(channelId, auctionStartData.getItems().stream()
+                        .map(item -> new AuctionPlayItem(item.getId(), item.getName()))
+                        .toList()
+                ));
+
+        MessageResponse messageResponse = new DataMessageResponse<>(MessageType.START, "SYSTEM", MessageType.START.makeFullMessage(""), auctionStartData);
 
         this.publishMessageToChannel(channelId, messageResponse);
 

@@ -46,6 +46,9 @@ public class Channel extends BaseTimeEntity {
     @ManyToOne
     private AuctionRule auctionRule;
 
+    @Column(columnDefinition = "현재 진행중인 경매 순서")
+    private int order;
+
     @Column
     private Boolean deleted;
 
@@ -59,6 +62,7 @@ public class Channel extends BaseTimeEntity {
                 .capacity(auctionRule.getMaximumParticipants())
                 .auctionRule(auctionRule)
                 .state(ChannelState.WAITING)
+                .order(0)
                 .build();
     }
 
@@ -89,6 +93,7 @@ public class Channel extends BaseTimeEntity {
                 .headCount(getHeadCount())
                 .capacity(capacity)
                 .auctionRuleResponse(auctionRule.toResponseDto())
+                .order(order)
                 .clientRole(role.get().toResponseDto())
                 .activeRoles(activeRoles)
                 .readyRoles(connections.stream().filter(ChannelConnection::isReady).map(ChannelConnection::getRole).toList())
@@ -105,6 +110,10 @@ public class Channel extends BaseTimeEntity {
         }
 
         if(capacity == getHeadCount()) this.state = ChannelState.FULL;
+    }
+
+    public void nextStep() {
+        this.order += 1;
     }
 
     private boolean isAdmissionStatus() {

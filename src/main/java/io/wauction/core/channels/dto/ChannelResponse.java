@@ -20,6 +20,7 @@ public class ChannelResponse {
     private int headCount;
     private ChannelState channelState;
     private AuctionRuleResponse auctionRuleResponse;
+    private int order;
     private ParticipantRoleResponse clientRole;
     private List<String> activeRoles;
     private List<String> readyRoles;

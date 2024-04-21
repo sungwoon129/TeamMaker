@@ -6,6 +6,7 @@ import io.wauction.core.auction.entity.Bid;
 import io.wauction.core.auction.infrastructure.AuctionRuleRepository;
 import io.wauction.core.auction.infrastructure.BidRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
 
 import java.util.Optional;
 
@@ -13,6 +14,7 @@ import static io.wauction.core.auction.entity.Bid.createBid;
 
 
 @RequiredArgsConstructor
+@Service
 public class AuctionPlayService {
 
     private final AuctionRuleRepository auctionRuleRepository;
