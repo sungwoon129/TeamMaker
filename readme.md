@@ -14,7 +14,7 @@
 > Gradle : 8.5  
 > Socket : SockJS(1.0.2) + STOMP Web Socket(2.3.3)  
 > JPA(Hibernate) : 6.4.1    
-> DB : H2 Database
+> DB : H2 Database, MongoDB(입찰, 낙찰, 유찰, 경매순서등의 경매진행중 발생하는 데이터관리)
 
 
 ### 구현 과정 스크린샷 ###
