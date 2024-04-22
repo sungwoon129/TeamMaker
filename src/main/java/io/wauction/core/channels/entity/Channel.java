@@ -46,6 +46,12 @@ public class Channel extends BaseTimeEntity {
     @ManyToOne
     private AuctionRule auctionRule;
 
+    @Column(columnDefinition = "다음 경매 대상으로 넘어가기까지의 시간")
+    private int waitingTimeForNext;
+
+    @Column(columnDefinition = "입찰 후 대기시간")
+    private int waitingTimeForAfterBid;
+
     @Column(columnDefinition = "현재 진행중인 경매 순서")
     private int order;
 
@@ -62,6 +68,8 @@ public class Channel extends BaseTimeEntity {
                 .capacity(auctionRule.getMaximumParticipants())
                 .auctionRule(auctionRule)
                 .state(ChannelState.WAITING)
+                .waitingTimeForNext(channelRequest.getWaitingTimeForNext())
+                .waitingTimeForAfterBid(channelRequest.getWaitingTimeForAfterBid())
                 .order(0)
                 .build();
     }
