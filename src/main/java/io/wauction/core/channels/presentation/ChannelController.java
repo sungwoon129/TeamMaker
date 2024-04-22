@@ -2,6 +2,7 @@ package io.wauction.core.channels.presentation;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.wauction.core.auction.dto.BidRequest;
 import io.wauction.core.channels.application.ChannelAuctionService;
 import io.wauction.core.channels.application.ChannelService;
 import io.wauction.core.channels.dto.MessageRequest;
@@ -85,7 +86,6 @@ public class ChannelController {
 
     }
 
-    // TODO MessageType 검증
     @MessageMapping("/channel/{channelId}/start")
     public void start(@DestinationVariable long channelId, StompHeaderAccessor headerAccessor) {
 
@@ -96,5 +96,15 @@ public class ChannelController {
     @MessageMapping("/channel/{channelId}/next")
     public void next(@DestinationVariable long channelId) {
         channelAuctionService.nextStep(channelId);
+    }
+
+    @MessageMapping("/channel/{channelId}/bid")
+    public void next(@DestinationVariable long channelId, BidRequest bidRequest) {
+
+        MessageType messageType = MessageType.findByTitle(bidRequest.getType());
+
+        if(messageType != MessageType.BID) throw new IllegalArgumentException("올바른 메시지 타입이 아닙니다.");
+
+        channelAuctionService.bid(bidRequest, channelId);
     }
 }
