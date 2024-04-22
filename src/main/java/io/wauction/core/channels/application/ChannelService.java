@@ -163,6 +163,8 @@ public class ChannelService {
                 .roles(auctionRuleResponse.getRoles())
                 .proceedWay(auctionRuleResponse.getProceedWay())
                 .order(channel.getOrder())
+                .waitingTimeForNext(channel.getWaitingTimeForNext())
+                .waitingTimeForAfterBid(channel.getWaitingTimeForAfterBid())
                 .build();
 
         // 경매순서 섞기
@@ -173,6 +175,16 @@ public class ChannelService {
                         .map(item -> new AuctionPlayItem(item.getId(), item.getName()))
                         .toList()
                 ));
+
+        // 첫 번째 경매대상
+        AuctionPlayItem auctionPlayItem = AuctionPlayItem.builder()
+                .itemId(auctionStartData.getItems().get(0).getId())
+                .name(auctionStartData.getItems().get(0).getName())
+                .order(auctionStartData.getOrder())
+                .price(0)
+                .build();
+
+        auctionStartData.setAuctionPlayItem(auctionPlayItem);
 
         MessageResponse messageResponse = new DataMessageResponse<>(MessageType.START, "SYSTEM", MessageType.START.makeFullMessage(""), auctionStartData);
 
