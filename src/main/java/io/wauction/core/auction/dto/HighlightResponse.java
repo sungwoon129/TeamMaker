@@ -10,5 +10,6 @@ import lombok.Getter;
 public class HighlightResponse {
     private Long id;
     private String name;
+    private int length;
     private String url;
 }

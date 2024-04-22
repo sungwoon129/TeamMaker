@@ -19,6 +19,9 @@ public class Highlight extends BaseTimeEntity {
     private Long id;
 
     private String name;
+
+    private int length;
+
     @Lob
     private String url;
 
@@ -26,6 +29,7 @@ public class Highlight extends BaseTimeEntity {
         return HighlightResponse.builder()
                 .id(id)
                 .name(name)
+                .length(length)
                 .url(url)
                 .build();
     }
