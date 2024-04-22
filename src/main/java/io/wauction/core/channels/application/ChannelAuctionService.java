@@ -21,6 +21,7 @@ public class ChannelAuctionService {
     private final AuctionOrderRepository auctionOrderRepository;
     private final ChannelService channelService;
 
+    @Transactional
     public void bid(BidRequest bidRequest, long channelId) {
 
         Channel channel = channelService.findOne(channelId);
