@@ -246,7 +246,7 @@ body {
 
 .progress-bar-text {
     color: white;
-    font-size: 24px;
+    font-size: 14px;
     font-weight: 700;
     position: relative;
     z-index: 1;
@@ -281,4 +281,34 @@ body {
     margin: 5px; /* 각 아이템 사이의 간격 설정 */
     position: absolute;
     transition: transform 1s ease; /* 애니메이션 적용 */
+}
+
+.progressbar {
+    width: 80%;
+    margin: 25px auto;
+    border: solid 1px #000;
+}
+.progressbar .inner {
+    height: 15px;
+    animation: progressbar-countdown;
+    /* Placeholder, this will be updated using javascript */
+    animation-duration: 40s;
+    /* We stop in the end */
+    animation-iteration-count: 1;
+    /* Stay on pause when the animation is finished finished */
+    animation-fill-mode: forwards;
+    /* We start paused, we start the animation using javascript */
+    animation-play-state: paused;
+    /* We want a linear animation, ease-out is standard */
+    animation-timing-function: linear;
+}
+@keyframes progressbar-countdown {
+    0% {
+        width: 100%;
+        background: #0F0;
+    }
+    100% {
+        width: 0%;
+        background: #F00;
+    }
 }

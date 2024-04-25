@@ -37,12 +37,12 @@ public class AuctionPlayService {
     }
 
     //TODO 유찰 구현
-    public void fallInBid() {
+    public void failInBid() {
 
     }
 
     // TODO 낙찰 구현
-    public void auctionOff() {
+    public void sold() {
 
     }
 
