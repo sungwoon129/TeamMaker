@@ -10,7 +10,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
-@Document(collation = "bids")
+@Document(collection = "bids")
 public class Bid {
 
     @GeneratedValue(strategy = GenerationType.IDENTITY)
