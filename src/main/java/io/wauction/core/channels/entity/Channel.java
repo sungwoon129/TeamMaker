@@ -46,14 +46,14 @@ public class Channel extends BaseTimeEntity {
     @ManyToOne
     private AuctionRule auctionRule;
 
-    @Column(columnDefinition = "다음 경매 대상으로 넘어가기까지의 시간")
+    @Column
     private int waitingTimeForNext;
 
-    @Column(columnDefinition = "입찰 후 대기시간")
+    @Column
     private int waitingTimeForAfterBid;
 
-    @Column(columnDefinition = "현재 진행중인 경매 순서")
-    private int order;
+    @Column
+    private int orderNum;
 
     @Column
     private Boolean deleted;
@@ -70,7 +70,7 @@ public class Channel extends BaseTimeEntity {
                 .state(ChannelState.WAITING)
                 .waitingTimeForNext(channelRequest.getWaitingTimeForNext())
                 .waitingTimeForAfterBid(channelRequest.getWaitingTimeForAfterBid())
-                .order(0)
+                .orderNum(0)
                 .build();
     }
 
@@ -101,7 +101,7 @@ public class Channel extends BaseTimeEntity {
                 .headCount(getHeadCount())
                 .capacity(capacity)
                 .auctionRuleResponse(auctionRule.toResponseDto())
-                .order(order)
+                .order(orderNum)
                 .clientRole(role.get().toResponseDto())
                 .activeRoles(activeRoles)
                 .readyRoles(connections.stream().filter(ChannelConnection::isReady).map(ChannelConnection::getRole).toList())
@@ -121,7 +121,7 @@ public class Channel extends BaseTimeEntity {
     }
 
     public void nextStep() {
-        this.order += 1;
+        this.orderNum += 1;
     }
 
     private boolean isAdmissionStatus() {
