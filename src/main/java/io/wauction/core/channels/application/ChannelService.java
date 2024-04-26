@@ -162,7 +162,7 @@ public class ChannelService {
                 .items(auctionRuleResponse.getItems())
                 .roles(auctionRuleResponse.getRoles())
                 .proceedWay(auctionRuleResponse.getProceedWay())
-                .order(channel.getOrder())
+                .order(channel.getOrderNum())
                 .waitingTimeForNext(channel.getWaitingTimeForNext())
                 .waitingTimeForAfterBid(channel.getWaitingTimeForAfterBid())
                 .build();

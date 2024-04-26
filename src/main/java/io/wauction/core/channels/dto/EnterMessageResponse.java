@@ -28,7 +28,7 @@ public class EnterMessageResponse extends MessageResponse {
     }
 
     public EnterMessageResponse(MessageType messageType, String writer, String sender, String msg, String manager) {
-        super(messageType, writer, sender, msg);
+        super(messageType, writer, msg, sender);
         this.manager = manager;
     }
 
