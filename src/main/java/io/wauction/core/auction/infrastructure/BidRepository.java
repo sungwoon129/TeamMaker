@@ -7,5 +7,5 @@ import java.util.Optional;
 
 public interface BidRepository extends MongoRepository<Bid, Long> {
 
-    Optional<Bid> findTopByChannelIdAndItemIdOOrderByPriceDesc(Long channelId, Long itemId);
+    Optional<Bid> findTopByChannelIdAndItemIdOrderByPriceDesc(Long channelId, long itemId);
 }

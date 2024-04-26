@@ -26,7 +26,7 @@ public class AuctionPlayService {
 
         if(auctionRule.getAuctionItems().stream().noneMatch(item -> item.getId() == bidRequest.getItemId())) throw new IllegalArgumentException(bidRequest.getItemId() + "와 일치하는 아이템 정보를 찾을 수 없습니다.");
 
-        Optional<Bid> biggestBid = bidRepository.findTopByChannelIdAndItemIdOOrderByPriceDesc(channelId, bidRequest.getItemId());
+        Optional<Bid> biggestBid = bidRepository.findTopByChannelIdAndItemIdOrderByPriceDesc(channelId, bidRequest.getItemId());
 
         if(biggestBid.isPresent() && biggestBid.get().priceIsEqualsOrGraterThan(Long.parseLong(bidRequest.getMessage()))) {
             throw new IllegalStateException("새로운 입찰 금액은 이전 최고가보다 높아야 합니다.");
