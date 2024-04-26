@@ -55,7 +55,9 @@ class Channel {
     isWaiting;
     timeoutFunc;
     auctionRule;
-    currentItem; // TODO : 현재 아이템 경매가와 관련된 기능 구현 - 현재 입찰가보다 낮은 가격 입찰불가
+    #waitingTimeForAfterBid;
+    #waitingTimeForNext;
+    #currentItem; // TODO : 현재 아이템 경매가와 관련된 기능 구현 - 현재 입찰가보다 낮은 가격 입찰불가
     timer = new BarTimer();
 
     constructor(channelId, role, uid) {
@@ -233,6 +235,9 @@ class Channel {
                         setTimeout(() => {
                             document.getElementById("shuffle-wrapper").classList.add('d-none');
                             relocationItem(msg.data.items);
+                            this.#waitingTimeForAfterBid = msg.data.waitingTimeForAfterBid;
+                            this.#waitingTimeForNext = msg.data.waitingTimeForNext;
+                            this.#currentItem = msg.data.auctionPlayItem;
                             this.toStageNextItem(msg.data.order)
                         }, 5000)
 
@@ -249,7 +254,7 @@ class Channel {
                 break;
             case 'NEXT' :
                 // TODO : 경매 대상정보 메시지 출력, 다음 경매대상 경매 시작까지 대기시간 처리
-                this.currentItem = msg.data;
+                this.#currentItem = msg.data;
                 this.toStageNextItem(msg.data.order);
                 break;
             default:
@@ -386,24 +391,87 @@ class Channel {
 
     toStageNextItem(order) {
 
+
         if(Array.isArray(this.auctionRule.items)) {
+
             const item = this.auctionRule.items[parseInt(order)];
             document.getElementById("profile-img").src=`${item.img}`;
-            document.getElementById("highlight").insertAdjacentHTML('beforeend', item.highlights[0].url);
+
+            const tag = document.createElement('script');
+
+            tag.src = `https://youtu.be/t1_FVzv4l-4?si=XsPcnLvDt34yg-KK`;
+            const firstScriptTag = document.getElementsByTagName('script')[0];
+            firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+
+
+
+            // 3. This function creates an <iframe> (and YouTube player)
+            //    after the API code downloads.
+            let player;
+            function onYouTubeIframeAPIReady() {
+                player = new YT.Player('player', {
+                    rel: '0',
+                    autoplay: '1',
+                    height: '360',
+                    width: '640',
+                    videoId: 'M7lc1UVf-VE',
+                    events: {
+                        'onReady': onPlayerReady,
+                        'onStateChange': onPlayerStateChange
+                    }
+                });
+            }
+            //document.getElementById("highlight").insertAdjacentHTML('beforeend', item.highlights[0].url);
+
+        }
+
+
+        // 4. The API will call this function when the video player is ready.
+        function onPlayerReady(event) {
+            event.target.playVideo();
+        }
+
+        // 5. The API calls this function when the player's state changes.
+        //    The function indicates that when playing a video (state=1),
+        //    the player should play for six seconds and then stop.
+        function onPlayerStateChange(event) {
+            if (event.data == YT.PlayerState.ENDED || event.data == YT.PlayerState.PAUSED) {
+                setTimeout(stopVideo, 1000);
+            }
+        }
+        function stopVideo() {
+            player.stopVideo();
+            createProgressbar("auction-timer",this.#waitingTimeForNext * 1000, this.auctionTimerEnd);
+            this.showPublicMsg({writer: this.role, msg: `${this.#currentItem.name} 경매시작 대기중`});
         }
 
     }
 
-    bid(plusValue) {
+    bid(value) {
 
         const order = 0;
 
         const data = {
             sender: this.role,
             type: "BID",
-            message: this.currentItemPrice + plusValue,
+            message: value,
             itemId: this.auctionRule.items[order].id
         }
+
+        stompClient.send(`/wauction/channel/${this.id}/start`, data);
+        // TODO : createProgressbar 애니메이션 초기화
+    }
+
+    auctionTimerEnd() {
+
+        // TODO : 채널 방장만 서버에 1회 전송
+
+        const data = {
+            itemId: this.#currentItem.id
+        }
+
+        stompClient.send(`/wauction/channel/${this.id}/item/determine-destination`, data);
+
     }
 }
 
@@ -558,6 +626,30 @@ const getElementPosition = (element) => {
     const scrollLeft =  document.documentElement.scrollLeft;
     const scrollTop = document.documentElement.scrollTop;
     return { x: rect.left + scrollLeft, y: rect.top + scrollTop };
+}
+
+const createProgressbar = (id, duration, callback) => {
+    // We select the div that we want to turn into a progressbar
+    const progressbar = document.getElementById(id);
+    progressbar.className = 'progressbar';
+
+    // We create the div that changes width to show progress
+    const progressbarinner = document.createElement('div');
+    progressbarinner.className = 'inner';
+
+    // Now we set the animation parameters
+    progressbarinner.style.animationDuration = duration;
+
+    // Eventually couple a callback
+    if (typeof(callback) === 'function') {
+        progressbarinner.addEventListener('animationend', callback);
+    }
+
+    // Append the progressbar to the main progressbardiv
+    progressbar.appendChild(progressbarinner);
+
+    // When everything is set up we start the animation
+    progressbarinner.style.animationPlayState = 'running';
 }
 
 
