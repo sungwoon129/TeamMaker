@@ -107,4 +107,9 @@ public class ChannelController {
 
         channelAuctionService.bid(bidRequest, channelId);
     }
+
+    @MessageMapping("/channel/{channelId}/item/determine-destination")
+    public void determineDestination(@DestinationVariable long channelId, @Payload MessageRequest messageRequest) {
+
+    }
 }

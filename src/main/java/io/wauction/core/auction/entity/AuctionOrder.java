@@ -1,12 +1,12 @@
 package io.wauction.core.auction.entity;
 
 import io.wauction.core.auction.dto.AuctionPlayItem;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
+
 import jakarta.persistence.Id;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.springframework.data.annotation.Transient;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.util.List;
@@ -16,9 +16,13 @@ import java.util.List;
 @Document(collation = "auctionOrder")
 public class AuctionOrder {
 
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Transient
+    public static final String SEQUENCE_NAME = "order_sequence";
+
     @Id
     private long id;
+
+    private long seq;
 
     private long channelId;
 
@@ -30,7 +34,7 @@ public class AuctionOrder {
     }
 
 
-    public static AuctionOrder createAuctionOrder(long channelId, List<AuctionPlayItem> items) {
+    public static AuctionOrder createAuctionOrder(long id, long channelId, List<AuctionPlayItem> items) {
         return new AuctionOrder(channelId, items);
     }
 

@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.wauction.core.auction.dto.AuctionPlayItem;
 import io.wauction.core.auction.dto.AuctionRuleResponse;
+import io.wauction.core.auction.entity.AuctionOrder;
 import io.wauction.core.auction.entity.ParticipantRole;
 import io.wauction.core.auction.infrastructure.AuctionOrderRepository;
 import io.wauction.core.channels.dto.*;
@@ -11,6 +12,7 @@ import io.wauction.core.channels.entity.Channel;
 import io.wauction.core.channels.entity.ChannelState;
 import io.wauction.core.channels.entity.MessageType;
 import io.wauction.core.channels.infrastructure.ChannelRepository;
+import io.wauction.core.common.utils.SequenceGeneratorService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.messaging.simp.SimpMessageSendingOperations;
@@ -33,6 +35,7 @@ public class ChannelService {
     private final SimpMessageSendingOperations simpMessageSendingOperations;
     private final ChannelRepository channelRepository;
     private final AuctionOrderRepository auctionOrderRepository;
+    private final SequenceGeneratorService sequenceGenerator;
     private final ObjectMapper objectMapper = new ObjectMapper();
 
 
@@ -181,7 +184,7 @@ public class ChannelService {
         auctionStartData.shuffleItems();
 
         // 섞인 경매순서 저장
-        auctionOrderRepository.save(createAuctionOrder(channelId, auctionStartData.getItems().stream()
+        auctionOrderRepository.save(createAuctionOrder(sequenceGenerator.generateSequence(AuctionOrder.SEQUENCE_NAME),channelId, auctionStartData.getItems().stream()
                         .map(item -> new AuctionPlayItem(item.getId(), item.getName()))
                         .toList()
                 ));
