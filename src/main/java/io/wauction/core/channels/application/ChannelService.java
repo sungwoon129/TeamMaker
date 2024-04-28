@@ -65,13 +65,14 @@ public class ChannelService {
 
         List<String> activeRoles = connections.stream().map(ChannelConnection::getRole).toList();
 
-        MessageResponse responseDto = new EnterMessageResponse(
-                MessageType.LEAVE,
-                "SYSTEM",
-                sender,
-                activeRoles,
-                connections.stream().filter(ChannelConnection::isManager).findAny().orElseThrow(() -> new NullPointerException("채널의 방장 정보를 찾을 수 없습니다")).getRole()
-        );
+
+        MessageResponse responseDto = EnterMessageResponse.builder()
+                .messageType(MessageType.LEAVE)
+                .writer("SYSTEM")
+                .sender(sender)
+                .activeRoles(activeRoles)
+                .manager(connections.stream().filter(ChannelConnection::isManager).findAny().orElseThrow(() -> new NullPointerException("채널의 방장 정보를 찾을 수 없습니다")).getRole())
+                .build();
 
         publishMessageToChannel(channel.getId(), responseDto);
     }
@@ -99,7 +100,11 @@ public class ChannelService {
 
     public void requestForRoleExchange(long channelId, MessageRequest messageRequest, MessageType messageType) {
 
-        MessageResponse messageResponse = new MessageResponse(MessageType.EXCHANGE, messageRequest.getSender(), messageType.makeFullMessage(messageRequest.getSender()), messageRequest.getTargetUsername());
+        MessageResponse messageResponse = new MessageResponse(
+                MessageType.EXCHANGE,
+                messageRequest.getSender(),
+                messageType.makeFullMessage(messageRequest.getSender()),
+                messageRequest.getTargetUsername());
 
         List<ChannelConnection> connections = subscribeMap.get(String.valueOf(channelId));
 
@@ -112,7 +117,12 @@ public class ChannelService {
 
     public void responseRoleExchangeRequest(long channelId, MessageRequest messageRequest, MessageType messageType) {
 
-        MessageResponse messageResponse = new MessageResponse(MessageType.EXCHANGE_RES, messageRequest.getSender(), messageType.makeFullMessage(messageRequest.getMessage()), messageRequest.getTargetUsername(), messageRequest.getMessage());
+        MessageResponse messageResponse = new MessageResponse(
+                MessageType.EXCHANGE_RES,
+                messageRequest.getSender(),
+                messageType.makeFullMessage(messageRequest.getMessage()),
+                messageRequest.getTargetUsername());
+
         List<ChannelConnection> connections = subscribeMap.get(String.valueOf(channelId));
 
         Optional<ChannelConnection> targetConnection = connections.stream().filter(connect -> connect.getRole().equals(messageRequest.getTargetUsername())).findAny();

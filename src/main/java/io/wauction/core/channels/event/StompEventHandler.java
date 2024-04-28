@@ -67,12 +67,13 @@ public class StompEventHandler {
             ChannelConnection channelConnection = connections.stream().filter(connection -> connection.getSessionId().equals(headerAccessor.getSessionId())).findFirst().orElseThrow(() -> new IllegalArgumentException("클라이언트의 세션 정보를 찾을 수 없습니다."));
 
 
-            MessageResponse responseDto = new EnterMessageResponse(
-                    MessageType.JOIN,
-                    "SYSTEM",
-                    channelConnection.getRole().toUpperCase(),
-                    MessageType.JOIN.makeFullMessage(channelConnection.getRole()),
-                    connections.stream().filter(ChannelConnection::isManager).findAny().orElseThrow(() -> new NullPointerException("채널의 방장 정보를 찾을 수 없습니다")).getRole());
+            MessageResponse responseDto = EnterMessageResponse.builder()
+                    .messageType(MessageType.JOIN)
+                    .writer("SYSTEM")
+                    .sender(channelConnection.getRole().toUpperCase())
+                    .msg(MessageType.JOIN.makeFullMessage(channelConnection.getRole()))
+                    .manager(connections.stream().filter(ChannelConnection::isManager).findAny().orElseThrow(() -> new NullPointerException("채널의 방장 정보를 찾을 수 없습니다")).getRole())
+                    .build();
 
             channelService.publishMessageToChannel(Long.parseLong(channelId), responseDto);
 

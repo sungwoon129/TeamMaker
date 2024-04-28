@@ -5,7 +5,9 @@ import io.wauction.core.channels.entity.MessageType;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.experimental.SuperBuilder;
 
+@SuperBuilder
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @Getter
 @AllArgsConstructor
@@ -13,6 +15,7 @@ import lombok.NoArgsConstructor;
 public class MessageResponse {
     private MessageType messageType;
     private String writer;
+    private String sender;
     private String msg;
     private String targetUsername;
     private String resultYne;
@@ -30,5 +33,6 @@ public class MessageResponse {
         this.msg = msg;
         this.targetUsername = targetUsername;
     }
+
 
 }
