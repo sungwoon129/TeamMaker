@@ -5,6 +5,7 @@ import org.springframework.data.mongodb.repository.MongoRepository;
 
 import java.util.Optional;
 
-public interface AuctionOrderRepository extends MongoRepository<AuctionOrder, Long> {
+public interface AuctionOrderRepository extends MongoRepository<AuctionOrder, String> {
     Optional<AuctionOrder> findByChannelId(long channelId);
+
 }
