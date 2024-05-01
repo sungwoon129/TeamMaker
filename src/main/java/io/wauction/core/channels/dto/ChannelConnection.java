@@ -12,6 +12,7 @@ public class ChannelConnection {
     private String role;
     private boolean isReady;
     private boolean isManager;
+    private boolean currentHighlightCompleted;
 
 
     public ChannelConnection(String sessionId, String channelId) {

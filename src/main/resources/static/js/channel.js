@@ -59,6 +59,7 @@ class Channel {
     #waitingTimeForNext;
     #currentItem; // TODO : 현재 아이템 경매가와 관련된 기능 구현 - 현재 입찰가보다 낮은 가격 입찰불가
     timer = new BarTimer();
+    player;
 
     constructor(channelId, role, uid) {
         this.id = channelId;
@@ -195,14 +196,15 @@ class Channel {
 
                 const readyTargetIdx= getParticipantIdx(msg.writer);
                 document.querySelectorAll(".participant-info").item(readyTargetIdx).classList.add('ready');
-                document.querySelectorAll(".exchange-display").item(readyTargetIdx).classList.add('d-none');
+
+                if(this.role !== msg.writer) document.querySelectorAll(".exchange-display").item(readyTargetIdx).classList.add('d-none');
 
                 break;
 
             case 'UNREADY' :
                 const unreadyTargetIdx= getParticipantIdx(msg.writer);
                 document.querySelectorAll(".participant-info").item(unreadyTargetIdx).classList.remove('ready');
-                document.querySelectorAll(".exchange-display").item(unreadyTargetIdx).classList.remove('d-none');
+                if(this.role !== msg.writer) document.querySelectorAll(".exchange-display").item(unreadyTargetIdx).classList.remove('d-none');
 
                 break;
 
@@ -256,6 +258,9 @@ class Channel {
                 // TODO : 경매 대상정보 메시지 출력, 다음 경매대상 경매 시작까지 대기시간 처리
                 this.#currentItem = msg.data;
                 this.toStageNextItem(msg.data.order);
+                break;
+            case 'COMPLETE_HIGHLIGHT_PLAY' :
+                this.initWaitingTime();
                 break;
             default:
                 console.error("잘못된 메시지 타입입니다.")
@@ -397,52 +402,26 @@ class Channel {
             const item = this.auctionRule.items[parseInt(order)];
             document.getElementById("profile-img").src=`${item.img}`;
 
-            const tag = document.createElement('script');
+            this.player = new YT.Player('player', {
+                rel: '0',
+                autoplay: '1',
+                height: '360',
+                width: '640',
+                videoId: 't1_FVzv4l-4?si=XsPcnLvDt34yg-KK',
+                playerVars: {
+                    autoplay: 1,
+                    controls: 0,
+                    showinfo: 0,
+                    autohide: 1
+                },
+                events: {
+                    'onReady': this.onPlayerReady,
+                    'onStateChange': this.onPlayerStateChange
+                }
+            });
 
-            tag.src = `https://youtu.be/t1_FVzv4l-4?si=XsPcnLvDt34yg-KK`;
-            const firstScriptTag = document.getElementsByTagName('script')[0];
-            firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
-
-
-
-            // 3. This function creates an <iframe> (and YouTube player)
-            //    after the API code downloads.
-            let player;
-            function onYouTubeIframeAPIReady() {
-                player = new YT.Player('player', {
-                    rel: '0',
-                    autoplay: '1',
-                    height: '360',
-                    width: '640',
-                    videoId: 'M7lc1UVf-VE',
-                    events: {
-                        'onReady': onPlayerReady,
-                        'onStateChange': onPlayerStateChange
-                    }
-                });
-            }
             //document.getElementById("highlight").insertAdjacentHTML('beforeend', item.highlights[0].url);
 
-        }
-
-
-        // 4. The API will call this function when the video player is ready.
-        function onPlayerReady(event) {
-            event.target.playVideo();
-        }
-
-        // 5. The API calls this function when the player's state changes.
-        //    The function indicates that when playing a video (state=1),
-        //    the player should play for six seconds and then stop.
-        function onPlayerStateChange(event) {
-            if (event.data == YT.PlayerState.ENDED || event.data == YT.PlayerState.PAUSED) {
-                setTimeout(stopVideo, 1000);
-            }
-        }
-        function stopVideo() {
-            player.stopVideo();
-            createProgressbar("auction-timer",this.#waitingTimeForNext * 1000, this.auctionTimerEnd);
-            this.showPublicMsg({writer: this.role, msg: `${this.#currentItem.name} 경매시작 대기중`});
         }
 
     }
@@ -472,6 +451,25 @@ class Channel {
 
         stompClient.send(`/wauction/channel/${this.id}/item/determine-destination`, data);
 
+    }
+
+    onPlayerReady(event) {
+        event.target.playVideo();
+    }
+
+
+    onPlayerStateChange(event) {
+        if (this.#currentItem.isCompleteHighlightPlay === true && (event.data === YT.PlayerState.ENDED || event.data === YT.PlayerState.PAUSED)) {
+            stompClient.send(`/wauction/channel/${this.id}/item/complete-highlight-play`);
+            this.#currentItem.isCompleteHighlightPlay = true;
+        }
+    }
+
+
+    initWaitingTime() {
+        this.player.stopVideo();
+        createProgressbar("auction-timer",this.#waitingTimeForNext * 1000, this.auctionTimerEnd);
+        this.showPublicMsg({writer: this.role, msg: `${this.#currentItem.name} 경매시작 대기중`});
     }
 }
 
@@ -651,6 +649,12 @@ const createProgressbar = (id, duration, callback) => {
     // When everything is set up we start the animation
     progressbarinner.style.animationPlayState = 'running';
 }
+
+
+
+
+
+
 
 
 

@@ -56,6 +56,11 @@ public enum MessageType {
         public String makeFullMessage(String item) {
             return "다음 순서 " + item;
         }
+    },
+    COMPLETE_HIGHLIGHT_PLAY("complete_highlight_play") {
+        public String makeFullMessage(String msg) {
+            return msg;
+        }
     };
 
 

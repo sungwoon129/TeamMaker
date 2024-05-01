@@ -112,4 +112,11 @@ public class ChannelController {
     public void determineDestination(@DestinationVariable long channelId, @Payload MessageRequest messageRequest) {
 
     }
+
+    @MessageMapping("/channel/{channelId}/item/complete-highlight-play")
+    public void completeHighlightPlay(@DestinationVariable long channelId, StompHeaderAccessor headerAccessor) {
+
+        channelAuctionService.completeHighlightPlay(channelId, headerAccessor.getSessionId());
+
+    }
 }

@@ -5,6 +5,7 @@ import io.wauction.core.auction.dto.AuctionPlayItem;
 import io.wauction.core.auction.dto.BidRequest;
 import io.wauction.core.auction.entity.AuctionOrder;
 import io.wauction.core.auction.infrastructure.AuctionOrderRepository;
+import io.wauction.core.channels.dto.ChannelConnection;
 import io.wauction.core.channels.dto.DataMessageResponse;
 import io.wauction.core.channels.dto.MessageResponse;
 import io.wauction.core.channels.entity.Channel;
@@ -12,6 +13,10 @@ import io.wauction.core.channels.entity.MessageType;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+
+import static io.wauction.core.channels.event.StompEventHandler.subscribeMap;
 
 @RequiredArgsConstructor
 @Service
@@ -49,6 +54,14 @@ public class ChannelAuctionService {
         AuctionPlayItem auctionPlayItem = auctionOrder.getItems().get(channel.getOrderNum());
         auctionPlayItem.setOrder(channel.getOrderNum());
 
+        List<ChannelConnection> connections = subscribeMap.get(String.valueOf(channelId));
+
+
+        for(ChannelConnection connection : connections) {
+            connection.setCurrentHighlightCompleted(false);
+        }
+
+
         MessageResponse messageResponse = new DataMessageResponse<>(
                 MessageType.NEXT,
                 "SYSTEM",
@@ -57,5 +70,27 @@ public class ChannelAuctionService {
         );
 
         channelService.publishMessageToChannel(channelId, messageResponse);
+    }
+
+    public void completeHighlightPlay(long channelId, String sessionId) {
+        List<ChannelConnection> connections = subscribeMap.get(String.valueOf(channelId));
+
+        connections.stream().filter(connect -> connect.getSessionId().equals(sessionId)).findAny().orElseThrow(() -> new IllegalStateException("현재 채널에 참가하지 않은 클라이언트의 요청입니다."));
+
+        for(ChannelConnection connection : connections) {
+            if(connection.getSessionId().equals(sessionId)) {
+                connection.setCurrentHighlightCompleted(true);
+            }
+        }
+
+        if(connections.stream().allMatch(ChannelConnection::isCurrentHighlightCompleted)) {
+
+            MessageResponse messageResponse = MessageResponse.builder()
+                    .messageType(MessageType.COMPLETE_HIGHLIGHT_PLAY)
+                    .writer("SYSTEM")
+                    .build();
+
+            channelService.publishMessageToChannel(channelId, messageResponse);
+        }
     }
 }
