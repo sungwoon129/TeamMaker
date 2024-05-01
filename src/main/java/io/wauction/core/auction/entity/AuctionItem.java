@@ -20,7 +20,9 @@ public class AuctionItem {
     private String name;
 
     @Comment("경매 대상의 담당 포지션(역할)")
-    private String position;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "position_id")
+    private TeamPosition position;
 
     @Comment("경매 대상의 이미지 url")
     private String img;
