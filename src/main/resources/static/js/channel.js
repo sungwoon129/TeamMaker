@@ -240,6 +240,7 @@ class Channel {
                             this.#waitingTimeForAfterBid = msg.data.waitingTimeForAfterBid;
                             this.#waitingTimeForNext = msg.data.waitingTimeForNext;
                             this.#currentItem = msg.data.auctionPlayItem;
+                            this.#currentItem.isCompleteHighlightPlay = false;
                             this.toStageNextItem(msg.data.order)
                         }, 5000)
 
@@ -257,6 +258,7 @@ class Channel {
             case 'NEXT' :
                 // TODO : 경매 대상정보 메시지 출력, 다음 경매대상 경매 시작까지 대기시간 처리
                 this.#currentItem = msg.data;
+                this.#currentItem.isCompleteHighlightPlay = false;
                 this.toStageNextItem(msg.data.order);
                 break;
             case 'COMPLETE_HIGHLIGHT_PLAY' :
@@ -401,6 +403,9 @@ class Channel {
 
             const item = this.auctionRule.items[parseInt(order)];
             document.getElementById("profile-img").src=`${item.img}`;
+            document.querySelector(".item-contents-box .item-name").textContent = item.name;
+            document.querySelector(".item-info-box .item-info-1").textContent = item.position.name;
+            document.querySelector(".item-info-box .item-info-2").textContent = "";
 
             this.player = new YT.Player('player', {
                 rel: '0',
@@ -455,8 +460,8 @@ class Channel {
     }
 
 
-    onPlayerStateChange(event) {
-        if (this.#currentItem.isCompleteHighlightPlay === true && (event.data === YT.PlayerState.ENDED || event.data === YT.PlayerState.PAUSED)) {
+    onPlayerStateChange = (event) => {
+        if ((event.data === YT.PlayerState.ENDED || event.data === YT.PlayerState.PAUSED) && this.#currentItem.isCompleteHighlightPlay !== true) {
             stompClient.send(`/wauction/channel/${this.id}/item/complete-highlight-play`);
             this.#currentItem.isCompleteHighlightPlay = true;
         }
