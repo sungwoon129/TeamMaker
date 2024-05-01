@@ -38,8 +38,10 @@ dependencies {
     implementation('org.webjars:jquery:3.7.1')
     implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
 
+
     // mongodb
     implementation 'org.springframework.boot:spring-boot-starter-data-mongodb'
+    implementation 'org.mongodb:mongodb-driver-reactivestreams'
 }
 
 tasks.named('test') {
