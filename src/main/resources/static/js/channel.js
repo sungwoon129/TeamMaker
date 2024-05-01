@@ -407,7 +407,7 @@ class Channel {
                 autoplay: '1',
                 height: '360',
                 width: '640',
-                videoId: 't1_FVzv4l-4?si=XsPcnLvDt34yg-KK',
+                videoId: `${item.highlights[0].url}`,
                 playerVars: {
                     autoplay: 1,
                     controls: 0,
@@ -419,9 +419,6 @@ class Channel {
                     'onStateChange': this.onPlayerStateChange
                 }
             });
-
-            //document.getElementById("highlight").insertAdjacentHTML('beforeend', item.highlights[0].url);
-
         }
 
     }
