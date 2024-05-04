@@ -266,6 +266,16 @@ class Channel {
             case 'COMPLETE_HIGHLIGHT_PLAY' :
                 this.initWaitingTime();
                 break;
+            case 'COMPLETE_COUNT' :
+                if(msg.data === "COMPLETE_BEFORE_BID") {
+                    this.showPublicMsg(msg.msg)
+                    this.startBid()
+
+                } else if(msg.data === "END_BID_TIMER") {
+
+                }
+
+                break;
             default:
                 console.error("잘못된 메시지 타입입니다.")
 
@@ -445,14 +455,15 @@ class Channel {
         // TODO : createProgressbar 애니메이션 초기화
     }
 
-    auctionTimerEnd = (event)  => {
+    // 입찰 전 대기시간 타이머 종료
+    beforeBiddingTimerEnd = (event)  => {
 
-        // TODO : 채널 방장만 서버에 1회 전송
         const data = {
-            itemId: this.#currentItem.id
-        }
+            type: "COMPLETE_BEFORE_BID"
+        };
 
-        //stompClient.send(`/wauction/channel/${this.id}/item/determine-destination`, data);
+
+        stompClient.send(`/wauction/channel/${this.id}/item/timer-end`,{}, JSON.stringify(data));
 
     }
 
@@ -473,8 +484,19 @@ class Channel {
     // 참가자들의 입찰 전 경매대상의 정보를 확인하면서 준비하는 시간 타이머 동작
     initWaitingTime() {
         this.player.stopVideo();
-        createProgressbar("auction-timer",this.#waitingTimeForNext, this.auctionTimerEnd, "입찰시작 까지");
+        createProgressbar("auction-timer",this.#waitingTimeForNext, this.beforeBiddingTimerEnd, "입찰시작 까지");
         this.showPublicMsg({writer: "SYSTEM", msg: `${this.#currentItem.name} 경매시작 대기중...`});
+    }
+
+    startBid() {
+        document.getElementById("bid-status").classList.remove("d-none");
+
+        //TODO 애니메이션 초기화되지 않음. 초기화되지않고 이미 끝난상태로 인식. 타이머 초기화되야함
+        createProgressbar("auction-timer",this.#waitingTimeForAfterBid, this.endBid, "입찰종료 까지");
+    }
+
+    endBid = (event) => {
+        console.log("end bid!");
     }
 }
 
@@ -642,7 +664,6 @@ const createProgressbar = (id, duration, callback, text) => {
     progressbarinner.className = 'inner';
 
     // Now we set the animation parameters
-    console.log(duration);
     progressbarinner.style.animationDuration = duration + "s";
 
     // Eventually couple a callback

@@ -24,11 +24,4 @@ public class MessageRequest {
         return sender;
     }
 
-    public String getType() {
-        return type;
-    }
-
-    public String getMessage() {
-        return message;
-    }
 }

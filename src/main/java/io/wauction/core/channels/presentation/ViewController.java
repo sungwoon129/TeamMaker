@@ -66,7 +66,7 @@ public class ViewController {
 
     @ResponseBody
     @PostMapping("/channel")
-    public ResponseEntity<CommonResponse<Long>> createChannel(@RequestBody ChannelRequest channelRequest) throws URISyntaxException {
+    public ResponseEntity<CommonResponse<Long>> createChannel(@RequestBody ChannelRequest channelRequest) {
         Long channelId = createAuctionRoomService.createAuctionRoom(channelRequest);
         return new ResponseEntity<>(new CommonResponse<>(channelId),HttpStatus.CREATED);
     }

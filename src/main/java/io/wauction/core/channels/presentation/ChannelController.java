@@ -108,15 +108,28 @@ public class ChannelController {
         channelAuctionService.bid(bidRequest, channelId);
     }
 
-    @MessageMapping("/channel/{channelId}/item/determine-destination")
-    public void determineDestination(@DestinationVariable long channelId, @Payload MessageRequest messageRequest) {
+
+    @MessageMapping("/channel/{channelId}/item/timer-end")
+    public void timerEnd(@DestinationVariable long channelId, @Payload MessageRequest messageRequest, StompHeaderAccessor headerAccessor) {
+
+        MessageType messageType = MessageType.findByTitle(messageRequest.getType());
+
+        channelAuctionService.timerEnd(channelId, headerAccessor.getSessionId(), messageType);
 
     }
+
+
 
     @MessageMapping("/channel/{channelId}/item/complete-highlight-play")
     public void completeHighlightPlay(@DestinationVariable long channelId, StompHeaderAccessor headerAccessor) {
 
         channelAuctionService.completeHighlightPlay(channelId, headerAccessor.getSessionId());
+
+    }
+
+    @MessageMapping("/channel/{channelId}/item/determine-destination")
+    public void determineDestination(@DestinationVariable long channelId, @Payload MessageRequest messageRequest) {
+
 
     }
 }

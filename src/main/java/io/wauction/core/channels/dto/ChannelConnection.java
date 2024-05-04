@@ -13,6 +13,7 @@ public class ChannelConnection {
     private boolean isReady;
     private boolean isManager;
     private boolean currentHighlightCompleted;
+    private boolean isCounted;
 
 
     public ChannelConnection(String sessionId, String channelId) {

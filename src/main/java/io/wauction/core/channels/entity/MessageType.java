@@ -61,7 +61,23 @@ public enum MessageType {
         public String makeFullMessage(String msg) {
             return msg;
         }
+    },
+    COMPLETE_BEFORE_BID("complete_before_bid") {
+        public String makeFullMessage(String msg) {
+            return "경매 시작";
+        }
+    },
+    END_BID_TIMER("end_bid_timer") {
+        public String makeFullMessage(String msg) {
+            return "입찰 종료";
+        }
+    },
+    COMPLETE_COUNT("complete_count") {
+        public String makeFullMessage(String msg) {
+            return msg;
+        }
     };
+
 
 
     private final String title;

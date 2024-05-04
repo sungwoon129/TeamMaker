@@ -93,4 +93,35 @@ public class ChannelAuctionService {
             channelService.publishMessageToChannel(channelId, messageResponse);
         }
     }
+
+    public void timerEnd(long channelId, String sessionId, MessageType type) {
+        List<ChannelConnection> connections = subscribeMap.get(String.valueOf(channelId));
+
+        connections.stream().filter(connect -> connect.getSessionId().equals(sessionId)).findAny().orElseThrow(() -> new IllegalStateException("현재 채널에 참가하지 않은 클라이언트의 요청입니다."));
+
+        for(ChannelConnection connection : connections) {
+            if(connection.getSessionId().equals(sessionId)) {
+                connection.setCounted(true);
+            }
+        }
+
+        if(connections.stream().allMatch(ChannelConnection::isCounted)) {
+
+            MessageResponse messageResponse = new DataMessageResponse<>(
+                    MessageType.COMPLETE_COUNT,
+                    "SYSTEM",
+                    type.makeFullMessage(""),
+                    type);
+
+
+            channelService.publishMessageToChannel(channelId, messageResponse);
+
+            initCounted(connections);
+
+        }
+    }
+
+    private void initCounted(List<ChannelConnection> connections) {
+        for(ChannelConnection connection : connections) connection.setCounted(false);
+    }
 }
