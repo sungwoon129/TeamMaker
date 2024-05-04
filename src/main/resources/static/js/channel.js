@@ -216,7 +216,7 @@ class Channel {
 
                     this.showPublicMsg({writer: "SYSTEM", msg: `시작 ${count}초 전...`})
 
-                    count --;
+
 
                     if(count > 0) {
                         setTimeout(countDown, 1000)
@@ -246,6 +246,8 @@ class Channel {
 
 
                     }
+
+                    count --;
                 }
 
                 countDown();
@@ -415,7 +417,7 @@ class Channel {
                 videoId: `${item.highlights[0].url}`,
                 playerVars: {
                     autoplay: 1,
-                    controls: 0,
+                    controls: 1,
                     showinfo: 0,
                     autohide: 1
                 },
@@ -443,15 +445,14 @@ class Channel {
         // TODO : createProgressbar 애니메이션 초기화
     }
 
-    auctionTimerEnd() {
+    auctionTimerEnd = (event)  => {
 
         // TODO : 채널 방장만 서버에 1회 전송
-
         const data = {
             itemId: this.#currentItem.id
         }
 
-        stompClient.send(`/wauction/channel/${this.id}/item/determine-destination`, data);
+        //stompClient.send(`/wauction/channel/${this.id}/item/determine-destination`, data);
 
     }
 
@@ -460,6 +461,7 @@ class Channel {
     }
 
 
+    // 하이라이트 영상 일시정지 or 재생완료시 서버에 완료 메시지 전송
     onPlayerStateChange = (event) => {
         if ((event.data === YT.PlayerState.ENDED || event.data === YT.PlayerState.PAUSED) && this.#currentItem.isCompleteHighlightPlay !== true) {
             stompClient.send(`/wauction/channel/${this.id}/item/complete-highlight-play`);
@@ -468,10 +470,11 @@ class Channel {
     }
 
 
+    // 참가자들의 입찰 전 경매대상의 정보를 확인하면서 준비하는 시간 타이머 동작
     initWaitingTime() {
         this.player.stopVideo();
-        createProgressbar("auction-timer",this.#waitingTimeForNext * 1000, this.auctionTimerEnd);
-        this.showPublicMsg({writer: this.role, msg: `${this.#currentItem.name} 경매시작 대기중`});
+        createProgressbar("auction-timer",this.#waitingTimeForNext, this.auctionTimerEnd, "입찰시작 까지");
+        this.showPublicMsg({writer: "SYSTEM", msg: `${this.#currentItem.name} 경매시작 대기중...`});
     }
 }
 
@@ -628,9 +631,10 @@ const getElementPosition = (element) => {
     return { x: rect.left + scrollLeft, y: rect.top + scrollTop };
 }
 
-const createProgressbar = (id, duration, callback) => {
+const createProgressbar = (id, duration, callback, text) => {
     // We select the div that we want to turn into a progressbar
     const progressbar = document.getElementById(id);
+    const remainingTimer = document.querySelector(".progress-bar-text");
     progressbar.className = 'progressbar';
 
     // We create the div that changes width to show progress
@@ -638,7 +642,8 @@ const createProgressbar = (id, duration, callback) => {
     progressbarinner.className = 'inner';
 
     // Now we set the animation parameters
-    progressbarinner.style.animationDuration = duration;
+    console.log(duration);
+    progressbarinner.style.animationDuration = duration + "s";
 
     // Eventually couple a callback
     if (typeof(callback) === 'function') {
@@ -650,6 +655,34 @@ const createProgressbar = (id, duration, callback) => {
 
     // When everything is set up we start the animation
     progressbarinner.style.animationPlayState = 'running';
+
+
+    // Update the timer text
+    const updateTimerText = () => {
+        // Calculate remaining time
+        const totalTime = parseFloat(duration) * 1000; // Convert seconds to milliseconds
+        const elapsedTime = totalTime - (progressbarinner.getBoundingClientRect().width / progressbar.getBoundingClientRect().width) * totalTime;
+        const remainingTime = Math.max(0, totalTime - elapsedTime);
+
+
+        // Convert remaining time to seconds
+        const seconds = Math.ceil(remainingTime / 100) / 10;
+
+
+        // Display remaining time
+        remainingTimer.innerHTML = `${text} <span class="emphasis-remains">${seconds}s</span> `;
+    };
+
+    // Update timer text initially
+    updateTimerText();
+
+    // Update timer text on animation frame
+    const updateTimer = () => {
+        updateTimerText();
+        requestAnimationFrame(updateTimer);
+    };
+    requestAnimationFrame(updateTimer);
+
 }
 
 

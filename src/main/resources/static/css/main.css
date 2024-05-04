@@ -283,16 +283,27 @@ body {
     transition: transform 1s ease; /* 애니메이션 적용 */
 }
 
+
+/* 경매 중 입찰 대기시간, 입찰 잔여시간 타이머 */
+.auction-progress-bar-container {
+    padding-top: 10px;
+}
+
+.emphasis-remains {
+    color: white;
+    font-size: 18px;
+}
+
 .progressbar {
-    width: 80%;
-    margin: 25px auto;
-    border: solid 1px #000;
+    width: 100%;
+    margin: 10px auto;
+    /*border: solid 1px #000;*/
 }
 .progressbar .inner {
     height: 15px;
     animation: progressbar-countdown;
     /* Placeholder, this will be updated using javascript */
-    animation-duration: 40s;
+    animation-duration: 10s;
     /* We stop in the end */
     animation-iteration-count: 1;
     /* Stay on pause when the animation is finished finished */
@@ -305,10 +316,10 @@ body {
 @keyframes progressbar-countdown {
     0% {
         width: 100%;
-        background: #0F0;
+        background: #00ced1;
     }
     100% {
         width: 0%;
-        background: #F00;
+        background: #f6bb43;
     }
 }
