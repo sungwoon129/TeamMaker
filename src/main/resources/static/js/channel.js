@@ -256,7 +256,8 @@ class Channel {
             case 'BID' :
                 // TODO : 대기시간 초기화, 대기시간 모두 소모시까지 입찰 없을 시 유찰처리, 입찰정보에 따른 ui 업데이트
                 this.showPublicMsg(msg)
-                resetProgressBarAnime();
+                this.updateBidInfo(msg);
+                resetTimer("inner1");
                 break;
             case 'NEXT' :
                 // TODO : 경매 대상정보 메시지 출력, 다음 경매대상 경매 시작까지 대기시간 처리
@@ -446,11 +447,11 @@ class Channel {
         const data = {
             sender: this.role,
             type: "BID",
-            message: this.#currentItem.price + value,
+            message: parseInt(this.#currentItem.price) + parseInt(value),
             itemId: this.#currentItem.itemId
         }
 
-        stompClient.send(`/wauction/channel/${this.id}/bid`, data);
+        stompClient.send(`/wauction/channel/${this.id}/bid`, {}, JSON.stringify(data));
     }
 
     // 입찰 전 대기시간 타이머 종료
@@ -482,19 +483,34 @@ class Channel {
     // 참가자들의 입찰 전 경매대상의 정보를 확인하면서 준비하는 시간 타이머 동작
     initWaitingTime() {
         this.player.stopVideo();
-        createProgressbar("auction-timer",this.#waitingTimeForNext, this.beforeBiddingTimerEnd, "입찰시작 까지");
+        createTimer("auction-timer",this.#waitingTimeForNext, this.beforeBiddingTimerEnd, "입찰시작 까지");
         this.showPublicMsg({writer: "SYSTEM", msg: `${this.#currentItem.name} 경매시작 대기중...`});
     }
 
     startBid() {
         document.getElementById("bid-status").classList.remove("d-none");
+        this.showPublicMsg({writer: "SYSTEM", msg: `${this.#currentItem.name} 경매시작`});
+        createTimer("auction-timer",this.#waitingTimeForAfterBid, this.endBid, "입찰종료 까지");
 
-        //TODO 애니메이션 초기화되지 않음. 초기화되지않고 이미 끝난상태로 인식. 타이머 초기화되야함
-        createProgressbar("auction-timer",this.#waitingTimeForAfterBid, this.endBid, "입찰종료 까지");
+        document.querySelectorAll(".price-control-panel button").forEach(btn => btn.disabled = false);
     }
 
     endBid = (event) => {
         console.log("end bid!");
+
+        this.showPublicMsg({writer: "SYSTEM", msg: `${this.#currentItem.name} 경매 종료`});
+
+        const bidStatusBtn = document.getElementById("bid-status");
+        bidStatusBtn.classList.replace("bg-success", "bg-danger");
+        bidStatusBtn.textContent = "입찰 종료";
+
+        document.querySelectorAll(".price-control-panel button").forEach(btn => btn.disabled = true);
+    }
+
+    updateBidInfo(msg) {
+        document.querySelector(".bidder-text").textContent = msg.writer;
+        document.querySelector(".bid-price").textContent = msg.data.price;
+
     }
 }
 
@@ -528,10 +544,9 @@ document.addEventListener("DOMContentLoaded",  () => {
         channel.start();
     });
 
-    document.querySelector("#bid").addEventListener("click", (event) => {
-
+    document.querySelectorAll(".price-control-panel button").forEach(btn => btn.addEventListener("click", (event) => {
         channel.bid(event.target.value);
-    })
+    }));
 
     document.querySelectorAll(".exchange-seat").forEach((btn, idx) => {
         btn.addEventListener("click", (event) => {
@@ -651,7 +666,7 @@ const getElementPosition = (element) => {
     return { x: rect.left + scrollLeft, y: rect.top + scrollTop };
 }
 
-const createProgressbar = (id, duration, callback, text) => {
+const createTimer = (id, duration, callback, text, canReset) => {
     // We select the div that we want to turn into a progressbar
     const progressbar = document.getElementById(id);
     const remainingTimer = document.querySelector(".progress-bar-text");
@@ -659,7 +674,9 @@ const createProgressbar = (id, duration, callback, text) => {
 
     // We create the div that changes width to show progress
     const progressbarinner = document.createElement('div');
+
     progressbarinner.className = 'inner';
+    progressbarinner.id = "inner" + progressbar.querySelectorAll(".inner").length;
 
     // Now we set the animation parameters
     progressbarinner.style.animationDuration = duration + "s";
@@ -704,8 +721,8 @@ const createProgressbar = (id, duration, callback, text) => {
 
 }
 
-const resetProgressBarAnime = () => {
-    const progressbarInner = document.querySelector(".progressbar .inner");
+const resetTimer = (id) => {
+    const progressbarInner = document.getElementById(id);
 
     progressbarInner.classList.remove("inner");
     void progressbarInner.offsetWidth;
