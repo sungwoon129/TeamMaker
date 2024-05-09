@@ -14,7 +14,7 @@ import java.util.List;
 
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
-@Document(collation = "auctionOrder")
+@Document(collection = "auctionOrder")
 public class AuctionOrder {
 
 
