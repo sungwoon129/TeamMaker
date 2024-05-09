@@ -87,7 +87,7 @@ public class ChannelController {
     }
 
     @MessageMapping("/channel/{channelId}/bid")
-    public void next(@DestinationVariable long channelId, BidRequest bidRequest) {
+    public void bid(@DestinationVariable long channelId, @Payload BidRequest bidRequest) {
 
         MessageType messageType = MessageType.findByTitle(bidRequest.getType());
 
