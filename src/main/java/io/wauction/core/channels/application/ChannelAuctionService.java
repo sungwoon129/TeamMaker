@@ -1,6 +1,8 @@
 package io.wauction.core.channels.application;
 
 import io.wauction.core.auction.application.AuctionPlayService;
+import io.wauction.core.auction.application.BidValidator;
+import io.wauction.core.auction.dto.AuctionError;
 import io.wauction.core.auction.dto.AuctionPlayItem;
 import io.wauction.core.auction.dto.BidRequest;
 import io.wauction.core.auction.entity.AuctionOrder;
@@ -10,6 +12,7 @@ import io.wauction.core.channels.dto.DataMessageResponse;
 import io.wauction.core.channels.dto.MessageResponse;
 import io.wauction.core.channels.entity.Channel;
 import io.wauction.core.channels.entity.MessageType;
+import io.wauction.core.common.exception.BidException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -30,6 +33,16 @@ public class ChannelAuctionService {
     public void bid(BidRequest bidRequest, long channelId) {
 
         Channel channel = channelService.findOne(channelId);
+
+        if(!channel.isPlaying()) throw new IllegalStateException("입찰은 경매 진행중에만 가능합니다.");
+
+        AuctionOrder auctionOrder = auctionOrderRepository.findByChannelId(channelId).orElseThrow(() -> new IllegalArgumentException(channelId + " 와 일치하는 경매순서 데이터를 찾을 수 없습니다."));
+        AuctionPlayItem auctionPlayItem = auctionOrder.getItems().get(channel.getOrderNum());
+
+        BidValidator bidValidator = new BidValidator();
+        List<AuctionError> errors = bidValidator.validate(bidRequest, auctionPlayItem);
+
+        if(!errors.isEmpty()) throw new BidException(errors);
 
         auctionPlayService.saveBid(bidRequest, channel.getId(), channel.getAuctionRule().getId());
 

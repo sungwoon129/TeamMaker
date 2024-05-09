@@ -52,18 +52,6 @@ public class ChannelController {
     }
 
 
-
-    @MessageMapping("/channel/{channelId}/send")
-    public void bid(@DestinationVariable long channelId, @Payload MessageRequest messageRequest) throws JsonProcessingException {
-
-        String destination = "/channel/" + channelId;
-        MessageType messageType = MessageType.findByTitle(messageRequest.getType());
-
-        String resultMsg = objectMapper.writeValueAsString(new MessageResponse(messageType, messageRequest.getSender(), messageType.makeFullMessage(messageRequest.getMessage())));
-
-        simpMessagingTemplate.convertAndSend(destination, resultMsg);
-    }
-
     @MessageMapping("/channel/{channelId}/ready")
     public void ready(@DestinationVariable long channelId, @Payload MessageRequest messageRequest, StompHeaderAccessor headerAccessor) {
 

@@ -115,6 +115,14 @@ body {
     text-align:center;
 }
 
+.btn-box button + button {
+    margin-left:10px;
+
+}
+
+.ready-btn-box button{
+
+}
 
 .item-img {
     width: 48px;

@@ -141,4 +141,7 @@ public class Channel extends BaseTimeEntity {
         return subscribeMap.get(String.valueOf(this.id)) == null ? 0 : subscribeMap.get(String.valueOf(this.id)).size();
     }
 
+    public boolean isPlaying() {
+        return state == ChannelState.PLAYING;
+    }
 }

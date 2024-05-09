@@ -125,12 +125,12 @@
                 <div class="row">
                     <!-- 경매 시작 전 대기 화면 -->
                     <div class="d-flex p-2 waiting-display">
-                        <div>경매 준비</div>
+                        <!--<div>경매 준비</div>-->
                         <div class="waiting-info"> </div>
                         <div class="btn-box d-flex ready-btn-box">
-                            <button type="button" id="ready" class="btn btn-success flex-one">준비</button>
-                            <button type="button" id="unready" class="btn btn-success flex-one d-none">준비완료 취소</button>
-                            <button type="button" id="start" class="btn btn-success flex-one d-none">경매 시작</button>
+                            <button type="button" id="ready" class="btn btn-success">준비</button>
+                            <button type="button" id="unready" class="btn btn-success d-none">준비완료 취소</button>
+                            <button type="button" id="start" class="btn btn-success d-none">경매 시작</button>
                         </div>
                     </div>
                     <div class="d-flex p-2 d-none">
@@ -143,12 +143,10 @@
                 </div>
                 <div class="row">
                     <div class="price-control-panel">
-                        <button type="button" class="btn btn-dark">초기화</button>
-                        <button type="button" class="btn btn-dark">+5</button>
-                        <button type="button" class="btn btn-dark">+10</button>
-                        <button type="button" class="btn btn-dark">+50</button>
-                        <button type="button" class="btn btn-dark">+100</button>
-                        <button type="button" id="bid" class="btn btn-outline-success flex-one">입찰</button>
+                        <button type="button" class="btn btn-dark" value="5">+5</button>
+                        <button type="button" class="btn btn-dark" value="10">+10</button>
+                        <button type="button" class="btn btn-dark" value="50">+50</button>
+                        <button type="button" class="btn btn-dark" value="100">+100</button>
                     </div>
                     <div class="panel-helper">
                         <!-- panel help text -->

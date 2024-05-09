@@ -256,6 +256,7 @@ class Channel {
             case 'BID' :
                 // TODO : 대기시간 초기화, 대기시간 모두 소모시까지 입찰 없을 시 유찰처리, 입찰정보에 따른 ui 업데이트
                 this.showPublicMsg(msg)
+                resetProgressBarAnime();
                 break;
             case 'NEXT' :
                 // TODO : 경매 대상정보 메시지 출력, 다음 경매대상 경매 시작까지 대기시간 처리
@@ -442,17 +443,14 @@ class Channel {
 
     bid(value) {
 
-        const order = 0;
-
         const data = {
             sender: this.role,
             type: "BID",
-            message: value,
-            itemId: this.auctionRule.items[order].id
+            message: this.#currentItem.price + value,
+            itemId: this.#currentItem.itemId
         }
 
-        stompClient.send(`/wauction/channel/${this.id}/start`, data);
-        // TODO : createProgressbar 애니메이션 초기화
+        stompClient.send(`/wauction/channel/${this.id}/bid`, data);
     }
 
     // 입찰 전 대기시간 타이머 종료
@@ -530,9 +528,9 @@ document.addEventListener("DOMContentLoaded",  () => {
         channel.start();
     });
 
-    document.querySelector("#bid").addEventListener("click", () => {
-        const messageType = "PRICE";
-        //channel.bid(messageType);
+    document.querySelector("#bid").addEventListener("click", (event) => {
+
+        channel.bid(event.target.value);
     })
 
     document.querySelectorAll(".exchange-seat").forEach((btn, idx) => {
@@ -704,6 +702,14 @@ const createProgressbar = (id, duration, callback, text) => {
     };
     requestAnimationFrame(updateTimer);
 
+}
+
+const resetProgressBarAnime = () => {
+    const progressbarInner = document.querySelector(".progressbar .inner");
+
+    progressbarInner.classList.remove("inner");
+    void progressbarInner.offsetWidth;
+    progressbarInner.classList.add("inner")
 }
 
 
