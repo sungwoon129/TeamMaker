@@ -49,7 +49,7 @@ public enum MessageType {
     },
     BID("bid") {
         public String makeFullMessage(String price) {
-            return price + " 포인트 입찰";
+            return Integer.parseInt(price) + " 포인트 입찰";
         }
     },
     NEXT("next") {
