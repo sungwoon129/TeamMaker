@@ -8,4 +8,6 @@ import java.util.Optional;
 public interface BidRepository extends MongoRepository<Bid, Long> {
 
     Optional<Bid> findTopByChannelIdAndItemIdOrderByPriceDesc(Long channelId, long itemId);
+
+    boolean existsByItemIdAndChannelId(long itemId, long channelId);
 }

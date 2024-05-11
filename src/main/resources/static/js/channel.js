@@ -488,7 +488,10 @@ class Channel {
     }
 
     startBid() {
-        document.getElementById("bid-status").classList.remove("d-none");
+        const bidStatusBtn = document.getElementById("bid-status");
+        bidStatusBtn.class =  "badge bg-success";
+        bidStatusBtn.textContent = "입찰중";
+
         this.showPublicMsg({writer: "SYSTEM", msg: `${this.#currentItem.name} 경매시작`});
         createTimer("auction-timer",this.#waitingTimeForAfterBid, this.endBid, "입찰종료 까지");
 
@@ -496,15 +499,23 @@ class Channel {
     }
 
     endBid = (event) => {
-        console.log("end bid!");
+
 
         this.showPublicMsg({writer: "SYSTEM", msg: `${this.#currentItem.name} 경매 종료`});
 
         const bidStatusBtn = document.getElementById("bid-status");
-        bidStatusBtn.classList.replace("bg-success", "bg-danger");
+        bidStatusBtn.class = "bg-danger";
+
         bidStatusBtn.textContent = "입찰 종료";
 
         document.querySelectorAll(".price-control-panel button").forEach(btn => btn.disabled = true);
+
+        const data = {
+            type: "END_BID_TIMER"
+        };
+
+
+        stompClient.send(`/wauction/channel/${this.id}/item/timer-end`,{}, JSON.stringify(data));
     }
 
     updateBidInfo(msg) {

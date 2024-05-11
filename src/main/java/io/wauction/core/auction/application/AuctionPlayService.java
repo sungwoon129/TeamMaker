@@ -1,5 +1,6 @@
 package io.wauction.core.auction.application;
 
+import io.wauction.core.auction.dto.AuctionPlayItem;
 import io.wauction.core.auction.dto.BidRequest;
 import io.wauction.core.auction.entity.AuctionRule;
 import io.wauction.core.auction.entity.Bid;
@@ -51,4 +52,7 @@ public class AuctionPlayService {
     }
 
 
+    public Optional<Bid> getHighestBid(long channelId, AuctionPlayItem auctionPlayItem) {
+        return bidRepository.findTopByChannelIdAndItemIdOrderByPriceDesc(channelId, auctionPlayItem.getItemId());
+    }
 }
