@@ -1,6 +1,6 @@
 package io.wauction.core.auction.application;
 
-import io.wauction.core.auction.entity.AuctionRule;
+import io.wauction.core.auction.entity.table.AuctionRule;
 import io.wauction.core.auction.infrastructure.AuctionRuleRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

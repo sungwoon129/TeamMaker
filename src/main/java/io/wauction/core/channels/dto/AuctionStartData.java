@@ -4,7 +4,7 @@ import io.wauction.core.auction.dto.AuctionItemResponse;
 import io.wauction.core.auction.dto.AuctionPlayItem;
 import io.wauction.core.auction.dto.ParticipantRoleResponse;
 import io.wauction.core.auction.dto.TeamPositionResponse;
-import io.wauction.core.auction.entity.ProceedWay;
+import io.wauction.core.auction.entity.table.ProceedWay;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;

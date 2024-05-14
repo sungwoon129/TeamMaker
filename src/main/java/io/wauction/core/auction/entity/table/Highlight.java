@@ -1,4 +1,4 @@
-package io.wauction.core.auction.entity;
+package io.wauction.core.auction.entity.table;
 
 import io.wauction.core.auction.dto.HighlightResponse;
 import io.wauction.core.common.entity.BaseTimeEntity;

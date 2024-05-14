@@ -4,7 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.wauction.core.auction.dto.AuctionPlayItem;
 import io.wauction.core.auction.dto.AuctionRuleResponse;
-import io.wauction.core.auction.entity.ParticipantRole;
+import io.wauction.core.auction.entity.table.ParticipantRole;
 import io.wauction.core.auction.infrastructure.AuctionOrderRepository;
 import io.wauction.core.channels.dto.*;
 import io.wauction.core.channels.entity.Channel;
@@ -21,7 +21,7 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 
-import static io.wauction.core.auction.entity.AuctionOrder.createAuctionOrder;
+import static io.wauction.core.auction.entity.document.AuctionOrder.createAuctionOrder;
 import static io.wauction.core.channels.event.StompEventHandler.subscribeMap;
 
 

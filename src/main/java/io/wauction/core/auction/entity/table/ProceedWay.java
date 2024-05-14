@@ -1,4 +1,4 @@
-package io.wauction.core.auction.entity;
+package io.wauction.core.auction.entity.table;
 
 
 public enum ProceedWay {

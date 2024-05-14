@@ -1,8 +1,8 @@
 package io.wauction.core.channels.entity;
 
 import io.wauction.core.auction.application.AuctionRuleService;
-import io.wauction.core.auction.entity.AuctionRule;
-import io.wauction.core.auction.entity.ParticipantRole;
+import io.wauction.core.auction.entity.table.AuctionRule;
+import io.wauction.core.auction.entity.table.ParticipantRole;
 import io.wauction.core.channels.dto.ChannelConnection;
 import io.wauction.core.channels.dto.ChannelRequest;
 import io.wauction.core.channels.dto.ChannelResponse;

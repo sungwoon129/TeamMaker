@@ -1,6 +1,6 @@
 package io.wauction.core.auction.dto;
 
-import io.wauction.core.auction.entity.ProceedWay;
+import io.wauction.core.auction.entity.table.ProceedWay;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;

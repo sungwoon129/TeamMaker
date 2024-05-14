@@ -1,4 +1,4 @@
-package io.wauction.core.auction.entity;
+package io.wauction.core.auction.entity.document;
 
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;

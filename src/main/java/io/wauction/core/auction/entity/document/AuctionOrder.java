@@ -1,4 +1,4 @@
-package io.wauction.core.auction.entity;
+package io.wauction.core.auction.entity.document;
 
 import io.wauction.core.auction.dto.AuctionPlayItem;
 import jakarta.persistence.Id;
@@ -47,6 +47,7 @@ public class AuctionOrder {
     private long generateId() {
         return 0;
     }
+
 
 
 }
