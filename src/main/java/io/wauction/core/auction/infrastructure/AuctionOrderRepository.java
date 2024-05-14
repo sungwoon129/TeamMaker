@@ -1,6 +1,6 @@
 package io.wauction.core.auction.infrastructure;
 
-import io.wauction.core.auction.entity.AuctionOrder;
+import io.wauction.core.auction.entity.document.AuctionOrder;
 import org.springframework.data.mongodb.repository.MongoRepository;
 
 import java.util.Optional;

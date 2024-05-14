@@ -1,6 +1,6 @@
 package io.wauction.core.auction.dto;
 
-import io.wauction.core.auction.entity.TeamPosition;
+import io.wauction.core.auction.entity.table.TeamPosition;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
