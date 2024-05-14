@@ -5,8 +5,8 @@ import io.wauction.core.auction.application.BidValidator;
 import io.wauction.core.auction.dto.AuctionError;
 import io.wauction.core.auction.dto.AuctionPlayItem;
 import io.wauction.core.auction.dto.BidRequest;
-import io.wauction.core.auction.entity.AuctionOrder;
-import io.wauction.core.auction.entity.Bid;
+import io.wauction.core.auction.entity.document.AuctionOrder;
+import io.wauction.core.auction.entity.document.Bid;
 import io.wauction.core.auction.infrastructure.AuctionOrderRepository;
 import io.wauction.core.channels.dto.ChannelConnection;
 import io.wauction.core.channels.dto.DataMessageResponse;
@@ -109,8 +109,8 @@ public class ChannelAuctionService {
         }
     }
 
+    @Transactional
     public void timerEnd(long channelId, String sessionId, MessageType type) {
-
 
 
         List<ChannelConnection> connections = subscribeMap.get(String.valueOf(channelId));
@@ -141,10 +141,7 @@ public class ChannelAuctionService {
 
                 if(!channel.isPlaying()) throw new IllegalStateException("타이머 종료요청은 경매 진행중에만 가능합니다.");
 
-                AuctionOrder auctionOrder = auctionOrderRepository.findByChannelId(channelId).orElseThrow(() -> new IllegalArgumentException(channelId + " 와 일치하는 경매순서 데이터를 찾을 수 없습니다."));
-                AuctionPlayItem auctionPlayItem = auctionOrder.getItems().get(channel.getOrderNum());
-
-                determineDestination(channelId, auctionPlayItem);
+                determineDestination(channelId, channel.getOrderNum());
             }
 
             initCounted(connections);
@@ -152,19 +149,27 @@ public class ChannelAuctionService {
         }
     }
 
-    private void determineDestination(long channelId, AuctionPlayItem auctionPlayItem) {
+    private void determineDestination(long channelId, int orderNum) {
+
+        AuctionOrder auctionOrder = auctionOrderRepository.findByChannelId(channelId).orElseThrow(() -> new IllegalArgumentException(channelId + " 와 일치하는 경매순서 데이터를 찾을 수 없습니다."));
+        AuctionPlayItem auctionPlayItem = auctionOrder.getItems().get(orderNum);
 
         Optional<Bid> highestBid = auctionPlayService.getHighestBid(channelId, auctionPlayItem);
+        MessageType messageType;
 
-        if(highestBid.isEmpty()) auctionPlayService.failInBid();
+        if(highestBid.isEmpty()) {
+            auctionPlayService.failInBid();
+            messageType = MessageType.FAIL_IN_BID;
+        }
         else {
-            auctionPlayService.sold();
+            auctionPlayService.sold(highestBid.get(), auctionOrder);
+            messageType = MessageType.SOLD;
         }
 
         MessageResponse messageResponse = new MessageResponse(
-                MessageType.COMPLETE_COUNT,
+                messageType,
                 "SYSTEM",
-                "XX님 낙찰(or유찰)"
+                messageType.makeFullMessage(auctionPlayItem.getName())
                 );
 
 

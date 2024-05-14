@@ -2,8 +2,10 @@ package io.wauction.core.auction.application;
 
 import io.wauction.core.auction.dto.AuctionPlayItem;
 import io.wauction.core.auction.dto.BidRequest;
-import io.wauction.core.auction.entity.AuctionRule;
-import io.wauction.core.auction.entity.Bid;
+import io.wauction.core.auction.entity.document.AuctionOrder;
+import io.wauction.core.auction.entity.document.Bid;
+import io.wauction.core.auction.entity.table.AuctionRule;
+import io.wauction.core.auction.infrastructure.AuctionOrderRepository;
 import io.wauction.core.auction.infrastructure.AuctionRuleRepository;
 import io.wauction.core.auction.infrastructure.BidRepository;
 import lombok.RequiredArgsConstructor;
@@ -11,7 +13,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.Optional;
 
-import static io.wauction.core.auction.entity.Bid.createBid;
+import static io.wauction.core.auction.entity.document.Bid.createBid;
 
 
 @RequiredArgsConstructor
@@ -20,6 +22,7 @@ public class AuctionPlayService {
 
     private final AuctionRuleRepository auctionRuleRepository;
     private final BidRepository bidRepository;
+    private final AuctionOrderRepository auctionOrderRepository;
 
     public void saveBid(BidRequest bidRequest, long channelId, long auctionRuleId) {
 
@@ -37,13 +40,20 @@ public class AuctionPlayService {
 
     }
 
-    //TODO 유찰 구현
+    //TODO 유찰 구현. 현재로서는 필요한 작업 X 확장성 위해 선언된 메소드
     public void failInBid() {
 
     }
 
-    // TODO 낙찰 구현
-    public void sold() {
+    public void sold(Bid bid, AuctionOrder auctionOrder) {
+
+        for(AuctionPlayItem item : auctionOrder.getItems()) {
+            if(item.getItemId() == bid.getItemId()) {
+                item.setSuccessfulBidder(bid.getBidder());
+            }
+        }
+
+        auctionOrderRepository.save(auctionOrder);
 
     }
 

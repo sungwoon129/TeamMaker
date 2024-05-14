@@ -14,10 +14,16 @@ public class AuctionPlayItem {
     private String name;
     private long price;
     private int order;
+    private String successfulBidder;
+
 
     public AuctionPlayItem(final long itemId, final String name) {
         this.itemId = itemId;
         this.name = name;
+    }
+
+    public boolean isNotSold(int currentOrder) {
+        return successfulBidder == null && currentOrder >= order;
     }
 
 }

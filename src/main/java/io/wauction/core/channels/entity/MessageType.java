@@ -76,6 +76,16 @@ public enum MessageType {
         public String makeFullMessage(String msg) {
             return msg;
         }
+    },
+    SOLD("sold") {
+        public String makeFullMessage(String item) {
+            return item + " 낙찰";
+        }
+    },
+    FAIL_IN_BID("fail_in_bid") {
+        public String makeFullMessage(String item) {
+            return item + " 유찰";
+        }
     };
 
 
