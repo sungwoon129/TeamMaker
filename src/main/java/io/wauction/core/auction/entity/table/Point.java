@@ -12,4 +12,9 @@ public class Point {
 
     @Column(name = "point")
     private long value;
+
+
+    public void updateValue(long value) {
+        this.value = value;
+    }
 }

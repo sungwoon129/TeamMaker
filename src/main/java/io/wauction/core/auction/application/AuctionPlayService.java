@@ -5,6 +5,7 @@ import io.wauction.core.auction.dto.BidRequest;
 import io.wauction.core.auction.entity.document.AuctionOrder;
 import io.wauction.core.auction.entity.document.Bid;
 import io.wauction.core.auction.entity.table.AuctionRule;
+import io.wauction.core.auction.entity.table.ParticipantRole;
 import io.wauction.core.auction.infrastructure.AuctionOrderRepository;
 import io.wauction.core.auction.infrastructure.AuctionRuleRepository;
 import io.wauction.core.auction.infrastructure.BidRepository;
@@ -30,6 +31,15 @@ public class AuctionPlayService {
 
         if(auctionRule.getAuctionItems().stream().noneMatch(item -> item.getId() == bidRequest.getItemId())) throw new IllegalArgumentException(bidRequest.getItemId() + "와 일치하는 아이템 정보를 찾을 수 없습니다.");
 
+        ParticipantRole participant = auctionRule.getRoles().stream()
+                .filter(role -> role.getName().equals(bidRequest.getSender()))
+                .findAny()
+                .orElseThrow(() -> new IllegalArgumentException(bidRequest.getSender() + "와 일치하는 참가자 정보를 찾을 수 없습니다."));
+
+        if(participant.getPoint().getValue() < Long.parseLong(bidRequest.getMessage())) {
+            throw new IllegalStateException("보유한 포인트보다 더 높은 포인트를 입찰할 수 없습니다.");
+        }
+
         Optional<Bid> biggestBid = bidRepository.findTopByChannelIdAndItemIdOrderByPriceDesc(channelId, bidRequest.getItemId());
 
         if(biggestBid.isPresent() && biggestBid.get().priceIsEqualsOrGraterThan(Long.parseLong(bidRequest.getMessage()))) {
@@ -45,15 +55,29 @@ public class AuctionPlayService {
 
     }
 
-    public void sold(Bid bid, AuctionOrder auctionOrder) {
+    public AuctionPlayItem sold(Bid bid, AuctionOrder auctionOrder, AuctionRule auctionRule) {
+
+        AuctionPlayItem target = null;
 
         for(AuctionPlayItem item : auctionOrder.getItems()) {
             if(item.getItemId() == bid.getItemId()) {
-                item.setSuccessfulBidder(bid.getBidder());
+                item.setWinningBidder(bid.getBidder());
+                target = item;
+                target.setPrice(bid.getPrice());
             }
         }
 
         auctionOrderRepository.save(auctionOrder);
+        if(target == null) throw new IllegalArgumentException("등록된 경매순서내에 입찰건과 일치하는 경매대상을 찾을 수 없습니다.");
+
+        ParticipantRole participant = auctionRule.getRoles().stream()
+                .filter(role -> role.getName().equals(bid.getBidder()))
+                .findAny()
+                .orElseThrow(() -> new IllegalArgumentException(bid.getBidder() + "와 일치하는 참가자 정보를 찾을 수 없습니다."));
+
+        participant.deductPoint(bid.getPrice());
+
+        return target;
 
     }
 

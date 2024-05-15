@@ -141,7 +141,7 @@ public class ChannelAuctionService {
 
                 if(!channel.isPlaying()) throw new IllegalStateException("타이머 종료요청은 경매 진행중에만 가능합니다.");
 
-                determineDestination(channelId, channel.getOrderNum());
+                determineDestination(channel);
             }
 
             initCounted(connections);
@@ -149,31 +149,40 @@ public class ChannelAuctionService {
         }
     }
 
-    private void determineDestination(long channelId, int orderNum) {
+    private void determineDestination(Channel channel) {
 
-        AuctionOrder auctionOrder = auctionOrderRepository.findByChannelId(channelId).orElseThrow(() -> new IllegalArgumentException(channelId + " 와 일치하는 경매순서 데이터를 찾을 수 없습니다."));
-        AuctionPlayItem auctionPlayItem = auctionOrder.getItems().get(orderNum);
+        AuctionOrder auctionOrder = auctionOrderRepository.findByChannelId(channel.getId()).orElseThrow(() -> new IllegalArgumentException(channel.getId() + " 와 일치하는 경매순서 데이터를 찾을 수 없습니다."));
+        AuctionPlayItem auctionPlayItem = auctionOrder.getItems().get(channel.getOrderNum());
 
-        Optional<Bid> highestBid = auctionPlayService.getHighestBid(channelId, auctionPlayItem);
+        Optional<Bid> highestBid = auctionPlayService.getHighestBid(channel.getId(), auctionPlayItem);
         MessageType messageType;
+        String msg;
 
+
+        // 유찰
         if(highestBid.isEmpty()) {
             auctionPlayService.failInBid();
             messageType = MessageType.FAIL_IN_BID;
+            msg = messageType.makeFullMessage(auctionPlayItem.getName(), String.valueOf(highestBid.get().getPrice()));
+
         }
+        // 낙찰
         else {
-            auctionPlayService.sold(highestBid.get(), auctionOrder);
+            AuctionPlayItem updated = auctionPlayService.sold(highestBid.get(), auctionOrder, channel.getAuctionRule());
             messageType = MessageType.SOLD;
+            msg = messageType.makeFullMessage(updated.getName());
+            auctionPlayItem = updated;
         }
 
-        MessageResponse messageResponse = new MessageResponse(
+        MessageResponse messageResponse = new DataMessageResponse<>(
                 messageType,
                 "SYSTEM",
-                messageType.makeFullMessage(auctionPlayItem.getName())
+                msg,
+                auctionPlayItem
                 );
 
 
-        channelService.publishMessageToChannel(channelId, messageResponse);
+        channelService.publishMessageToChannel(channel.getId(), messageResponse);
 
     }
 

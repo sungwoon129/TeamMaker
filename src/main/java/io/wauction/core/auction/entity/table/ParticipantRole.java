@@ -30,4 +30,9 @@ public class ParticipantRole extends BaseTimeEntity {
                 .point(point.getValue())
                 .build();
     }
+
+    public void deductPoint(long value) {
+        long updatedPoint = point.getValue() - value;
+        point.updateValue(updatedPoint);
+    }
 }
