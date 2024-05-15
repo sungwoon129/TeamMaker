@@ -278,6 +278,14 @@ class Channel {
                 }
 
                 break;
+            case 'SOLD' :
+                this.showPublicMsg(msg.msg)
+                this.assignSoldItem(msg);
+                break;
+            case 'FAIL_IN_BID' :
+                this.showPublicMsg(msg.msg)
+                this.addToPutOffList(msg);
+                break;
             default:
                 console.error("잘못된 메시지 타입입니다.")
 
@@ -522,6 +530,40 @@ class Channel {
         document.querySelector(".bidder-text").textContent = msg.writer;
         document.querySelector(".bid-price").textContent = msg.data.price;
 
+    }
+    assignSoldItem(msg) {
+        const item = this.auctionRule.items.find(item => item.id === msg.data.itemId);
+        const winningBidder = msg.data.winningBidder;
+        document.querySelectorAll(".participant-info").forEach(participant => {
+            if(participant.querySelector(".role-name").textContent === winningBidder) {
+                participant.querySelectorAll(".successful-bid-box .successful-bid").forEach(el => {
+                    const positionNameEl = el.querySelector(".name");
+                    if(positionNameEl.textContent === item.position.name) {
+                        el.querySelector("img").src = item.img;
+                        positionNameEl.textContent = item.name;
+                    }
+                });
+                const origin = participant.querySelector(".remaining-point").textContent;
+                participant.querySelector(".remaining-point").textContent = parseInt(origin) - parseInt(msg.data.price);
+            }
+        })
+
+
+    }
+
+
+    addToPutOffList(msg) {
+        const target = this.auctionRule.items.find(item => item.id === msg.data.itemId);
+        const html =
+            `<div class="item-box">
+                <div class="item-img">
+                    <img th:if="${target.img != null}" th:src="${target.img}" alt="Item Image">
+                    <img th:unless="${target.img != null}" src="/icon/item.png" alt="Default Image">
+                </div>
+            <div th:text="${target.name}" class="text-small text-overflow item-box-name"></div>
+        </div>`
+
+        document.querySelector(".put-off-item-container").insertAdjacentHTML('beforeend', html);
     }
 }
 

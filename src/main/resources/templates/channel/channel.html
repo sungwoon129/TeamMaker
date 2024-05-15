@@ -38,7 +38,10 @@
                     <div class="row">
                         <div class="d-flex p-2 flex-side">
                             <div th:text="${participant.getName() }" class="text-bold random-color-element role-name"></div>
-                            <div th:text="${'남은 포인트 ' + participant.getPoint()}" class="remaining-point text-custom-orange text-bold"></div>
+                            <div class="remaining-point-container text-bold">
+                                <span>남은 포인트</span>
+                                <span class="remaining-point text-custom-orange" th:text="${participant.getPoint()}"></span>
+                            </div>
                         </div>
                     </div>
                     <div class="row overlay" th:classappend="${channel.getActiveRoles().contains(participant.getName()) || participant.getName() eq channel.getClientRole().getName() ? 'active' : 'overlay-inactive'}">
@@ -174,6 +177,9 @@
                 <div th:if="${!itemStat.last}" class="arrow-box">
                     <img src="/icon/next.png" width="16">
                 </div>
+            </div>
+            <div class="put-off-item-container">
+
             </div>
 
         </div>
