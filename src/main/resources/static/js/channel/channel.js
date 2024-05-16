@@ -1,6 +1,7 @@
 const socket = new SockJS('/wauction');
 const stompClient = Stomp.over(socket);
 
+// 자리교환 타이머
 class BarTimer {
     initialTime;
     timeLeft;
@@ -137,12 +138,14 @@ class Channel {
             secured : `/channel/${this.id}/${this.user}/secured`
         }
 
+        // 공용 채널 구독
         stompClient.subscribe(topic.public, msg => {
             this.updateUi(JSON.parse(msg.body));
         },{
             id: topic.public
         });
 
+        // 개인 채널 구독
         stompClient.subscribe(topic.secured , msg => {
             const data = JSON.parse(msg.body)
             this.showPrivateMsg(data);
@@ -469,9 +472,7 @@ class Channel {
             type: "COMPLETE_BEFORE_BID"
         };
 
-
         stompClient.send(`/wauction/channel/${this.id}/item/timer-end`,{}, JSON.stringify(data));
-
     }
 
     onPlayerReady(event) {
@@ -495,6 +496,7 @@ class Channel {
         this.showPublicMsg({writer: "SYSTEM", msg: `${this.#currentItem.name} 경매시작 대기중...`});
     }
 
+    // 입찰 시작.
     startBid() {
         const bidStatusBtn = document.getElementById("bid-status");
         bidStatusBtn.class =  "badge bg-success";
@@ -506,6 +508,7 @@ class Channel {
         document.querySelectorAll(".price-control-panel button").forEach(btn => btn.disabled = false);
     }
 
+    // 입찰 종료. 입찰 타이머가 끝나면 서버에 '타이머 완료' 메시지 전송
     endBid = (event) => {
 
 
@@ -522,15 +525,16 @@ class Channel {
             type: "END_BID_TIMER"
         };
 
-
         stompClient.send(`/wauction/channel/${this.id}/item/timer-end`,{}, JSON.stringify(data));
     }
 
+    // 채널의 참가자가 입찰을 한 경우, 입찰정보 업데이트
     updateBidInfo(msg) {
         document.querySelector(".bidder-text").textContent = msg.writer;
         document.querySelector(".bid-price").textContent = msg.data.price;
 
     }
+    // 낙찰이 된 경매대상을 낙찰자의 낙찰목록에 시각적으로 추가
     assignSoldItem(msg) {
         const item = this.auctionRule.items.find(item => item.id === msg.data.itemId);
         const winningBidder = msg.data.winningBidder;
@@ -550,8 +554,7 @@ class Channel {
 
 
     }
-
-
+    // 유찰된 경매대상을 유찰목록에 시각적으로 추가
     addToPutOffList(msg) {
         const target = this.auctionRule.items.find(item => item.id === msg.data.itemId);
         const html =
