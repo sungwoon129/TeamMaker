@@ -168,8 +168,8 @@
             <div th:each="item, itemStat : ${channel.getAuctionRuleResponse().getItems()}" class="item-container">
                 <div class="item-box" th:data-id="${item.getId()}">
                     <div class="item-img">
-                        <img th:if="${item.getImg() != null}" th:src="${item.getImg()}" alt="Item Image">
-                        <img th:unless="${item.getImg() != null}" src="/icon/item.png" alt="Default Image">
+                        <img th:if="${item.getImg() != null}" th:src="${item.getImg()}" alt="Item Image" class="darker">
+                        <img th:unless="${item.getImg() != null}" src="/icon/item.png" alt="Default Image" class="darker">
                     </div>
                     <div th:text="${item.getName()}" class="text-small text-overflow item-box-name"></div>
 

@@ -139,6 +139,10 @@ body {
 
 }
 
+.darker {
+    filter: brightness(50%)
+}
+
 .item-box {
     display:flex;
     flex-direction: column;

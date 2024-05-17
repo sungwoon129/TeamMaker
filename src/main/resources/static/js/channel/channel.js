@@ -432,6 +432,15 @@ class Channel {
             document.querySelector(".item-info-box .item-info-1").textContent = item.position.name;
             document.querySelector(".item-info-box .item-info-2").textContent = "";
 
+            for(let i=0 ;i< document.querySelector(".items-container").querySelectorAll("item-img").length; i++) {
+                if((i + 1) ===  parseInt(order)) {
+                    document.querySelector(".items-container").querySelectorAll("item-img").item(i).classList.remove("darker");
+                } else {
+                    document.querySelector(".items-container").querySelectorAll("item-img").item(i).classList.add("darker");
+                }
+            }
+
+
             this.player = new YT.Player('player', {
                 rel: '0',
                 autoplay: '1',
