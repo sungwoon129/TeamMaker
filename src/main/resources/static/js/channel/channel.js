@@ -540,7 +540,7 @@ class Channel {
     // 채널의 참가자가 입찰을 한 경우, 입찰정보 업데이트
     updateBidInfo(msg) {
         document.querySelector(".bidder-text").textContent = msg.writer;
-        document.querySelector(".bid-price").textContent = msg.data.price;
+        document.querySelector(".bid-price").textContent = `${msg.data.price} 포인트`;
 
     }
     // 낙찰이 된 경매대상을 낙찰자의 낙찰목록에 시각적으로 추가

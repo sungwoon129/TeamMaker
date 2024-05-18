@@ -170,7 +170,7 @@ public class ChannelAuctionService {
         else {
             AuctionPlayItem updated = auctionPlayService.sold(highestBid.get(), auctionOrder, channel.getAuctionRule());
             messageType = MessageType.SOLD;
-            msg = messageType.makeFullMessage(updated.getName());
+            msg = messageType.makeFullMessage(updated.getName(), String.valueOf(updated.getPrice()));
             auctionPlayItem = updated;
         }
 
