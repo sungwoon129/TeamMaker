@@ -43,4 +43,4 @@
 
 ### 구현 과정 스크린샷 ###
 
-![image](https://github.com/sungwoon129/TeamMaker/assets/43958570/4f369bb4-6914-4fb8-98ed-7ce0ba156e99)
+![image](https://github.com/sungwoon129/TeamMaker/assets/43958570/c5198ac8-f8e0-4998-b50a-0bed352aab6f)
