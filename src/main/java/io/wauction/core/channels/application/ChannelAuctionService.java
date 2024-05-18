@@ -163,7 +163,7 @@ public class ChannelAuctionService {
         if(highestBid.isEmpty()) {
             auctionPlayService.failInBid();
             messageType = MessageType.FAIL_IN_BID;
-            msg = messageType.makeFullMessage(auctionPlayItem.getName(), String.valueOf(highestBid.get().getPrice()));
+            msg = messageType.makeFullMessage(auctionPlayItem.getName());
 
         }
         // 낙찰

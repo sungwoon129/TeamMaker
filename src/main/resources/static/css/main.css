@@ -150,6 +150,11 @@ body {
     /*justify-content: center;*/
 }
 
+.custom-hr {
+    color: #FFF;
+    width: 100%;
+    opacity: 0.75;
+}
 
 .text-overflow {
     overflow: hidden;

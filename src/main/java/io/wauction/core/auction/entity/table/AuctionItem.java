@@ -36,7 +36,7 @@ public class AuctionItem {
         return AuctionItemResponse.builder()
                 .id(id)
                 .name(name)
-                .position(position)
+                .position(position.toResponseDto())
                 .img(img)
                 .highlights(highlights.stream().map(Highlight::toResponseDto).toList())
                 .build();

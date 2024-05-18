@@ -81,13 +81,13 @@ public enum MessageType {
     SOLD("sold") {
         public String makeFullMessage(String ...bidInfo) {
             // ex) [낙찰된 대상 이름] [낙찰된 포인트] 낙찰
-            return bidInfo[0] + bidInfo[1] + " 낙찰";
+            return bidInfo[0] + " " + bidInfo[1] + " 포인트 낙찰";
         }
 
     },
     FAIL_IN_BID("fail_in_bid") {
         public String makeFullMessage(String ...item) {
-            return item + " 유찰";
+            return item[0] + " 유찰";
         }
     };
 

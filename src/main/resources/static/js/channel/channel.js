@@ -282,11 +282,11 @@ class Channel {
 
                 break;
             case 'SOLD' :
-                this.showPublicMsg(msg.msg)
+                this.showPublicMsg(msg)
                 this.assignSoldItem(msg);
                 break;
             case 'FAIL_IN_BID' :
-                this.showPublicMsg(msg.msg)
+                this.showPublicMsg(msg)
                 this.addToPutOffList(msg);
                 break;
             default:
@@ -432,13 +432,13 @@ class Channel {
             document.querySelector(".item-info-box .item-info-1").textContent = item.position.name;
             document.querySelector(".item-info-box .item-info-2").textContent = "";
 
-            for(let i=0 ;i< document.querySelector(".items-container").querySelectorAll("item-img").length; i++) {
-                if((i + 1) ===  parseInt(order)) {
-                    document.querySelector(".items-container").querySelectorAll("item-img").item(i).classList.remove("darker");
-                } else {
-                    document.querySelector(".items-container").querySelectorAll("item-img").item(i).classList.add("darker");
-                }
+            const waitingListEl = document.querySelector(".items-container").querySelectorAll("img");
+
+            for(let i= 0 ;  i < waitingListEl.length ; i++) {
+                waitingListEl.item(i).classList.add("darker");
             }
+
+            waitingListEl.item(parseInt(order)).classList.remove("darker");
 
 
             this.player = new YT.Player('player', {
@@ -547,30 +547,30 @@ class Channel {
     assignSoldItem(msg) {
         const item = this.auctionRule.items.find(item => item.id === msg.data.itemId);
         const winningBidder = msg.data.winningBidder;
-        document.querySelectorAll(".participant-info").forEach(participant => {
-            if(participant.querySelector(".role-name").textContent === winningBidder) {
-                participant.querySelectorAll(".successful-bid-box .successful-bid").forEach(el => {
-                    const positionNameEl = el.querySelector(".name");
-                    if(positionNameEl.textContent === item.position.name) {
-                        el.querySelector("img").src = item.img;
-                        positionNameEl.textContent = item.name;
-                    }
-                });
-                const origin = participant.querySelector(".remaining-point").textContent;
-                participant.querySelector(".remaining-point").textContent = parseInt(origin) - parseInt(msg.data.price);
-            }
-        })
+        const idx = getParticipantIdx(winningBidder);
+        const targetParticipant = document.querySelectorAll(".participant-info").item(idx);
 
+
+
+        targetParticipant.querySelectorAll(".successful-bid").forEach(el => {
+            const positionNameEl = el.querySelector(".name");
+            if(positionNameEl.textContent === item.position.name) {
+                el.querySelector("img").src = item.img;
+                positionNameEl.textContent = item.name;
+            }
+        });
+        const origin = targetParticipant.querySelector(".remaining-point").textContent;
+        targetParticipant.querySelector(".remaining-point").textContent = parseInt(origin) - parseInt(msg.data.price);
 
     }
     // 유찰된 경매대상을 유찰목록에 시각적으로 추가
     addToPutOffList(msg) {
         const target = this.auctionRule.items.find(item => item.id === msg.data.itemId);
+        const targetImg = target.img != null ? target.img :"/icon/item.png";
         const html =
             `<div class="item-box">
-                <div class="item-img">
-                    <img th:if="${target.img != null}" th:src="${target.img}" alt="Item Image">
-                    <img th:unless="${target.img != null}" src="/icon/item.png" alt="Default Image">
+                <div class="item-img">         
+                    <img src="${targetImg}" alt="Item Image">                   
                 </div>
             <div th:text="${target.name}" class="text-small text-overflow item-box-name"></div>
         </div>`

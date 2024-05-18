@@ -6,6 +6,7 @@ import org.hibernate.annotations.DynamicInsert;
 
 @DynamicInsert
 @Entity
+@Table(name = "team_position")
 public class TeamPosition {
 
     @Column(name = "position_id")

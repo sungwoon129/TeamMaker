@@ -165,6 +165,9 @@
             </div>
         </div>
         <div class="col-md-4 items-container">
+            <div class="col-md-12">
+                <strong>경매 순서</strong>
+            </div>
             <div th:each="item, itemStat : ${channel.getAuctionRuleResponse().getItems()}" class="item-container">
                 <div class="item-box" th:data-id="${item.getId()}">
                     <div class="item-img">
@@ -177,6 +180,10 @@
                 <div th:if="${!itemStat.last}" class="arrow-box">
                     <img src="/icon/next.png" width="16">
                 </div>
+            </div>
+            <hr class="custom-hr">
+            <div class="col-md-12">
+                <strong>유찰 목록</strong>
             </div>
             <div class="put-off-item-container">
 
