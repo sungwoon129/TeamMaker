@@ -1,12 +1,10 @@
 package io.wauction.core.channels.presentation;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.wauction.core.auction.dto.BidRequest;
 import io.wauction.core.channels.application.ChannelAuctionService;
 import io.wauction.core.channels.application.ChannelService;
 import io.wauction.core.channels.dto.MessageRequest;
-import io.wauction.core.channels.dto.MessageResponse;
 import io.wauction.core.channels.entity.MessageType;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -83,7 +81,7 @@ public class ChannelController {
 
     @MessageMapping("/channel/{channelId}/next")
     public void next(@DestinationVariable long channelId) {
-        channelAuctionService.nextStep(channelId);
+        channelAuctionService.nextItem(channelId);
     }
 
     @MessageMapping("/channel/{channelId}/bid")
