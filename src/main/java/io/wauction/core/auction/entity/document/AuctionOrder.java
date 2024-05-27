@@ -44,10 +44,6 @@ public class AuctionOrder {
         return new AuctionOrder(channelId, items);
     }
 
-    private long generateId() {
-        return 0;
-    }
-
 
 
 }
