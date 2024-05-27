@@ -94,7 +94,7 @@ public class StompEventHandler {
             List<ChannelConnection> updated =  connections.stream().filter(connection -> !connection.getSessionId().equals(disConnectSession.get().getSessionId()))
                     .toList();
 
-            if(disConnectSession.get().isManager()) {
+            if(disConnectSession.get().isManager() && !updated.isEmpty()) {
                 updated.get(0).setManager(true);
             }
 
@@ -103,6 +103,8 @@ public class StompEventHandler {
 
             channelService.leave(Long.parseLong(channelId), disConnectSession.get().getRole(), updated);
         }
+
+        if(subscribeMap.get(channelId).isEmpty()) subscribeMap.remove(channelId);
 
     }
 

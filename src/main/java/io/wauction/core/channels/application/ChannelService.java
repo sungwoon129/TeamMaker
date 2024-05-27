@@ -65,16 +65,22 @@ public class ChannelService {
 
         List<String> activeRoles = connections.stream().map(ChannelConnection::getRole).toList();
 
+        if(!connections.isEmpty()) {
+            Optional<ChannelConnection> nextManagerConnection = connections.stream().filter(ChannelConnection::isManager).findAny();
 
-        MessageResponse responseDto = EnterMessageResponse.builder()
-                .messageType(MessageType.LEAVE)
-                .writer("SYSTEM")
-                .sender(sender)
-                .activeRoles(activeRoles)
-                .manager(connections.stream().filter(ChannelConnection::isManager).findAny().orElseThrow(() -> new NullPointerException("채널의 방장 정보를 찾을 수 없습니다")).getRole())
-                .build();
+            MessageResponse responseDto = EnterMessageResponse.builder()
+                    .messageType(MessageType.LEAVE)
+                    .writer("SYSTEM")
+                    .sender(sender)
+                    .activeRoles(activeRoles)
+                    .manager(nextManagerConnection.map(ChannelConnection::getRole).orElse(null))
+                    .build();
 
-        publishMessageToChannel(channel.getId(), responseDto);
+            publishMessageToChannel(channel.getId(), responseDto);
+        }
+
+        channelRepository.save(channel);
+
     }
 
     public void countReady(long channelId, String sessionId, MessageRequest messageRequest, boolean isPlus) {
