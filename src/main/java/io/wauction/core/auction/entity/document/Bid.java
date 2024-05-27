@@ -8,6 +8,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import java.util.Random;
+
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
 @Document(collection = "bids")
@@ -23,6 +25,7 @@ public class Bid {
     private long price;
 
     protected Bid(long channelId, long auctionRuleId, long itemId, String bidder, long price) {
+        this.id = new Random().nextLong();
         this.channelId = channelId;
         this.auctionRuleId = auctionRuleId;
         this.itemId = itemId;
