@@ -31,7 +31,6 @@ public class ChannelAuctionService {
     private final AuctionOrderRepository auctionOrderRepository;
     private final ChannelService channelService;
 
-    // TODO : 다른 사람이 입찰시 중복키 이슈로 insert안됨.
     @Transactional
     public void bid(BidRequest bidRequest, long channelId) {
 
@@ -59,7 +58,6 @@ public class ChannelAuctionService {
         channelService.publishMessageToChannel(channelId,messageResponse);
     }
 
-    @Transactional
     public void nextItem(long channelId) {
         Channel channel = channelService.findOne(channelId);
 
@@ -184,6 +182,9 @@ public class ChannelAuctionService {
 
 
         channelService.publishMessageToChannel(channel.getId(), messageResponse);
+
+        // 다음 매물로
+        this.nextItem(channel.getId());
 
     }
 

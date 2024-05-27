@@ -257,7 +257,6 @@ class Channel {
                 break;
 
             case 'BID' :
-                // TODO : 대기시간 초기화, 대기시간 모두 소모시까지 입찰 없을 시 유찰처리, 입찰정보에 따른 ui 업데이트
                 this.showPublicMsg(msg)
                 this.updateBidInfo(msg);
                 resetTimer("inner1");
@@ -426,11 +425,13 @@ class Channel {
 
         if(Array.isArray(this.auctionRule.items)) {
 
+
             const item = this.auctionRule.items[parseInt(order)];
             document.getElementById("profile-img").src=`${item.img}`;
             document.querySelector(".item-contents-box .item-name").textContent = item.name;
             document.querySelector(".item-info-box .item-info-1").textContent = item.position.name;
             document.querySelector(".item-info-box .item-info-2").textContent = "";
+            this.updateBidInfo({writer:"", data:{price:0}});
 
             const waitingListEl = document.querySelector(".items-container").querySelectorAll("img");
 
@@ -440,24 +441,28 @@ class Channel {
 
             waitingListEl.item(parseInt(order)).classList.remove("darker");
 
+            if(!!this.player) {
+                this.player.loadVideoById(item.highlights[0].url);
+            } else {
+                this.player = new YT.Player('player', {
+                    rel: '0',
+                    autoplay: '1',
+                    height: '360',
+                    width: '640',
+                    videoId: `${item.highlights[0].url}`,
+                    playerVars: {
+                        autoplay: 1,
+                        controls: 1,
+                        showinfo: 0,
+                        autohide: 1
+                    },
+                    events: {
+                        'onReady': this.onPlayerReady,
+                        'onStateChange': this.onPlayerStateChange
+                    }
+                });
+            }
 
-            this.player = new YT.Player('player', {
-                rel: '0',
-                autoplay: '1',
-                height: '360',
-                width: '640',
-                videoId: `${item.highlights[0].url}`,
-                playerVars: {
-                    autoplay: 1,
-                    controls: 1,
-                    showinfo: 0,
-                    autohide: 1
-                },
-                events: {
-                    'onReady': this.onPlayerReady,
-                    'onStateChange': this.onPlayerStateChange
-                }
-            });
         }
 
     }
@@ -572,7 +577,7 @@ class Channel {
                 <div class="item-img">         
                     <img src="${targetImg}" alt="Item Image">                   
                 </div>
-            <div th:text="${target.name}" class="text-small text-overflow item-box-name"></div>
+            <div class="text-small text-overflow item-box-name">${target.name}</div>
         </div>`
 
         document.querySelector(".put-off-item-container").insertAdjacentHTML('beforeend', html);
