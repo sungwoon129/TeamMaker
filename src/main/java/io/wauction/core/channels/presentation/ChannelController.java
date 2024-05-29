@@ -29,13 +29,13 @@ public class ChannelController {
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     @MessageMapping("/channel/{channelId}/exchangeSeat")
-    public void requestForRoleExchange(@DestinationVariable long channelId, @Payload MessageRequest messageRequest) {
+    public void requestForRoleExchange(@DestinationVariable long channelId, @Payload MessageRequest messageRequest, StompHeaderAccessor headerAccessor) {
 
         MessageType messageType = MessageType.findByTitle(messageRequest.getType());
 
         if(messageType != MessageType.EXCHANGE) throw new IllegalArgumentException("올바른 메시지 타입이 아닙니다.");
 
-        channelService.requestForRoleExchange(channelId, messageRequest, messageType);
+        channelService.requestForRoleExchange(channelId, messageRequest, messageType, headerAccessor.getSessionId());
     }
 
     @MessageMapping("/channel/{channelId}/role-exchange/response")

@@ -104,20 +104,33 @@ public class ChannelService {
     }
 
 
-    public void requestForRoleExchange(long channelId, MessageRequest messageRequest, MessageType messageType) {
+    public void requestForRoleExchange(long channelId, MessageRequest messageRequest, MessageType messageType, String SessionId) {
 
-        MessageResponse messageResponse = new MessageResponse(
-                MessageType.EXCHANGE,
-                messageRequest.getSender(),
-                messageType.makeFullMessage(messageRequest.getSender()),
-                messageRequest.getTargetUsername());
 
         List<ChannelConnection> connections = subscribeMap.get(String.valueOf(channelId));
 
-        Optional<ChannelConnection> connection = connections.stream().filter(connect -> connect.getRole().equals(messageRequest.getTargetUsername())).findAny();
-        if(connection.isEmpty()) throw new IllegalArgumentException(messageRequest.getTargetUsername() + " 은(는) 올바른 메시지 수신자가 아닙니다.");
+        Optional<ChannelConnection> targetConnection = connections.stream().filter(connect -> connect.getRole().equals(messageRequest.getTargetUsername())).findAny();
+        if(targetConnection.isEmpty()) {
+            // TODO : 자리교환 성공시, 채널 전체에 broadcast하는 방식으로 변경필요
+            allowExchange(channelId,messageRequest, connections, targetConnection);
 
-        publishMessageToUser(channelId, connection.get().getUid(), messageResponse);
+            MessageResponse messageResponse = new MessageResponse(
+                    MessageType.EXCHANGE_RES,
+                    messageRequest.getSender(),
+                    messageType.makeFullMessage(messageRequest.getMessage()),
+                    messageRequest.getTargetUsername());
+
+            publishMessageToChannel(channelId, messageResponse);
+        } else {
+
+            MessageResponse messageResponse = new MessageResponse(
+                    MessageType.EXCHANGE,
+                    messageRequest.getSender(),
+                    messageType.makeFullMessage(messageRequest.getSender()),
+                    messageRequest.getTargetUsername());
+
+            publishMessageToUser(channelId, targetConnection.get().getUid(), messageResponse);
+        }
 
     }
 
@@ -135,25 +148,13 @@ public class ChannelService {
         if(targetConnection.isEmpty()) throw new IllegalArgumentException(messageRequest.getTargetUsername() + " 은(는) 올바른 메시지 수신자가 아닙니다.");
 
         if (messageRequest.getMessage().equals("Y")) {
-
-            subscribeMap.get(String.valueOf(channelId)).forEach(c -> log.info("before swap = {} : {}", c.getRole(), c.getSessionId()));
-
-            for (ChannelConnection connection : connections) {
-                if (connection.getRole().equals(messageRequest.getTargetUsername())) {
-                    connection.setRole(messageRequest.getSender());
-                } else if (connection.getRole().equals(messageRequest.getSender())) {
-                    connection.setRole(messageRequest.getTargetUsername());
-                }
-            }
-
-            subscribeMap.put(String.valueOf(channelId), connections);
-
-            subscribeMap.get(String.valueOf(channelId)).forEach(c -> log.info("after swap = {} : {}", c.getRole(), c.getSessionId()));
+            allowExchange(channelId, messageRequest, connections, targetConnection);
         }
-
 
         publishMessageToUser(channelId, targetConnection.get().getUid(), messageResponse);
     }
+
+
 
     @Transactional
     public void start(long channelId, String sessionId) {
@@ -207,6 +208,22 @@ public class ChannelService {
 
         this.publishMessageToChannel(channelId, messageResponse);
 
+    }
+
+    private void allowExchange(long channelId, MessageRequest messageRequest, List<ChannelConnection> connections, Optional<ChannelConnection> targetConnection) {
+        subscribeMap.get(String.valueOf(channelId)).forEach(c -> log.info("before swap = {} : {}", c.getRole(), c.getSessionId()));
+
+        for (ChannelConnection connection : connections) {
+            if (targetConnection.isPresent() && connection.getRole().equals(messageRequest.getTargetUsername())) {
+                connection.setRole(messageRequest.getSender());
+            } else if (connection.getRole().equals(messageRequest.getSender())) {
+                connection.setRole(messageRequest.getTargetUsername());
+            }
+        }
+
+        subscribeMap.put(String.valueOf(channelId), connections);
+
+        subscribeMap.get(String.valueOf(channelId)).forEach(c -> log.info("after swap = {} : {}", c.getRole(), c.getSessionId()));
     }
 
     public <T extends MessageResponse> void publishMessageToChannel(long channelId, T messageResponseDto) {

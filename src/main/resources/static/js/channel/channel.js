@@ -58,7 +58,7 @@ class Channel {
     auctionRule;
     #waitingTimeForAfterBid;
     #waitingTimeForNext;
-    #currentItem; // TODO : 현재 아이템 경매가와 관련된 기능 구현 - 현재 입찰가보다 낮은 가격 입찰불가
+    #currentItem;
     timer = new BarTimer();
     player;
 
@@ -100,6 +100,7 @@ class Channel {
             message: "자리교환 요청",
             targetUsername: targetUser
         }
+
         stompClient.send(`/wauction/channel/${this.id}/exchangeSeat`, {}, JSON.stringify(data));
         this.isWaiting = true;
         document.querySelectorAll(".exchange-seat").forEach(btn => btn.disabled = true);
@@ -166,7 +167,7 @@ class Channel {
                         if(!target) console.error("메시지 작성자와 일치하는 참가자를 찾을 수 없습니다.");
                         target.classList.remove("overlay-inactive");
                         target.classList.add("active");
-                        target.querySelector(".exchange-display").classList.remove("d-none");
+                        /*target.querySelector(".exchange-display").classList.remove("d-none");*/
                     }
 
                     if(this.role === msg.manager) {
@@ -193,6 +194,16 @@ class Channel {
                     }
                 })
                 this.showPublicMsg(msg);
+                break;
+
+            case 'EXCHANGE_RES' :
+                // TODO : 구현 필요. 자리교환 기능을 채널전체에 브로드 캐스팅하도록 변경해야함.
+/*                this.role = msg.writer;
+                const targetIdx = getParticipantIdx(msg.writer);
+                const origin = document.querySelector(".emphasis-user");
+                const target = document.querySelectorAll(".participant-info").item(targetIdx);*/
+
+                swapRole(origin, target);
                 break;
 
             case 'READY' :
@@ -262,7 +273,6 @@ class Channel {
                 resetTimer("inner1");
                 break;
             case 'NEXT' :
-                // TODO : 경매 대상정보 메시지 출력, 다음 경매대상 경매 시작까지 대기시간 처리
                 this.#currentItem = msg.data;
                 this.#currentItem.isCompleteHighlightPlay = false;
                 this.toStageNextItem(msg.data.order);
@@ -349,7 +359,8 @@ class Channel {
 
 
             case "EXCHANGE_RES" :
-                if(msg.resultYne === "Y") {
+                // TODO : 자리교환 기능 수정필요
+/*                if(msg.resultYne === "Y") {
                     this.role = msg.writer;
                     const idx = getParticipantIdx(msg.writer);
                     const origin = document.querySelector(".emphasis-user");
@@ -361,7 +372,7 @@ class Channel {
                 }
 
                 this.isWaiting = false;
-                document.querySelectorAll(".exchange-seat").forEach(btn => btn.disabled = false);
+                document.querySelectorAll(".exchange-seat").forEach(btn => btn.disabled = false);*/
 
                 break;
         }
@@ -675,6 +686,7 @@ const getParticipantIdx = (roleName) => {
     return resultIdx;
 }
 
+// TODO: 비어있는 역할 교환도 가능해야함.
 const swapRole = (origin, target) => {
     origin.classList.remove("emphasis-user");
     target.classList.add("emphasis-user");
@@ -791,6 +803,7 @@ const createTimer = (id, duration, callback, text, canReset) => {
 
 }
 
+// TODO: 기존타이머가 리셋되지 않고 새로운 타이머가 추가됨
 const resetTimer = (id) => {
     const progressbarInner = document.getElementById(id);
 
