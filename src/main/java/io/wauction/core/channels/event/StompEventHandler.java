@@ -2,8 +2,8 @@ package io.wauction.core.channels.event;
 
 import io.wauction.core.channels.application.ChannelService;
 import io.wauction.core.channels.dto.ChannelConnection;
-import io.wauction.core.channels.dto.EnterMessageResponse;
-import io.wauction.core.channels.dto.MessageResponse;
+import io.wauction.core.channels.dto.message.EnterMessageResponse;
+import io.wauction.core.channels.dto.message.MessageResponse;
 import io.wauction.core.channels.entity.MessageType;
 import io.wauction.core.config.CustomPrincipal;
 import lombok.RequiredArgsConstructor;

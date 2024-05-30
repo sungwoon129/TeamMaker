@@ -7,10 +7,12 @@ import io.wauction.core.auction.dto.AuctionRuleResponse;
 import io.wauction.core.auction.entity.table.ParticipantRole;
 import io.wauction.core.auction.infrastructure.AuctionOrderRepository;
 import io.wauction.core.channels.dto.*;
+import io.wauction.core.channels.dto.message.*;
 import io.wauction.core.channels.entity.Channel;
 import io.wauction.core.channels.entity.ChannelState;
 import io.wauction.core.channels.entity.MessageType;
 import io.wauction.core.channels.infrastructure.ChannelRepository;
+import io.wauction.core.common.dto.ResultYnType;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.messaging.simp.SimpMessageSendingOperations;
@@ -110,18 +112,27 @@ public class ChannelService {
         List<ChannelConnection> connections = subscribeMap.get(String.valueOf(channelId));
 
         Optional<ChannelConnection> targetConnection = connections.stream().filter(connect -> connect.getRole().equals(messageRequest.getTargetUsername())).findAny();
+
+        // 교환을 원하는 역할을 가지고 있는 다른 클라이언트가 없는 경우
         if(targetConnection.isEmpty()) {
-            // TODO : 자리교환 성공시, 채널 전체에 broadcast하는 방식으로 변경필요
+
             allowExchange(channelId,messageRequest, connections, targetConnection);
 
-            MessageResponse messageResponse = new MessageResponse(
-                    MessageType.EXCHANGE_RES,
-                    messageRequest.getSender(),
-                    messageType.makeFullMessage(messageRequest.getMessage()),
-                    messageRequest.getTargetUsername());
+            MessageResponse messageResponse = SwapMessageResponse.builder()
+                    .messageType(MessageType.EXCHANGE_RES)
+                    .writer(messageRequest.getSender())
+                    .sender(messageRequest.getSender())
+                    .msg(MessageType.EXCHANGE_RES.makeFullMessage(ResultYnType.Y.name()))
+                    .originRole(messageRequest.getSender())
+                    .destinationRole(messageRequest.getTargetUsername())
+                    .resultYne(ResultYnType.Y.name())
+                    .build();
+
 
             publishMessageToChannel(channelId, messageResponse);
-        } else {
+        }
+        // 교환을 원하는 역할을 가지고 있는 다른 클라이언트가 존재하는 경우
+        else {
 
             MessageResponse messageResponse = new MessageResponse(
                     MessageType.EXCHANGE,
@@ -136,12 +147,6 @@ public class ChannelService {
 
     public void responseRoleExchangeRequest(long channelId, MessageRequest messageRequest, MessageType messageType) {
 
-        MessageResponse messageResponse = new MessageResponse(
-                MessageType.EXCHANGE_RES,
-                messageRequest.getSender(),
-                messageType.makeFullMessage(messageRequest.getMessage()),
-                messageRequest.getTargetUsername());
-
         List<ChannelConnection> connections = subscribeMap.get(String.valueOf(channelId));
 
         Optional<ChannelConnection> targetConnection = connections.stream().filter(connect -> connect.getRole().equals(messageRequest.getTargetUsername())).findAny();
@@ -149,9 +154,28 @@ public class ChannelService {
 
         if (messageRequest.getMessage().equals("Y")) {
             allowExchange(channelId, messageRequest, connections, targetConnection);
+
+            MessageResponse channelMessageResponse = SwapMessageResponse.builder()
+                    .messageType(MessageType.EXCHANGE_RES)
+                    .writer(messageRequest.getSender())
+                    .sender(messageRequest.getSender())
+                    .msg(MessageType.EXCHANGE_RES.makeFullMessage(ResultYnType.Y.name()))
+                    .originRole(messageRequest.getTargetUsername())
+                    .destinationRole(messageRequest.getSender())
+                    .resultYne(ResultYnType.Y.name())
+                    .build();
+
+            publishMessageToChannel(channelId, channelMessageResponse);
         }
 
-        publishMessageToUser(channelId, targetConnection.get().getUid(), messageResponse);
+        MessageResponse userMessageResponse = new MessageResponse(
+                MessageType.EXCHANGE_RES,
+                messageRequest.getSender(),
+                messageType.makeFullMessage(messageRequest.getMessage()),
+                messageRequest.getTargetUsername());
+
+        publishMessageToUser(channelId, targetConnection.get().getUid(), userMessageResponse);
+
     }
 
 
@@ -214,9 +238,9 @@ public class ChannelService {
         subscribeMap.get(String.valueOf(channelId)).forEach(c -> log.info("before swap = {} : {}", c.getRole(), c.getSessionId()));
 
         for (ChannelConnection connection : connections) {
-            if (targetConnection.isPresent() && connection.getRole().equals(messageRequest.getTargetUsername())) {
+            if (connection.getRole().equals(messageRequest.getTargetUsername())) {
                 connection.setRole(messageRequest.getSender());
-            } else if (connection.getRole().equals(messageRequest.getSender())) {
+            } else if (targetConnection.isPresent() && connection.getRole().equals(messageRequest.getSender())) {
                 connection.setRole(messageRequest.getTargetUsername());
             }
         }

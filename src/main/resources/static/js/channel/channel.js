@@ -197,13 +197,24 @@ class Channel {
                 break;
 
             case 'EXCHANGE_RES' :
-                // TODO : 구현 필요. 자리교환 기능을 채널전체에 브로드 캐스팅하도록 변경해야함.
-/*                this.role = msg.writer;
-                const targetIdx = getParticipantIdx(msg.writer);
-                const origin = document.querySelector(".emphasis-user");
-                const target = document.querySelectorAll(".participant-info").item(targetIdx);*/
 
-                swapRole(origin, target);
+                if(this.role === msg.originRole) {
+                    this.isWaiting = false;
+                    document.querySelectorAll(".exchange-seat").forEach(btn => btn.disabled = false);
+                }
+
+                if(msg.resultYne === "Y") {
+                    this.role = msg.destinationRole;
+                    const originIdx = getParticipantIdx(msg.originRole);
+                    const targetIdx = getParticipantIdx(msg.destinationRole);
+                    const origin = document.querySelectorAll(".participant-info").item(originIdx);
+                    const target = document.querySelectorAll(".participant-info").item(targetIdx);
+
+                    swapRole(origin, target);
+
+                } else if(msg.resultYne === "N") {
+                    alert(msg.msg);
+                }
                 break;
 
             case 'READY' :
@@ -359,21 +370,9 @@ class Channel {
 
 
             case "EXCHANGE_RES" :
-                // TODO : 자리교환 기능 수정필요
-/*                if(msg.resultYne === "Y") {
-                    this.role = msg.writer;
-                    const idx = getParticipantIdx(msg.writer);
-                    const origin = document.querySelector(".emphasis-user");
-                    const target = document.querySelectorAll(".participant-info").item(idx);
-
-                    swapRole(origin, target);
-                } else if(msg.resultYne === "N") {
+                if(msg.resultYne === "N") {
                     alert(msg.msg);
                 }
-
-                this.isWaiting = false;
-                document.querySelectorAll(".exchange-seat").forEach(btn => btn.disabled = false);*/
-
                 break;
         }
 

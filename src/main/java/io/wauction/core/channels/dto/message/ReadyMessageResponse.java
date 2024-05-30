@@ -1,4 +1,4 @@
-package io.wauction.core.channels.dto;
+package io.wauction.core.channels.dto.message;
 
 import io.wauction.core.channels.entity.MessageType;
 import lombok.AllArgsConstructor;

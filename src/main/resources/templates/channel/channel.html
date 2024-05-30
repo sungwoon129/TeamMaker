@@ -44,7 +44,7 @@
                             </div>
                         </div>
                     </div>
-                    <div class="row overlay" th:classappend="${channel.getActiveRoles().contains(participant.getName()) || participant.getName() eq channel.getClientRole().getName() ? 'active' : 'overlay-inactive'}">
+                    <div class="row overlay">
                         <div class="interact-display">
                             <div class="exchange-display">
                                 <button type="button" class="btn btn-outline-success exchange-seat">자리교환 요청</button>
