@@ -52,6 +52,7 @@ public class AuctionPlayService {
 
     //TODO 유찰 구현. 현재로서는 필요한 작업 X 확장성 위해 선언된 메소드
     public void failInBid() {
+        // do nothing
 
     }
 

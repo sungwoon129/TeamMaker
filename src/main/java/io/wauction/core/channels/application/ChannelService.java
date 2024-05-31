@@ -238,9 +238,9 @@ public class ChannelService {
         subscribeMap.get(String.valueOf(channelId)).forEach(c -> log.info("before swap = {} : {}", c.getRole(), c.getSessionId()));
 
         for (ChannelConnection connection : connections) {
-            if (connection.getRole().equals(messageRequest.getTargetUsername())) {
+            if (targetConnection.isPresent() && connection.getRole().equals(messageRequest.getTargetUsername())) {
                 connection.setRole(messageRequest.getSender());
-            } else if (targetConnection.isPresent() && connection.getRole().equals(messageRequest.getSender())) {
+            } else if (connection.getRole().equals(messageRequest.getSender())) {
                 connection.setRole(messageRequest.getTargetUsername());
             }
         }

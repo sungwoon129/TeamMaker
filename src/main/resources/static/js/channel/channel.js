@@ -685,7 +685,6 @@ const getParticipantIdx = (roleName) => {
     return resultIdx;
 }
 
-// TODO: 비어있는 역할 교환도 가능해야함.
 const swapRole = (origin, target) => {
     origin.classList.remove("emphasis-user");
     target.classList.add("emphasis-user");
