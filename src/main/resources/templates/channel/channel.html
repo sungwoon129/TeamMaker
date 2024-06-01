@@ -47,7 +47,7 @@
                     <div class="row overlay">
                         <div class="interact-display">
                             <div class="exchange-display">
-                                <button type="button" class="btn btn-outline-success exchange-seat">자리교환 요청</button>
+                                <button type="button" class="btn btn-outline-success exchange-seat" th:classappend="${participant.getName() eq channel.getClientRole().getName() ? 'd-none' : ''}">자리교환 요청</button>
                             </div>
                             <div class="d-none ready-alarm">
                                 <p>준비 버튼을 눌러주세요.</p>
