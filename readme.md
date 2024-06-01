@@ -1,6 +1,8 @@
 ## Spring WebSocket STOMP 를 활용한 경매 웹 어플리케이션(Team Maker) ##
 
 ### 개요 ###
+Spring STOMP를 활용한 WebSocket 기반의 실시간 경매 웹 서비스
+
 소수의 인원(평균적으로 2~10)이 한 공간에 모여, 경매시스템을 통해 물품 혹은 팀원을 자신이 가진 재화를 소비해 좋은 팀 혹은 구성을 만드는 애플리케이션
 
 물품 혹은 팀원(이하 아이템)들이 랜덤한 순서로 경매에 나오고, 참가자들은 자신이 가진 재화를 효율적으로 사용해 다른 참가자들보다 좋은 팀 혹은 구성을 만드는 것이 목적.
@@ -43,4 +45,11 @@
 
 ### 구현 과정 스크린샷 ###
 
+#### 시작 전 대기 상태 ####
+![image](https://github.com/sungwoon129/TeamMaker/assets/43958570/19018793-dea5-4233-8be3-16e4214f0e89)
+
+#### 역할 교환 요청 ####
+![image](https://github.com/sungwoon129/TeamMaker/assets/43958570/0e41f024-5326-43f1-85e9-14227c07a7bd)
+
+#### 경매 중 ####
 ![image](https://github.com/sungwoon129/TeamMaker/assets/43958570/a017ecbc-d048-46e4-933b-83d928151a0c)
