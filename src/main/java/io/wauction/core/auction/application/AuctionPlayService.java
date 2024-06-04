@@ -8,7 +8,6 @@ import io.wauction.core.auction.entity.document.Bid;
 import io.wauction.core.auction.entity.table.AuctionRule;
 import io.wauction.core.auction.entity.table.ParticipantRole;
 import io.wauction.core.auction.infrastructure.AuctionOrderRepository;
-import io.wauction.core.auction.infrastructure.AuctionRuleRepository;
 import io.wauction.core.auction.infrastructure.BidRepository;
 import io.wauction.core.common.exception.BidException;
 import lombok.RequiredArgsConstructor;
@@ -20,11 +19,13 @@ import java.util.Optional;
 import static io.wauction.core.auction.entity.document.Bid.createBid;
 
 
+/**
+ * 입찰, 낙찰, 유찰과 같이 NoSQL에서 관리하면서 경매 대상 한명에 대한 기능을 담당하는 클래스
+ */
 @RequiredArgsConstructor
 @Service
 public class AuctionPlayService {
 
-    private final AuctionRuleRepository auctionRuleRepository;
     private final BidRepository bidRepository;
     private final AuctionOrderRepository auctionOrderRepository;
 
@@ -33,6 +34,7 @@ public class AuctionPlayService {
 
         Optional<Bid> biggestBid = bidRepository.findTopByChannelIdAndItemIdOrderByPriceDesc(channelId, bidRequest.getItemId());
 
+        // (동일한 채널의 동일한 경매대상에 대한 다른 입찰건이 존재하는 경우) 입찰 유효성검사 2단계
         if(biggestBid.isPresent()) {
 
             BidValidator bidValidator = new BidValidator();
@@ -78,11 +80,6 @@ public class AuctionPlayService {
         return target;
 
     }
-
-    private AuctionRule findById(long auctionRuleId) {
-        return auctionRuleRepository.findById(auctionRuleId).orElseThrow(() -> new IllegalArgumentException(auctionRuleId + "와 일치하는 경매진행정보를 찾을 수 없습니다."));
-    }
-
 
     public Optional<Bid> getHighestBid(long channelId, AuctionPlayItem auctionPlayItem) {
         return bidRepository.findTopByChannelIdAndItemIdOrderByPriceDesc(channelId, auctionPlayItem.getItemId());
