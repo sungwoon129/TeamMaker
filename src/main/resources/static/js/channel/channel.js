@@ -817,7 +817,6 @@ const createTimer = (id, duration, callback, text, canReset) => {
 
 }
 
-// TODO: 기존타이머가 리셋되지 않고 새로운 타이머가 추가됨
 const resetTimer = (id) => {
     const progressbarInner = document.getElementById(id);
 

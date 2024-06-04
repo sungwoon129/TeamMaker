@@ -12,4 +12,9 @@ public class BidRequest extends MessageRequest {
     private long itemId;
     private String itemName;
 
+
+    public long getPrice() {
+        return Long.parseLong(this.getMessage());
+    }
+
 }

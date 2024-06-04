@@ -42,7 +42,7 @@ public class ChannelAuctionService {
         AuctionPlayItem auctionPlayItem = auctionOrder.getItems().get(channel.getOrderNum());
 
         BidValidator bidValidator = new BidValidator();
-        List<AuctionError> errors = bidValidator.validate(bidRequest, auctionPlayItem);
+        List<AuctionError> errors = bidValidator.validateBidRequest(bidRequest, auctionPlayItem, channel.getAuctionRule());
 
         if(!errors.isEmpty()) throw new BidException(errors);
 

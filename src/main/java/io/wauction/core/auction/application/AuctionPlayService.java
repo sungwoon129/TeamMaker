@@ -1,5 +1,6 @@
 package io.wauction.core.auction.application;
 
+import io.wauction.core.auction.dto.AuctionError;
 import io.wauction.core.auction.dto.AuctionPlayItem;
 import io.wauction.core.auction.dto.BidRequest;
 import io.wauction.core.auction.entity.document.AuctionOrder;
@@ -9,9 +10,11 @@ import io.wauction.core.auction.entity.table.ParticipantRole;
 import io.wauction.core.auction.infrastructure.AuctionOrderRepository;
 import io.wauction.core.auction.infrastructure.AuctionRuleRepository;
 import io.wauction.core.auction.infrastructure.BidRepository;
+import io.wauction.core.common.exception.BidException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
 
 import static io.wauction.core.auction.entity.document.Bid.createBid;
@@ -27,23 +30,17 @@ public class AuctionPlayService {
 
     public void saveBid(BidRequest bidRequest, long channelId, long auctionRuleId) {
 
-        AuctionRule auctionRule = findById(auctionRuleId);
-
-        if(auctionRule.getAuctionItems().stream().noneMatch(item -> item.getId() == bidRequest.getItemId())) throw new IllegalArgumentException(bidRequest.getItemId() + "와 일치하는 아이템 정보를 찾을 수 없습니다.");
-
-        ParticipantRole participant = auctionRule.getRoles().stream()
-                .filter(role -> role.getName().equals(bidRequest.getSender()))
-                .findAny()
-                .orElseThrow(() -> new IllegalArgumentException(bidRequest.getSender() + "와 일치하는 참가자 정보를 찾을 수 없습니다."));
-
-        if(participant.getPoint().getValue() < Long.parseLong(bidRequest.getMessage())) {
-            throw new IllegalStateException("보유한 포인트보다 더 높은 포인트를 입찰할 수 없습니다.");
-        }
 
         Optional<Bid> biggestBid = bidRepository.findTopByChannelIdAndItemIdOrderByPriceDesc(channelId, bidRequest.getItemId());
 
-        if(biggestBid.isPresent() && biggestBid.get().priceIsEqualsOrGraterThan(Long.parseLong(bidRequest.getMessage()))) {
-            throw new IllegalStateException("새로운 입찰 금액은 이전 최고가보다 높아야 합니다.");
+        if(biggestBid.isPresent()) {
+
+            BidValidator bidValidator = new BidValidator();
+            List<AuctionError> errors = bidValidator.validateBidCondition(biggestBid.get(), bidRequest);
+
+            if(!errors.isEmpty()) {
+                throw new BidException(errors);
+            }
         }
 
         bidRepository.save(createBid(channelId, auctionRuleId, bidRequest.getItemId(), bidRequest.getSender(), Long.parseLong(bidRequest.getMessage())));
