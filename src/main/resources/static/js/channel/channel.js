@@ -516,7 +516,16 @@ class Channel {
     // 참가자들의 입찰 전 경매대상의 정보를 확인하면서 준비하는 시간 타이머 동작
     initWaitingTime() {
         this.player.stopVideo();
-        createTimer("auction-timer",this.#waitingTimeForNext, this.beforeBiddingTimerEnd, "입찰시작 까지");
+
+        const timerId = "auction-timer";
+
+        if(existingTimer()) {
+            resetTimer(timerId)
+        } else {
+            createTimer(timerId,this.#waitingTimeForNext, this.beforeBiddingTimerEnd, "입찰시작 까지");
+        }
+
+
         this.showPublicMsg({writer: "SYSTEM", msg: `${this.#currentItem.name} 경매시작 대기중...`});
     }
 
@@ -525,9 +534,14 @@ class Channel {
         const bidStatusBtn = document.getElementById("bid-status");
         bidStatusBtn.class =  "badge bg-success";
         bidStatusBtn.textContent = "입찰중";
+        const timerId = "auction-timer";
 
         this.showPublicMsg({writer: "SYSTEM", msg: `${this.#currentItem.name} 경매시작`});
-        createTimer("auction-timer",this.#waitingTimeForAfterBid, this.endBid, "입찰종료 까지");
+        if(existingTimer()) {
+            resetTimer(timerId)
+        } else {
+            createTimer(timerId,this.#waitingTimeForAfterBid, this.endBid, "입찰종료 까지");
+        }
 
         document.querySelectorAll(".price-control-panel button").forEach(btn => btn.disabled = false);
     }
@@ -592,6 +606,8 @@ class Channel {
 
         document.querySelector(".put-off-item-container").insertAdjacentHTML('beforeend', html);
     }
+
+
 }
 
 
@@ -808,6 +824,10 @@ const resetTimer = (id) => {
     progressbarInner.classList.remove("inner");
     void progressbarInner.offsetWidth;
     progressbarInner.classList.add("inner")
+}
+const existingTimer = (id) => {
+    const timer = document.getElementById(id);
+    return timer !== undefined || true
 }
 
 
