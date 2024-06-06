@@ -215,7 +215,7 @@ public class ChannelService {
         auctionOrderRepository.save(
                 createAuctionOrder(
                         channelId,
-                        auctionStartData.getItems().stream().map(item -> new AuctionPlayItem(item.getId(), item.getName())).toList())
+                        auctionStartData.getItems().stream().map(item -> new AuctionPlayItem(item.getId(), item.getName(), item.getPosition())).toList())
         );
 
         // 첫 번째 경매대상

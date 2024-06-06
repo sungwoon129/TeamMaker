@@ -2,8 +2,10 @@ package io.wauction.core.auction.entity.table;
 
 import io.wauction.core.auction.dto.TeamPositionResponse;
 import jakarta.persistence.*;
+import lombok.Getter;
 import org.hibernate.annotations.DynamicInsert;
 
+@Getter
 @DynamicInsert
 @Entity
 @Table(name = "team_position")

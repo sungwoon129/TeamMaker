@@ -7,6 +7,7 @@ import io.wauction.core.auction.dto.AuctionPlayItem;
 import io.wauction.core.auction.dto.BidRequest;
 import io.wauction.core.auction.entity.document.AuctionOrder;
 import io.wauction.core.auction.entity.document.Bid;
+import io.wauction.core.auction.entity.table.AuctionRule;
 import io.wauction.core.auction.infrastructure.AuctionOrderRepository;
 import io.wauction.core.channels.dto.ChannelConnection;
 import io.wauction.core.channels.dto.message.DataMessageResponse;
@@ -25,7 +26,6 @@ import static io.wauction.core.channels.event.StompEventHandler.subscribeMap;
 
 /**
  * '다음 경매 대상 진행', '타이머 종료'등 경매 진행 중 경매 흐름에 대해 담당하면서 RDBMS의 데이터가 필요한 기능을 담당하는 클래스
- * RDBMS와 NoSQL 모두 조회가 필요한 경우 이 클래스에서 RDBMS 처리 후, NoSQL 담당하는 클래스에 위임
  */
 @RequiredArgsConstructor
 @Service
@@ -42,14 +42,15 @@ public class ChannelAuctionService {
 
         AuctionOrder auctionOrder = auctionOrderRepository.findByChannelId(channelId).orElseThrow(() -> new IllegalArgumentException(channelId + " 와 일치하는 경매순서 데이터를 찾을 수 없습니다."));
         AuctionPlayItem auctionPlayItem = auctionOrder.getItems().get(channel.getOrderNum());
+        AuctionRule auctionRule = channel.getAuctionRule();
 
         // 입찰요청 유효성 검사 1단계
         BidValidator bidValidator = new BidValidator();
-        List<AuctionError> errors = bidValidator.validateBidRequest(bidRequest, auctionPlayItem, channel.getAuctionRule());
+        List<AuctionError> errors = bidValidator.validateBidRequest(bidRequest, auctionPlayItem, auctionRule, auctionOrder.getItems());
 
         if(!errors.isEmpty()) throw new BidException(errors);
 
-        auctionPlayService.saveBid(bidRequest, channel.getId(), channel.getAuctionRule().getId());
+        auctionPlayService.saveBid(bidRequest, channel.getId(), auctionRule.getId());
 
         MessageResponse messageResponse = new DataMessageResponse<>(
                 MessageType.BID,
