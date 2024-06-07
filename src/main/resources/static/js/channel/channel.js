@@ -289,7 +289,7 @@ class Channel {
                 this.toStageNextItem(msg.data.order);
                 break;
             case 'COMPLETE_HIGHLIGHT_PLAY' :
-                this.initWaitingTime();
+                this.initWaitingTimer();
                 break;
             case 'COMPLETE_COUNT' :
                 if(msg.data === "COMPLETE_BEFORE_BID") {
@@ -514,7 +514,7 @@ class Channel {
 
 
     // 참가자들의 입찰 전 경매대상의 정보를 확인하면서 준비하는 시간 타이머 동작
-    initWaitingTime() {
+    initWaitingTimer() {
         this.player.stopVideo();
 
         const timerId = "auction-timer";
