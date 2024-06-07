@@ -21,6 +21,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import static io.wauction.core.channels.event.StompEventHandler.subscribeMap;
 
@@ -34,6 +36,7 @@ public class ChannelAuctionService {
     private final AuctionPlayService auctionPlayService;
     private final AuctionOrderRepository auctionOrderRepository;
     private final ChannelService channelService;
+    private final ScheduledExecutorService scheduledExecutorService;
 
     @Transactional
     public void bid(BidRequest bidRequest, long channelId) {
@@ -63,22 +66,17 @@ public class ChannelAuctionService {
     }
 
     public void nextItem(long channelId) {
-        Channel channel = channelService.findOne(channelId);
 
+
+        Channel channel = channelService.findOne(channelId);
         channel.nextStep();
 
         AuctionOrder auctionOrder = auctionOrderRepository.findByChannelId(channelId).orElseThrow(() -> new IllegalArgumentException(channelId + " 와 일치하는 경매순서 데이터를 찾을 수 없습니다."));
 
+        initCompletionFlagOnChannel(channelId);
+
         AuctionPlayItem auctionPlayItem = auctionOrder.getItems().get(channel.getOrderNum());
         auctionPlayItem.setOrder(channel.getOrderNum());
-
-        List<ChannelConnection> connections = subscribeMap.get(String.valueOf(channelId));
-
-
-        for(ChannelConnection connection : connections) {
-            connection.setCurrentHighlightCompleted(false);
-        }
-
 
         MessageResponse messageResponse = new DataMessageResponse<>(
                 MessageType.NEXT,
@@ -109,24 +107,19 @@ public class ChannelAuctionService {
                     .build();
 
             channelService.publishMessageToChannel(channelId, messageResponse);
+
         }
     }
+
+
 
     @Transactional
     public void timerEnd(long channelId, String sessionId, MessageType type) {
 
+        /*List<ChannelConnection> connections = subscribeMap.get(String.valueOf(channelId));
+        connections.stream().filter(connect -> connect.getSessionId().equals(sessionId)).findAny().orElseThrow(() -> new IllegalStateException("현재 채널에 참가하지 않은 클라이언트의 요청입니다."));*/
 
-        List<ChannelConnection> connections = subscribeMap.get(String.valueOf(channelId));
-
-        connections.stream().filter(connect -> connect.getSessionId().equals(sessionId)).findAny().orElseThrow(() -> new IllegalStateException("현재 채널에 참가하지 않은 클라이언트의 요청입니다."));
-
-        for(ChannelConnection connection : connections) {
-            if(connection.getSessionId().equals(sessionId)) {
-                connection.setCounted(true);
-            }
-        }
-
-        if(connections.stream().allMatch(ChannelConnection::isCounted)) {
+        if(isEveryoneOnChannelComplete(channelId)) {
 
             MessageResponse messageResponse = new DataMessageResponse<>(
                     MessageType.COMPLETE_COUNT,
@@ -138,6 +131,7 @@ public class ChannelAuctionService {
             channelService.publishMessageToChannel(channelId, messageResponse);
 
 
+            // 입찰시간 타이머 종료
             if(type == MessageType.END_BID_TIMER) {
 
                 Channel channel = channelService.findOne(channelId);
@@ -146,12 +140,19 @@ public class ChannelAuctionService {
 
                 determineDestination(channel);
             }
-
-            initCounted(connections);
+            // 입찰 전 대기시간 타이머 종료. 클라이언트의 연결불량, 메시지 전송 지연등 시간이 지나도 모든 채널의 참가자의 완료메시지가 오지 않아도 일정 시간이 지나면 다음 단계 진행
+            else {
+                executeChannelTimerEnd(channelId);
+            }
 
         }
     }
 
+
+    /**
+     * 한 명의 경매대상의 입찰이 끝나고, 입찰결과에 따라 매물의 행선지(낙찰자팀 or 유찰목록) 결정
+     * @param channel
+     */
     private void determineDestination(Channel channel) {
 
         AuctionOrder auctionOrder = auctionOrderRepository.findByChannelId(channel.getId()).orElseThrow(() -> new IllegalArgumentException(channel.getId() + " 와 일치하는 경매순서 데이터를 찾을 수 없습니다."));
@@ -192,7 +193,48 @@ public class ChannelAuctionService {
 
     }
 
-    private void initCounted(List<ChannelConnection> connections) {
-        for(ChannelConnection connection : connections) connection.setCounted(false);
+    // TODO : 현재 '입찰 전 대기시간 타이머'에만 적용. 다른 타이머, 하이라이트등 채널 구성원의 완료 플래그 검사 진행 후 동작하는 기능에 적용해야함
+    /**
+     * 서버가 모종의 이유로 (타이머,하이라이트) 완료 메시지를 받지 못한 경우 실행
+     * 메시지를 수신하지 못해도 제한 시간이 지나면, 경매가 진행되도록 하기위한 목적
+     * @param channelId
+     */
+    public void executeChannelTimerEnd(long channelId) {
+
+        Channel channel = channelService.findOne(channelId);
+
+        scheduledExecutorService.schedule(() -> {
+            List<ChannelConnection> connections = subscribeMap.get(String.valueOf(channelId));
+            if(connections.stream().anyMatch(connection -> !connection.isCounted())) {
+
+                MessageResponse messageResponse = new DataMessageResponse<>(
+                        MessageType.COMPLETE_COUNT,
+                        "SYSTEM",
+                        MessageType.COMPLETE_COUNT.makeFullMessage(""),
+                        MessageType.COMPLETE_COUNT);
+
+
+                channelService.publishMessageToChannel(channelId, messageResponse);
+            }
+        }, channel.getWaitingTimeForAfterBid() + 2, TimeUnit.SECONDS);
+
+    }
+
+
+    private boolean isEveryoneOnChannelComplete(long channelId) {
+        List<ChannelConnection> connections = subscribeMap.get(String.valueOf(channelId));
+
+        return connections.stream().allMatch(ChannelConnection::isCounted);
+    }
+
+    private void initCompletionFlagOnChannel(long channelId) {
+
+        List<ChannelConnection> connections = subscribeMap.get(String.valueOf(channelId));
+
+        for(ChannelConnection connection : connections) {
+            connection.setCurrentHighlightCompleted(false);
+            connection.setCounted(false);
+        }
+
     }
 }
