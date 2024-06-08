@@ -7,6 +7,7 @@ import io.wauction.core.auction.dto.AuctionPlayItem;
 import io.wauction.core.auction.dto.BidRequest;
 import io.wauction.core.auction.entity.document.AuctionOrder;
 import io.wauction.core.auction.entity.document.Bid;
+import io.wauction.core.auction.entity.table.AuctionItem;
 import io.wauction.core.auction.entity.table.AuctionRule;
 import io.wauction.core.auction.infrastructure.AuctionOrderRepository;
 import io.wauction.core.channels.dto.ChannelConnection;
@@ -86,6 +87,7 @@ public class ChannelAuctionService {
         );
 
         channelService.publishMessageToChannel(channelId, messageResponse);
+        executeHighlightEnd(channel, auctionPlayItem.getItemId());
     }
 
     public void completeHighlightPlay(long channelId, String sessionId) {
@@ -99,19 +101,16 @@ public class ChannelAuctionService {
             }
         }
 
+        MessageResponse messageResponse = MessageResponse.builder()
+                .messageType(MessageType.COMPLETE_HIGHLIGHT_PLAY)
+                .writer("SYSTEM")
+                .build();
+
         if(connections.stream().allMatch(ChannelConnection::isCurrentHighlightCompleted)) {
-
-            MessageResponse messageResponse = MessageResponse.builder()
-                    .messageType(MessageType.COMPLETE_HIGHLIGHT_PLAY)
-                    .writer("SYSTEM")
-                    .build();
-
             channelService.publishMessageToChannel(channelId, messageResponse);
-
         }
+
     }
-
-
 
     @Transactional
     public void timerEnd(long channelId, String sessionId, MessageType type) {
@@ -119,30 +118,28 @@ public class ChannelAuctionService {
         /*List<ChannelConnection> connections = subscribeMap.get(String.valueOf(channelId));
         connections.stream().filter(connect -> connect.getSessionId().equals(sessionId)).findAny().orElseThrow(() -> new IllegalStateException("현재 채널에 참가하지 않은 클라이언트의 요청입니다."));*/
 
+        MessageResponse messageResponse = new DataMessageResponse<>(
+                MessageType.COMPLETE_COUNT,
+                "SYSTEM",
+                type.makeFullMessage(""),
+                type);
+
         if(isEveryoneOnChannelComplete(channelId)) {
 
-            MessageResponse messageResponse = new DataMessageResponse<>(
-                    MessageType.COMPLETE_COUNT,
-                    "SYSTEM",
-                    type.makeFullMessage(""),
-                    type);
-
-
             channelService.publishMessageToChannel(channelId, messageResponse);
-
+            Channel channel = channelService.findOne(channelId);
 
             // 입찰시간 타이머 종료
             if(type == MessageType.END_BID_TIMER) {
 
-                Channel channel = channelService.findOne(channelId);
-
                 if(!channel.isPlaying()) throw new IllegalStateException("타이머 종료요청은 경매 진행중에만 가능합니다.");
 
                 determineDestination(channel);
+
             }
             // 입찰 전 대기시간 타이머 종료. 클라이언트의 연결불량, 메시지 전송 지연등 시간이 지나도 모든 채널의 참가자의 완료메시지가 오지 않아도 일정 시간이 지나면 다음 단계 진행
             else {
-                executeChannelTimerEnd(channelId);
+                executeChannelTimerEnd(channelId, channel.getWaitingTimeForAfterBid(), messageResponse);
             }
 
         }
@@ -199,24 +196,33 @@ public class ChannelAuctionService {
      * 메시지를 수신하지 못해도 제한 시간이 지나면, 경매가 진행되도록 하기위한 목적
      * @param channelId
      */
-    public void executeChannelTimerEnd(long channelId) {
-
-        Channel channel = channelService.findOne(channelId);
+    public <T extends MessageResponse> void executeChannelTimerEnd(long channelId, int delay, T message) {
 
         scheduledExecutorService.schedule(() -> {
             List<ChannelConnection> connections = subscribeMap.get(String.valueOf(channelId));
             if(connections.stream().anyMatch(connection -> !connection.isCounted())) {
 
-                MessageResponse messageResponse = new DataMessageResponse<>(
-                        MessageType.COMPLETE_COUNT,
-                        "SYSTEM",
-                        MessageType.COMPLETE_COUNT.makeFullMessage(""),
-                        MessageType.COMPLETE_COUNT);
-
-
-                channelService.publishMessageToChannel(channelId, messageResponse);
+                channelService.publishMessageToChannel(channelId, message);
             }
-        }, channel.getWaitingTimeForAfterBid() + 2, TimeUnit.SECONDS);
+        }, delay + 2, TimeUnit.SECONDS);
+    }
+
+    public void executeHighlightEnd(Channel channel, long itemId) {
+
+        AuctionItem auctionItem = channel.getAuctionRule().getAuctionItems().stream().filter(item -> item.getId() == itemId).findAny().orElseThrow(() -> new IllegalArgumentException("존재하지 않는 경매 대상의 ID입니다."));
+
+        scheduledExecutorService.schedule(() -> {
+            List<ChannelConnection> connections = subscribeMap.get(String.valueOf(channel.getId()));
+            if(connections.stream().anyMatch(connection -> !connection.isCurrentHighlightCompleted())) {
+
+                MessageResponse messageResponse = MessageResponse.builder()
+                        .messageType(MessageType.COMPLETE_HIGHLIGHT_PLAY)
+                        .writer("SYSTEM")
+                        .build();
+
+                channelService.publishMessageToChannel(channel.getId(), messageResponse);
+            }
+        }, auctionItem.getHighlights().get(0).getLength() + 10, TimeUnit.SECONDS);
 
     }
 
