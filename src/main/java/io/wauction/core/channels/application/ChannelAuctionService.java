@@ -39,6 +39,11 @@ public class ChannelAuctionService {
     private final ChannelService channelService;
     private final ScheduledExecutorService scheduledExecutorService;
 
+    /**
+     * 입찰기능. 입찰정보에 대한 유효성을 검사하고 NoSQL에 저장헌 뒤, 채널 전체참가자들에게 입찰정보를 발행
+     * @param bidRequest
+     * @param channelId
+     */
     @Transactional
     public void bid(BidRequest bidRequest, long channelId) {
 
@@ -66,6 +71,10 @@ public class ChannelAuctionService {
         channelService.publishMessageToChannel(channelId,messageResponse);
     }
 
+    /**
+     * 채널에서 다음 경매대상의 경매가 진행되도록 채널 전체 참가자들에게 메시지 발행
+     * @param channelId
+     */
     public void nextItem(long channelId) {
 
 
@@ -90,6 +99,11 @@ public class ChannelAuctionService {
         executeHighlightEnd(channel, auctionPlayItem.getItemId());
     }
 
+    /**
+     * 경매 대상의 하이라이트 영상이 종료 or 일시정지되었을 때, 채널에 전체 인원 영상재생 완료 메시지를 발행
+     * @param channelId
+     * @param sessionId
+     */
     public void completeHighlightPlay(long channelId, String sessionId) {
         List<ChannelConnection> connections = subscribeMap.get(String.valueOf(channelId));
 
@@ -112,6 +126,13 @@ public class ChannelAuctionService {
 
     }
 
+    /**
+     * 입찰 전 대기시간 타이머, 다음 경매대상 대기시간 타이머등 경매 진행 중 타이머가 종료되었을 때,
+     * 참가 인원들의 타이머 완료를 체크하고 다음단계로 진행하는 역할 수행
+     * @param channelId
+     * @param sessionId
+     * @param type
+     */
     @Transactional
     public void timerEnd(long channelId, String sessionId, MessageType type) {
 
