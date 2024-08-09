@@ -96,7 +96,7 @@ public class ChannelAuctionService {
         );
 
         channelService.publishMessageToChannel(channelId, messageResponse);
-        executeHighlightEnd(channel, auctionPlayItem.getItemId());
+        executeAfterHighlightEnd(channel, auctionPlayItem.getItemId());
     }
 
     /**
@@ -228,7 +228,7 @@ public class ChannelAuctionService {
         }, delay + 2, TimeUnit.SECONDS);
     }
 
-    public void executeHighlightEnd(Channel channel, long itemId) {
+    public void executeAfterHighlightEnd(Channel channel, long itemId) {
 
         AuctionItem auctionItem = channel.getAuctionRule().getAuctionItems().stream().filter(item -> item.getId() == itemId).findAny().orElseThrow(() -> new IllegalArgumentException("존재하지 않는 경매 대상의 ID입니다."));
 
