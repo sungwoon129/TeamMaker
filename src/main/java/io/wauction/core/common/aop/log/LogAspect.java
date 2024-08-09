@@ -1,4 +1,4 @@
-package io.wauction.core.common.log;
+package io.wauction.core.common.aop.log;
 
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;
@@ -26,7 +26,8 @@ public class LogAspect {
 
         long executionTime = System.currentTimeMillis() - start;
 
-        log.info("{} executed in {} ms", joinPoint.getSignature(), executionTime);
+        if(executionTime > 3000) log.warn("{} executed in {} ms", joinPoint.getSignature(), executionTime);
+        else log.debug("{} executed in {} ms", joinPoint.getSignature(), executionTime);
 
         return result;
     }
