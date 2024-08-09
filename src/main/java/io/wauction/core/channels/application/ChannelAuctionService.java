@@ -145,7 +145,7 @@ public class ChannelAuctionService {
                 type.makeFullMessage(""),
                 type);
 
-        if(isEveryoneOnChannelComplete(channelId)) {
+        if(isEveryoneCompleteOnChannel(channelId)) {
 
             channelService.publishMessageToChannel(channelId, messageResponse);
             Channel channel = channelService.findOne(channelId);
@@ -248,7 +248,7 @@ public class ChannelAuctionService {
     }
 
 
-    private boolean isEveryoneOnChannelComplete(long channelId) {
+    private boolean isEveryoneCompleteOnChannel(long channelId) {
         List<ChannelConnection> connections = subscribeMap.get(String.valueOf(channelId));
 
         return connections.stream().allMatch(ChannelConnection::isCounted);
